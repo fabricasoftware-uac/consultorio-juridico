@@ -96,7 +96,7 @@ export default function Footer() {
               <p className="text-xs text-gray-400 font-medium">
                 Esta página fue realizada por{" "}
                 <span className="text-blue-500 font-semibold">
-                  La Fábrica de Software
+                  La Fábrica de Software. Powered by EmprendeLab
                 </span>
               </p>
             </div>
