@@ -24,12 +24,14 @@ export default function IdleTimerProvider() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isExpired, setIsExpired] = useState(false);
 
   useEffect(() => {
     // Check initial auth state
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsAuthenticated(!!session);
     });
+    setShowWarning(false);
 
     // Listen to Auth changes
     const {
@@ -37,13 +39,17 @@ export default function IdleTimerProvider() {
     } = supabase.auth.onAuthStateChange((event, session) => {
       setIsAuthenticated(!!session);
       if (event === "SIGNED_OUT") {
+        setIsExpired(false);
+        setShowWarning(false);
         // Limpiar caché, local storage, o estados globales (cumpliendo con la restricción solicitada)
         localStorage.clear();
         sessionStorage.clear();
-
         // Redirigir al inicio de sesión
-        router.push("/login");
         router.refresh();
+        router.push("/login");
+      } else if (event === "SIGNED_IN") {
+        setIsExpired(false);
+        setShowWarning(false);
       }
     });
 
@@ -86,7 +92,6 @@ export default function IdleTimerProvider() {
 
       if (timeIdle >= MAX_IDLE_TIME) {
         // Forzar desconexión
-        handleLogout();
       } else if (timeIdle >= WARNING_TIME && !showWarning) {
         // Mostrar advertencia en el minuto 14
         setShowWarning(true);
@@ -105,11 +110,14 @@ export default function IdleTimerProvider() {
 
   // Manejador del temporizador de advertencia (- 1 segundo)
   useEffect(() => {
-    if (showWarning) {
+    if (showWarning && !isExpired) {
       countdownRef.current = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
-            handleLogout();
+            if (countdownRef.current) clearInterval(countdownRef.current);
+            setIsExpired(true);
+            localStorage.clear();
+            sessionStorage.clear();
             return 0;
           }
           return prev - 1;
@@ -122,12 +130,11 @@ export default function IdleTimerProvider() {
     return () => {
       if (countdownRef.current) clearInterval(countdownRef.current);
     };
-  }, [showWarning]);
+  }, [showWarning, isExpired]);
 
   const handleLogout = async () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     if (countdownRef.current) clearInterval(countdownRef.current);
-    setShowWarning(false);
 
     // Finalizamos la sesión lo cual triggerea el evento SIGNED_OUT, limpiando el estado.
     await supabase.auth.signOut();
@@ -145,27 +152,36 @@ export default function IdleTimerProvider() {
     <Dialog
       open={showWarning}
       onOpenChange={(open) => {
+        if (isExpired) return;
         if (!open) handleContinue();
       }}
     >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Aviso de Inactividad</DialogTitle>
+          <DialogTitle>
+            {isExpired ? "Sesión Expirada" : "Aviso de Inactividad"}
+          </DialogTitle>
           <DialogDescription>
-            Por su seguridad, su sesión expirará en {timeLeft} segundos si no
-            realiza ninguna acción. ¿Desea mantener la sesión activa?
+            {isExpired
+              ? "Su sesión ha expirado por inactividad. Por favor, cierre sesión y vuelva a ingresar."
+              : `Por su seguridad, su sesión expirará en ${timeLeft} segundos si no realiza ninguna acción. ¿Desea mantener la sesión activa?`}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="sm:justify-end gap-2">
-          <Button variant="secondary" onClick={handleLogout}>
+          <Button
+            variant={isExpired ? "default" : "secondary"}
+            onClick={handleLogout}
+          >
             Cerrar Sesión
           </Button>
-          <Button
-            onClick={handleContinue}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            Continuar Sesión
-          </Button>
+          {!isExpired && (
+            <Button
+              onClick={handleContinue}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Continuar Sesión
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
