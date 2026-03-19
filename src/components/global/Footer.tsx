@@ -14,10 +14,10 @@ export default function Footer() {
               <Logo className="h-16 w-16" />
               <div className="flex flex-col">
                 <span className="text-xl font-bold text-gray-900 tracking-tight">
-                  Consultorio Jurídico
+                  Consultorio Jurídico de la
                 </span>
                 <span className="text-xs font-semibold text-blue-600 uppercase tracking-widest">
-                  Uniautónoma
+                  Corporación Universitaria Autónoma del Cauca
                 </span>
               </div>
             </div>
