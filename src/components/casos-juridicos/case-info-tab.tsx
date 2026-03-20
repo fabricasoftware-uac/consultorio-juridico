@@ -105,6 +105,18 @@ export const CaseInfoTab = ({
             </div>
           </div>
 
+          <div className="space-y-1">
+            <div className="flex items-center text-slate-500 mb-1">
+              <ClipboardList className="w-4 h-4 mr-2 opacity-70" />
+              <Label className="text-xs font-bold uppercase tracking-wider">
+                Clasificación
+              </Label>
+            </div>
+            <div className="pl-6 pt-1 text-lg font-semibold capitalize">
+              {caseData?.clasificacion?.replace("_", " ") || "Sin clasificar"}
+            </div>
+          </div>
+
           <InfoField
             label="Tipo de proceso"
             value={caseData?.tipo_proceso}
@@ -151,17 +163,47 @@ export const CaseInfoTab = ({
                   <SelectValue placeholder="Seleccionar tipo de caso" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-slate-200 shadow-xl">
-                  {["laboral", "civil", "penal", "familia", "otros"].map(
-                    (area) => (
-                      <SelectItem
-                        key={area}
-                        value={area}
-                        className="focus:bg-blue-50 focus:text-blue-700 capitalize"
-                      >
-                        {area}
-                      </SelectItem>
-                    ),
-                  )}
+                  {[
+                    "laboral",
+                    "civil_familia",
+                    "penal",
+                    "publica",
+                    "otros",
+                  ].map((area) => (
+                    <SelectItem
+                      key={area}
+                      value={area}
+                      className="focus:bg-blue-50 focus:text-blue-700 capitalize"
+                    >
+                      {area.replace("_", " ")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold flex items-center gap-2 mb-1">
+                <ClipboardList className="w-4 h-4 text-slate-400" />
+                Clasificación
+              </Label>
+              <Select
+                value={editedData?.clasificacion || ""}
+                onValueChange={(val) => onChange("clasificacion", val)}
+              >
+                <SelectTrigger className="border-slate-200 focus:ring-blue-500/20 focus:border-blue-500 rounded-lg h-11">
+                  <SelectValue placeholder="Seleccionar clasificación" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-slate-200 shadow-xl">
+                  {["en_tramite", "solo_asesoria"].map((cls) => (
+                    <SelectItem
+                      key={cls}
+                      value={cls}
+                      className="focus:bg-blue-50 focus:text-blue-700 capitalize"
+                    >
+                      {cls.replace("_", " ")}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
