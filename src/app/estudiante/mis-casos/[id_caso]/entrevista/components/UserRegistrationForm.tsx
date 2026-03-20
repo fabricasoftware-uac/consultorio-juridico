@@ -164,7 +164,7 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
 
     // Case Information
     resumen_hechos: "",
-    observaciones: "",
+    observaciones_estudiante: "",
 
     // Signatures
     firmasSolicitante: false,
@@ -257,7 +257,7 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
         .update({
           area: limpio.area,
           resumen_hechos: limpio.resumen_hechos,
-          observaciones: limpio.observaciones,
+          observaciones_estudiante: limpio.observaciones_estudiante,
           estado: "pendiente_aprobacion",
         })
         .eq("id_caso", idCaso);

@@ -41,7 +41,7 @@ export default function SupportCasesPage() {
   const [statusFilter, setStatusFilter] = useState("todos");
   const [typeFilter, setTypeFilter] = useState("todos");
   const [studentFilter, setStudentFilter] = useState("todos");
-  const [dateFilter, setDateFilter] = useState("");
+  const [dateSort, setDateSort] = useState("recientes");
   const [classFilter, setClassFilter] = useState("todos");
   const [casos, setCasos] = useState<Caso[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -88,8 +88,6 @@ export default function SupportCasesPage() {
       );
 
     // Nuevos filtros
-    const matchesDate =
-      !dateFilter || caso.fecha_creacion?.startsWith(dateFilter);
     const matchesClass =
       classFilter === "todos" || caso.clasificacion === classFilter;
 
@@ -98,9 +96,14 @@ export default function SupportCasesPage() {
       matchesStatus &&
       matchesArea &&
       matchesStudent &&
-      matchesDate &&
       matchesClass
     );
+  });
+
+  const sortedCases = [...filteredCases].sort((a, b) => {
+    const dateA = new Date(a.fecha_creacion).getTime();
+    const dateB = new Date(b.fecha_creacion).getTime();
+    return dateSort === "recientes" ? dateB - dateA : dateA - dateB;
   });
 
   const uniqueStudents = [
@@ -115,10 +118,10 @@ export default function SupportCasesPage() {
   ];
 
   // Paginación
-  const totalPages = Math.ceil(filteredCases.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(sortedCases.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentCases = filteredCases.slice(startIndex, endIndex);
+  const currentCases = sortedCases.slice(startIndex, endIndex);
 
   if (loading) {
     return (
@@ -265,15 +268,21 @@ export default function SupportCasesPage() {
 
             <div className="w-full lg:w-48 space-y-1.5">
               <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                Fecha de Creación
+                Ordenar por fecha
               </label>
-              <Input
-                type="date"
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
+              <Select
+                value={dateSort}
+                onValueChange={setDateSort}
                 disabled={loading}
-                className="bg-slate-50 border-transparent focus:bg-white focus:border-blue-500 transition-colors rounded-xl"
-              />
+              >
+                <SelectTrigger className="bg-slate-50 border-transparent focus:bg-white transition-colors rounded-xl">
+                  <SelectValue placeholder="Orden" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recientes">Más recientes</SelectItem>
+                  <SelectItem value="antiguos">Más antiguos</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="w-full lg:w-48 space-y-1.5">
@@ -304,7 +313,7 @@ export default function SupportCasesPage() {
                 setStatusFilter("todos");
                 setTypeFilter("todos");
                 setStudentFilter("todos");
-                setDateFilter("");
+                setDateSort("recientes");
                 setClassFilter("todos");
               }}
               variant="outline"
@@ -430,7 +439,7 @@ export default function SupportCasesPage() {
                 setStatusFilter("todos");
                 setTypeFilter("todos");
                 setStudentFilter("todos");
-                setDateFilter("");
+                setDateSort("recientes");
                 setClassFilter("todos");
               }}
               className="bg-white"

@@ -6,8 +6,14 @@ export type EstadoEnum =
   | "pendiente_aprobacion"
   | "cerrado"
   | "archivado";
-export type AreaEnum = "laboral" | "familia" | "penal" | "civil" | "otros";
+export type AreaEnum =
+  | "laboral"
+  | "civil_familia"
+  | "penal"
+  | "publica"
+  | "otros";
 export type TurnoEnum = "9-11" | "2-4" | "4-6";
+export type ClasificacionEnum = "en_tramite" | "solo_asesoria";
 export type JornadaEnum = "diurna" | "nocturna" | "mixto";
 export type EstadoCivilEnum = "soltero" | "casado" | "union libre" | "otro";
 export type TipoContratoEnum =
@@ -61,6 +67,7 @@ export type Estudiante = {
   semestre: number;
   jornada: JornadaEnum;
   turno: TurnoEnum;
+  dia?: string | null;
   perfil: Perfil;
   total_casos?: number;
 };
@@ -72,6 +79,8 @@ export type Asesor = {
   perfil: Perfil;
   turno: TurnoEnum;
   area: AreaEnum;
+  dia?: string | null;
+  horario?: Record<string, string> | null;
   total_casos?: number;
 };
 
@@ -100,12 +109,14 @@ export type Caso = {
   id_usuario?: string;
   resumen_hechos?: string | null;
   observaciones?: string | null;
+  observaciones_estudiante?: string | null;
   fecha_creacion: string;
   estado: EstadoEnum;
   fecha_cierre?: string | null;
   aprobacion_asesor?: boolean;
   area: AreaEnum;
   tipo_proceso?: string;
+  clasificacion?: ClasificacionEnum | null;
 
   // Relaciones
   usuarios: Usuario;

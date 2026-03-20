@@ -653,9 +653,9 @@ export function Step7DetallesCaso({ formData, handleInputChange }: StepProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="laboral">Laboral</SelectItem>
-              <SelectItem value="familia">Familia</SelectItem>
+              <SelectItem value="civil_familia">Civil y Familia</SelectItem>
               <SelectItem value="penal">Penal</SelectItem>
-              <SelectItem value="civil">Civil</SelectItem>
+              <SelectItem value="publico">Publico</SelectItem>
               <SelectItem value="otro">Otro</SelectItem>
             </SelectContent>
           </Select>
@@ -676,12 +676,16 @@ export function Step7DetallesCaso({ formData, handleInputChange }: StepProps) {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="observaciones">Observaciones</Label>
+          <Label htmlFor="observaciones_estudiante">
+            Observaciones del Estudiante
+          </Label>
           <Textarea
-            id="observaciones"
-            value={formData.observaciones}
-            onChange={(e) => handleInputChange("observaciones", e.target.value)}
-            placeholder="Describa el servicio legal que solicita..."
+            id="observaciones_estudiante"
+            value={formData.observaciones_estudiante}
+            onChange={(e) =>
+              handleInputChange("observaciones_estudiante", e.target.value)
+            }
+            placeholder="Describa sus observaciones con respecto al caso o dudas que tenga para el asesor..."
             rows={3}
           />
         </div>

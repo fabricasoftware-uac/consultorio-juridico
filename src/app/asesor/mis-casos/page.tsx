@@ -32,6 +32,8 @@ export default function Asesor() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [areaFilter, setAreaFilter] = useState("all");
+  const [dateSort, setDateSort] = useState("recientes");
+  const [classFilter, setClassFilter] = useState("todos");
   const [loading, setLoading] = useState(false);
   const [casos, setCasos] = useState<Caso[] | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -58,28 +60,6 @@ export default function Asesor() {
     }
     fetchData();
   }, []);
-
-  const handleApproveCase = async (caseId: number | undefined) => {
-    try {
-      const { data, error } = await supabase
-        .from("casos")
-        .update({ estado: "aprobado" })
-        .eq("id_caso", caseId);
-
-      if (error) {
-        throw error;
-      }
-
-      setCasos(
-        (prevCasos) =>
-          prevCasos?.map((caso) =>
-            caso.id_caso === caseId ? { ...caso, estado: "aprobado" } : caso,
-          ) || null,
-      );
-    } catch (error) {
-      console.error("Error aprobando caso:", error);
-    }
-  };
 
   // 1. First, filter only cases where the advisor is current active assignment
   const advisorActiveCasos = (casos ?? []).filter((caso) => {
@@ -111,8 +91,18 @@ export default function Asesor() {
       areaFilter === "all" ||
       areaFilter === "todos" ||
       caso.area === areaFilter;
+    const matchesClass =
+      classFilter === "all" ||
+      classFilter === "todos" ||
+      caso.clasificacion === classFilter;
 
-    return matchesSearch && matchesStatus && matchesArea;
+    return matchesSearch && matchesStatus && matchesArea && matchesClass;
+  });
+
+  const sortedCases = [...filteredCases].sort((a, b) => {
+    const dateA = new Date(a.fecha_creacion).getTime();
+    const dateB = new Date(b.fecha_creacion).getTime();
+    return dateSort === "recientes" ? dateB - dateA : dateA - dateB;
   });
 
   const pendingApprovalCount = advisorActiveCasos?.filter(
@@ -126,10 +116,10 @@ export default function Asesor() {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
-  const totalPages = Math.ceil(filteredCases?.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(sortedCases?.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentCases = filteredCases.slice(startIndex, endIndex);
+  const currentCases = sortedCases.slice(startIndex, endIndex);
 
   if (loading) {
     return (
@@ -235,8 +225,8 @@ export default function Asesor() {
 
         {/* Filters */}
         <Card className="bg-white border-none shadow-sm shadow-slate-200/50 p-5 mb-8 rounded-2xl">
-          <div className="flex flex-col md:flex-row gap-4 items-end">
-            <div className="flex-1 w-full space-y-1.5">
+          <div className="flex flex-col md:flex-row gap-4 items-end flex-wrap">
+            <div className="flex-1 min-w-[200px] space-y-1.5">
               <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Buscar
               </label>
@@ -272,7 +262,6 @@ export default function Asesor() {
                     Pendiente de Aprobación
                   </SelectItem>
                   <SelectItem value="archivado">Archivado</SelectItem>
-                  <SelectItem value="cerrado">Cerrado</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -291,10 +280,53 @@ export default function Asesor() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas las áreas</SelectItem>
-                  <SelectItem value="civil">Derecho Civil</SelectItem>
+                  <SelectItem value="publico">Derecho Público</SelectItem>
                   <SelectItem value="laboral">Derecho Laboral</SelectItem>
-                  <SelectItem value="familia">Derecho Familiar</SelectItem>
+                  <SelectItem value="civil_familia">
+                    Derecho Civil y familiar
+                  </SelectItem>
                   <SelectItem value="penal">Derecho Penal</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-full md:w-48 space-y-1.5">
+              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                Ordenar por fecha
+              </label>
+              <Select
+                value={dateSort}
+                onValueChange={setDateSort}
+                disabled={loading}
+              >
+                <SelectTrigger className="bg-slate-50 border-transparent focus:bg-white transition-colors rounded-xl">
+                  <SelectValue placeholder="Orden" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recientes">Más recientes</SelectItem>
+                  <SelectItem value="antiguos">Más antiguos</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-full md:w-48 space-y-1.5">
+              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                Clasificación
+              </label>
+              <Select
+                value={classFilter}
+                onValueChange={setClassFilter}
+                disabled={loading}
+              >
+                <SelectTrigger className="bg-slate-50 border-transparent focus:bg-white transition-colors rounded-xl">
+                  <SelectValue placeholder="Clasificación" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">
+                    Todas las clasificaciones
+                  </SelectItem>
+                  <SelectItem value="en_tramite">En trámite</SelectItem>
+                  <SelectItem value="solo_asesoria">Solo asesoría</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -304,6 +336,8 @@ export default function Asesor() {
                 setSearchTerm("");
                 setStatusFilter("all");
                 setAreaFilter("all");
+                setDateSort("recientes");
+                setClassFilter("todos");
               }}
               variant="outline"
               className="w-full md:w-auto shrink-0 bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl"
@@ -334,6 +368,8 @@ export default function Asesor() {
                 setSearchTerm("");
                 setStatusFilter("all");
                 setAreaFilter("all");
+                setDateSort("recientes");
+                setClassFilter("todos");
               }}
               className="bg-white"
             >
@@ -424,15 +460,6 @@ export default function Asesor() {
                   >
                     Ver expediente completo
                   </Link>
-                  {caso.estado === "pendiente_aprobacion" && (
-                    <Button
-                      onClick={() => handleApproveCase(caso.id_caso)}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white shadow-md shadow-green-600/20 h-[42px] rounded-xl font-medium"
-                    >
-                      <Check className="w-4 h-4 mr-2" />
-                      Aprobar Caso
-                    </Button>
-                  )}
                 </div>
               </Card>
             ))}

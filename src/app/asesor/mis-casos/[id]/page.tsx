@@ -122,6 +122,34 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     setIsEditing(true);
   };
 
+  // Clasificación Rápida de Casos
+  const [isSavingClasificacion, setIsSavingClasificacion] = useState(false);
+
+  const handleClasificarCaso = async (clasificacion: string) => {
+    try {
+      setIsSavingClasificacion(true);
+      const { error: errorCaso } = await supabase
+        .from("casos")
+        .update({
+          clasificacion: clasificacion,
+          estado: "aprobado",
+        })
+        .eq("id_caso", id_caso);
+
+      if (errorCaso) {
+        throw errorCaso;
+      }
+
+      await traerDatos();
+      toast.success("Caso clasificado y aprobado exitosamente");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al clasificar el caso");
+    } finally {
+      setIsSavingClasificacion(false);
+    }
+  };
+
   // Client editing functions
   const handleEditClient = () => {
     setEditedClientData(caso?.usuarios || null);
@@ -305,7 +333,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
   if (loading) {
     return (
-      <div className="flex flex-col justify-center items-center h-screen bg-slate-50/50">
+      <div className="flex flex-col justify-center items-center min-h-screen bg-slate-50/50">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         <p className="mt-4 text-slate-500 font-medium">
           Cargando detalles del caso...
@@ -391,10 +419,46 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               <TabsTrigger value="supervision">Datos estudiante</TabsTrigger>
               <TabsTrigger value="client">Usuario</TabsTrigger>
               <TabsTrigger value="defendant">Accionado</TabsTrigger>
+              
             </TabsList>
 
             {/* Overview Tab */}
             <TabsContent value="overview" className="space-y-6">
+              {caso.estado === "pendiente_aprobacion" && (
+                <Card className="p-6 bg-amber-50 border-amber-200">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                      <h3 className="text-lg font-bold text-amber-900">
+                        Aprobar y Clasificar Caso
+                      </h3>
+                      <p className="text-sm text-amber-700 mt-1">
+                        Este caso está pendiente de su revisión. Por favor
+                        determine si el caso debe continuar su trámite o si
+                        quedará registrado únicamente como asesoría. Al
+                        seleccionarlo se aprobará inmediatamente.
+                      </p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-3 min-w-fit">
+                      <Button
+                        onClick={() => handleClasificarCaso("solo_asesoria")}
+                        variant="outline"
+                        className="w-full sm:w-auto bg-white border-amber-300 text-amber-700 hover:bg-amber-100"
+                        disabled={isSavingClasificacion}
+                      >
+                        Queda solo como asesoría
+                      </Button>
+                      <Button
+                        onClick={() => handleClasificarCaso("en_tramite")}
+                        className="w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white"
+                        disabled={isSavingClasificacion}
+                      >
+                        El caso debe continuar
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              )}
+
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-6">
                   {/* Case Info */}
