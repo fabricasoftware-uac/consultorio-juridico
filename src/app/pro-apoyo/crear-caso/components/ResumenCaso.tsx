@@ -49,15 +49,17 @@ export function ResumenCaso({ caso, usuario, onNuevoCaso }: ResumenCasoProps) {
       }
       const casoData = await insertCasoNuevo(caso, id_usuario);
 
-      const id_estudiante = caso.estudiantes_casos?.[0]?.estudiante.id_perfil;
+      const id_estudiante = caso.estudiantes_casos?.[0]?.estudiante?.id_perfil;
       const id_caso = casoData?.[0]?.id_caso;
-      const id_asesor = caso.asesores_casos?.[0]?.asesor.id_perfil;
+      const id_asesor = caso.asesores_casos?.[0]?.asesor?.id_perfil;
 
-      if (id_caso && id_estudiante && id_asesor) {
+      if (id_caso && id_estudiante) {
         await insertEstudiantesCasos(id_caso.toString(), id_estudiante);
-        await insertAsesoresCasos(id_caso.toString(), id_asesor);
+        if (id_asesor) {
+          await insertAsesoresCasos(id_caso.toString(), id_asesor);
+        }
       } else {
-        console.error("Faltan IDs para vincular estudiante o asesor al caso.");
+        console.error("Faltan IDs para vincular estudiante al caso.");
       }
       setDialogOpen(true);
       toast.success("Caso creado exitosamente");
@@ -97,13 +99,13 @@ export function ResumenCaso({ caso, usuario, onNuevoCaso }: ResumenCasoProps) {
             <div className="p-2 bg-blue-100 rounded-lg">
               <FileText className="h-6 w-6 text-blue-600" />
             </div>
-            <CardTitle>Resumen del Caso</CardTitle>
+            <CardTitle>Resumen de los datos</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Información del usuario */}
           <div>
-            <h3 className="text-slate-900 mb-3">Profesional que Registra</h3>
+            <h3 className="text-slate-900 mb-3">Usuario que se está registrando</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50 rounded-lg">
               <div>
                 <span className="text-sm text-muted-foreground">
@@ -272,7 +274,7 @@ export function ResumenCaso({ caso, usuario, onNuevoCaso }: ResumenCasoProps) {
           ) : (
             <>
               <CheckCircle2 className="mr-2 h-5 w-5" />
-              Crear Caso
+              Registrar datos
             </>
           )}
         </Button>
@@ -284,10 +286,10 @@ export function ResumenCaso({ caso, usuario, onNuevoCaso }: ResumenCasoProps) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-blue-700">
               <CheckCircle2 className="h-6 w-6 text-green-600" />
-              Caso creado exitosamente
+              Datos registrados exitosamente
             </DialogTitle>
             <DialogDescription>
-              El caso se ha registrado correctamente en el sistema. Puedes crear
+              Los datos se han registrado correctamente en el sistema. Puedes crear
               uno nuevo o cerrar esta ventana.
             </DialogDescription>
           </DialogHeader>
@@ -308,7 +310,7 @@ export function ResumenCaso({ caso, usuario, onNuevoCaso }: ResumenCasoProps) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-red-700">
               <AlertCircle className="h-6 w-6 text-red-600" />
-              Error al crear el caso
+              Error al registrar los datos
             </DialogTitle>
             <DialogDescription className="text-slate-700 font-medium py-2">
               {errorMessage}

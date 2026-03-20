@@ -91,7 +91,12 @@ export default function IdleTimerProvider() {
       const timeIdle = currentTime - lastActivityTime.current;
 
       if (timeIdle >= MAX_IDLE_TIME) {
-        // Forzar desconexión
+        if (!isExpired) {
+          setIsExpired(true);
+          setShowWarning(true);
+          localStorage.clear();
+          sessionStorage.clear();
+        }
       } else if (timeIdle >= WARNING_TIME && !showWarning) {
         // Mostrar advertencia en el minuto 14
         setShowWarning(true);

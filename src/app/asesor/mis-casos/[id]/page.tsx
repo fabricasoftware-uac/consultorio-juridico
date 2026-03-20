@@ -7,10 +7,18 @@ import Link from "next/link";
 import { Navbar } from "app/asesor/components/NavBarAsesor";
 import { getCasoById } from "../../../../../supabase/queries/getCasoById";
 import { getDemandadoByCasoId } from "../../../../../supabase/queries/getDemandadoByCasoId";
-import { Asesor, Caso, Demandado, Estudiante } from "app/types/database";
+import {
+  Asesor,
+  Caso,
+  Demandado,
+  Estudiante,
+  Usuario,
+} from "app/types/database";
 import { Textarea } from "@/components/ui/textarea";
 import { updateObservaciones } from "../../../../../supabase/queries/updateObservaciones";
 import { toast } from "sonner";
+import { cleanData } from "@/lib/utils";
+import { supabase } from "@/lib/supabase/supabase-client";
 import {
   Pencil,
   Save,
@@ -43,6 +51,18 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editObservaciones, setEditObservaciones] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+
+  const [isEditingClient, setIsEditingClient] = useState(false);
+  const [editedClientData, setEditedClientData] = useState<Usuario | null>(
+    null,
+  );
+
+  const [isEditingDefendant, setIsEditingDefendant] = useState(false);
+  const [editedDefendantData, setEditedDefendantData] =
+    useState<Demandado | null>(null);
+
+  const [isEditingCaseInfo, setIsEditingCaseInfo] = useState(false);
+  const [editedCaseData, setEditedCaseData] = useState<Caso | null>(null);
 
   async function traerDatos() {
     try {
@@ -100,6 +120,183 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const startEditing = () => {
     setEditObservaciones(caso?.observaciones || "");
     setIsEditing(true);
+  };
+
+  // Client editing functions
+  const handleEditClient = () => {
+    setEditedClientData(caso?.usuarios || null);
+    setIsEditingClient(true);
+  };
+
+  const handleSaveClient = async () => {
+    if (editedClientData) {
+      setIsEditingClient(false);
+      setEditedClientData(null);
+      const limpio = cleanData(editedClientData);
+      try {
+        const { error: errorCaso } = await supabase
+          .from("usuarios")
+          .update({
+            nombre_completo: limpio.nombre_completo,
+            sexo: limpio.sexo,
+            cedula: limpio.cedula,
+            edad: limpio.edad,
+            estado_civil: limpio.estado_civil,
+            estrato: limpio.estrato,
+            telefono: limpio.telefono,
+            contacto_familiar: limpio.contacto_familiar,
+            correo: limpio.correo,
+            tipo_vivienda: limpio.tipo_vivienda,
+            direccion: limpio.direccion,
+            situacion_laboral: limpio.situacion_laboral,
+            valor_otros_ingresos: limpio.valor_otros_ingresos,
+            otros_ingresos: limpio.otros_ingresos,
+            concepto_otros_ingresos: limpio.concepto_otros_ingresos,
+          })
+          .eq("id_usuario", caso?.id_usuario);
+        if (errorCaso) {
+          setError(errorCaso.message);
+          throw errorCaso;
+        }
+        await traerDatos();
+        toast.success("Información del cliente actualizada");
+      } catch (err) {
+        console.error(err);
+        setError("Error al guardar los datos del usuario");
+      }
+    }
+  };
+
+  const handleCancelClientEdit = () => {
+    setIsEditingClient(false);
+    setEditedClientData(null);
+  };
+
+  const handleClientDataChange = (field: string, value: string | boolean) => {
+    if (editedClientData) {
+      setEditedClientData({
+        ...editedClientData,
+        [field]: value,
+      });
+    }
+  };
+
+  // Defendant editing functions
+  const handleEditDefendant = () => {
+    setEditedDefendantData(demandado || null);
+    setIsEditingDefendant(true);
+  };
+
+  const handleSaveDefendant = async () => {
+    if (editedDefendantData) {
+      setIsEditingDefendant(false);
+      setEditedDefendantData(null);
+      const limpio = cleanData(editedDefendantData);
+
+      try {
+        const { data, error } = await supabase
+          .from("demandados")
+          .update({
+            nombre_completo: limpio.nombre_completo,
+            lugar_residencia: limpio.lugar_residencia,
+            documento: limpio.documento,
+            correo: limpio.correo,
+            celular: limpio.celular,
+          })
+          .eq("id_caso", id_caso)
+          .select();
+
+        if (error) {
+          setError(error.message);
+          throw error;
+        }
+        await traerDatos();
+        toast.success("Información del demandado actualizada");
+      } catch (err) {
+        console.error(err);
+        setError("Error al guardar los datos del demandado");
+      }
+    }
+  };
+
+  const handleCancelDefendantEdit = () => {
+    setIsEditingDefendant(false);
+    setEditedDefendantData(null);
+  };
+
+  const handleDefendantDataChange = (field: string, value: string) => {
+    if (editedDefendantData) {
+      setEditedDefendantData({
+        ...editedDefendantData,
+        [field]: value,
+      });
+    }
+  };
+
+  // Case information editing functions
+  const handleEditCaseInfo = () => {
+    if (!caso) return;
+    setEditedCaseData({
+      area: caso.area,
+      aprobacion_asesor: caso?.aprobacion_asesor,
+      tipo_proceso: caso?.tipo_proceso,
+      resumen_hechos: caso?.resumen_hechos,
+      estado: caso?.estado,
+      observaciones: caso?.observaciones,
+      clasificacion: caso?.clasificacion,
+      // Conservar las referencias no editables
+      estudiantes_casos: caso?.estudiantes_casos,
+      asesores_casos: caso?.asesores_casos,
+      fecha_creacion: caso?.fecha_creacion,
+      fecha_cierre: caso?.fecha_cierre,
+      usuarios: caso?.usuarios,
+      id_caso: caso?.id_caso,
+      id_usuario: caso?.id_usuario,
+    });
+    setIsEditingCaseInfo(true);
+  };
+
+  const handleSaveCaseInfo = async () => {
+    if (editedCaseData) {
+      setIsEditingCaseInfo(false);
+      setEditedCaseData(null);
+      const limpio = cleanData(editedCaseData);
+      try {
+        const { error: errorCaso } = await supabase
+          .from("casos")
+          .update({
+            area: limpio.area,
+            aprobacion_asesor: limpio.aprobacion_asesor,
+            tipo_proceso: limpio.tipo_proceso,
+            estado: limpio.estado,
+            clasificacion: limpio.clasificacion,
+          })
+          .eq("id_caso", id_caso);
+        if (errorCaso) {
+          setError(errorCaso.message);
+          throw errorCaso;
+        }
+        await traerDatos();
+        toast.success("Información del caso actualizada");
+      } catch (err) {
+        console.error(err);
+        setError("Error al guardar los datos del caso");
+      }
+    }
+  };
+
+  const handleCancelCaseEdit = () => {
+    setIsEditingCaseInfo(false);
+    setEditedCaseData(null);
+  };
+
+  const handleCaseDataChange = (field: string, value: string | boolean) => {
+    if (editedCaseData) {
+      setEditedCaseData({
+        ...editedCaseData,
+        [field]: value,
+      });
+    }
   };
 
   useEffect(() => {
@@ -202,15 +399,15 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                 <div className="lg:col-span-2 space-y-6">
                   {/* Case Info */}
                   <CaseInfoTab
-                    caseData={caso}
-                    isEditing={false}
-                    editedData={null}
-                    onEdit={() => {}}
-                    onSave={() => {}}
-                    onCancel={() => {}}
-                    onChange={() => {}}
+                    caseData={isEditingCaseInfo ? editedCaseData : caso}
+                    isEditing={isEditingCaseInfo}
+                    editedData={editedCaseData}
+                    onEdit={handleEditCaseInfo}
+                    onSave={handleSaveCaseInfo}
+                    onCancel={handleCancelCaseEdit}
+                    onChange={handleCaseDataChange}
                     getStatusBadge={getStatusBadge}
-                    canEdit={false}
+                    canEdit={true}
                   />
 
                   <SectionCard
@@ -364,28 +561,30 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             {/* Client Tab */}
             <TabsContent value="client" className="space-y-6">
               <ClientInfo
-                usuarios={caso?.usuarios}
-                isEditing={false}
-                editedData={null}
-                onEdit={() => {}}
-                onSave={() => {}}
-                onCancel={() => {}}
-                onChange={() => {}}
-                canEdit={false}
+                usuarios={isEditingClient ? editedClientData : caso?.usuarios}
+                isEditing={isEditingClient}
+                editedData={editedClientData}
+                onEdit={handleEditClient}
+                onSave={handleSaveClient}
+                onCancel={handleCancelClientEdit}
+                onChange={handleClientDataChange}
+                canEdit={true}
               />
             </TabsContent>
 
             {/* Defendant Tab */}
             <TabsContent value="defendant" className="space-y-6">
               <DefendantInfo
-                defendantData={demandado}
-                isEditing={false}
-                editedData={null}
-                onEdit={() => {}}
-                onSave={() => {}}
-                onCancel={() => {}}
-                onChange={() => {}}
-                canEdit={false}
+                defendantData={
+                  isEditingDefendant ? editedDefendantData : demandado
+                }
+                isEditing={isEditingDefendant}
+                editedData={editedDefendantData}
+                onEdit={handleEditDefendant}
+                onSave={handleSaveDefendant}
+                onCancel={handleCancelDefendantEdit}
+                onChange={handleDefendantDataChange}
+                canEdit={true}
               />
             </TabsContent>
           </Tabs>

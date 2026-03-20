@@ -369,73 +369,92 @@ export function Step5DatosAccionado({
         </CardTitle>
         <CardDescription>Información del Accionado</CardDescription>
       </CardHeader>
-      <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="nombresDemandado">
-            Nombres Completos del Accionado *
+      <CardContent className="space-y-4">
+        <div className="flex items-center space-x-2 border-b border-slate-100 pb-4">
+          <Checkbox
+            id="sinDemandado"
+            checked={formData.sinDemandado}
+            onCheckedChange={(checked: boolean) =>
+              handleInputChange("sinDemandado", checked)
+            }
+          />
+          <Label htmlFor="sinDemandado" className="font-medium">
+            No hay accionado / No aplica para esta solicitud
           </Label>
-          <Input
-            id="nombresDemandado"
-            required
-            value={formData.nombreDemandado}
-            onChange={(e) =>
-              handleInputChange("nombreDemandado", e.target.value)
-            }
-            placeholder="Nombre completo del accionado"
-          />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="identificacionDemandado">
-            Identificación del Accionado
-          </Label>
-          <Input
-            id="identificacionDemandado"
-            value={formData.documentoDemandado}
-            onChange={(e) =>
-              handleInputChange("documentoDemandado", e.target.value)
-            }
-            placeholder="Número de identificación"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="celularDemandado">Número Celular del Accionado</Label>
-          <Input
-            id="celularDemandado"
-            type="tel"
-            value={formData.celularDemandado}
-            onChange={(e) =>
-              handleInputChange("celularDemandado", e.target.value)
-            }
-            placeholder="Número de celular"
-          />
-        </div>
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="lugarResidenciaDemandado">
-            Lugar de Residencia o Notificación del Accionado
-          </Label>
-          <Input
-            id="lugarResidenciaDemandado"
-            value={formData.lugarResidenciaDemandado}
-            onChange={(e) =>
-              handleInputChange("lugarResidenciaDemandado", e.target.value)
-            }
-            placeholder="Dirección de residencia"
-          />
-        </div>
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="correoDemandado">
-            Correo Electrónico del Accionado
-          </Label>
-          <Input
-            id="correoDemandado"
-            type="email"
-            value={formData.correoDemandado}
-            onChange={(e) =>
-              handleInputChange("correoDemandado", e.target.value)
-            }
-            placeholder="correo@ejemplo.com"
-          />
-        </div>
+
+        {!formData.sinDemandado && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="nombresDemandado">
+                Nombres Completos del Accionado *
+              </Label>
+              <Input
+                id="nombresDemandado"
+                required
+                value={formData.nombreDemandado}
+                onChange={(e) =>
+                  handleInputChange("nombreDemandado", e.target.value)
+                }
+                placeholder="Nombre completo del accionado"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="identificacionDemandado">
+                Identificación del Accionado
+              </Label>
+              <Input
+                id="identificacionDemandado"
+                value={formData.documentoDemandado}
+                onChange={(e) =>
+                  handleInputChange("documentoDemandado", e.target.value)
+                }
+                placeholder="Número de identificación"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="celularDemandado">
+                Número Celular del Accionado
+              </Label>
+              <Input
+                id="celularDemandado"
+                type="tel"
+                value={formData.celularDemandado}
+                onChange={(e) =>
+                  handleInputChange("celularDemandado", e.target.value)
+                }
+                placeholder="Número de celular"
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="lugarResidenciaDemandado">
+                Lugar de Residencia o Notificación del Accionado
+              </Label>
+              <Input
+                id="lugarResidenciaDemandado"
+                value={formData.lugarResidenciaDemandado}
+                onChange={(e) =>
+                  handleInputChange("lugarResidenciaDemandado", e.target.value)
+                }
+                placeholder="Dirección de residencia"
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="correoDemandado">
+                Correo Electrónico del Accionado
+              </Label>
+              <Input
+                id="correoDemandado"
+                type="email"
+                value={formData.correoDemandado}
+                onChange={(e) =>
+                  handleInputChange("correoDemandado", e.target.value)
+                }
+                placeholder="correo@ejemplo.com"
+              />
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

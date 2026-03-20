@@ -42,6 +42,7 @@ export default function Page({
   const [guardando, setGuardando] = useState(false);
   const [editando, setEditando] = useState(false);
   const [observaciones, setObservaciones] = useState("");
+  const [observacionesEstudiante, setObservacionesEstudiante] = useState("");
   const [loading, setLoading] = useState(true);
 
   async function traerDatos() {
@@ -75,6 +76,7 @@ export default function Page({
   useEffect(() => {
     if (caso) {
       setObservaciones(caso.observaciones || "");
+      setObservacionesEstudiante(caso.observaciones_estudiante || "");
     }
   }, [caso]);
 
@@ -83,11 +85,13 @@ export default function Page({
       setGuardando(true);
       await supabase
         .from("casos")
-        .update({ observaciones })
+        .update({ observaciones_estudiante: observacionesEstudiante })
         .eq("id_caso", id_caso);
       setEditando(false);
     } catch (err) {
       console.error(err);
+    } finally {
+      setGuardando(false);
     }
   };
 
@@ -236,11 +240,39 @@ export default function Page({
                           />
                         </svg>
                       </div>
-                      <h3 className="text-gray-900">Observaciones</h3>
+                      <h3 className="text-gray-900 font-semibold">
+                        Observaciones (Asesor)
+                      </h3>
                     </div>
-                    <div className="space-y-3 ">
-                      <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-semibold">Observaciones</h3>
+                    <div className="space-y-3 mt-4">
+                      <p className="text-gray-700 bg-gray-50 p-4 rounded-md min-h-20 whitespace-pre-wrap border border-gray-100 leading-relaxed">
+                        {observaciones ||
+                          "No hay observaciones registradas por el asesor."}
+                      </p>
+                    </div>
+                  </Card>
+
+                  <Card className="p-6">
+                    <div className="flex items-center mb-4">
+                      <div className="p-2 bg-blue-100 rounded-lg mr-3">
+                        <svg
+                          className="w-5 h-5 text-blue-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                          />
+                        </svg>
+                      </div>
+                      <div className="flex justify-between items-center w-full">
+                        <h3 className="text-gray-900 font-semibold">
+                          Mis Observaciones
+                        </h3>
                         {!editando ? (
                           <Button
                             onClick={() => setEditando(true)}
@@ -250,7 +282,7 @@ export default function Page({
                             Editar
                           </Button>
                         ) : (
-                          <div className="space-x-2">
+                          <div className="space-x-2 flex">
                             <Button
                               onClick={handleGuardar}
                               disabled={guardando}
@@ -261,7 +293,9 @@ export default function Page({
                             <Button
                               onClick={() => {
                                 setEditando(false);
-                                setObservaciones(caso?.observaciones || ""); // restaurar valor original
+                                setObservacionesEstudiante(
+                                  caso?.observaciones_estudiante || "",
+                                );
                               }}
                               variant="outline"
                             >
@@ -270,17 +304,22 @@ export default function Page({
                           </div>
                         )}
                       </div>
+                    </div>
 
+                    <div className="space-y-3 mt-2">
                       {!editando ? (
-                        <p className="text-gray-700 bg-gray-50 p-3 rounded-md min-h-20">
-                          {observaciones ||
-                            "No hay observaciones registradas para este caso."}
+                        <p className="text-gray-700 bg-gray-50 p-4 rounded-md min-h-20 whitespace-pre-wrap border border-gray-100 leading-relaxed">
+                          {observacionesEstudiante ||
+                            "No has registrado observaciones para este caso aún."}
                         </p>
                       ) : (
                         <Textarea
-                          value={observaciones}
-                          onChange={(e) => setObservaciones(e.target.value)}
-                          className="min-h-28"
+                          value={observacionesEstudiante}
+                          onChange={(e) =>
+                            setObservacionesEstudiante(e.target.value)
+                          }
+                          className="min-h-32 focus:border-blue-500 focus:ring-blue-500/20"
+                          placeholder="Escribe tus observaciones aquí..."
                         />
                       )}
                     </div>

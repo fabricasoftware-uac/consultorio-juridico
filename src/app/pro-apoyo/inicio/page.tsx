@@ -83,11 +83,11 @@ export default function PaginaPrincipal() {
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-2xl font-bold text-slate-900">
-                    Crear Caso
+                    Recepción Usuarios
                   </h3>
                   <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
-                    Registra un nuevo usuario con necesidades legales e inicia
-                    el proceso de perfilamiento y asignación.
+                    Registra un nuevo usuario y asigna un estudiante para iniciar
+                    el proceso de asesoría.
                   </p>
                 </div>
                 <Button className="w-full sm:w-auto mt-4 px-8 bg-slate-900 hover:bg-pink-600 text-white rounded-full transition-all duration-300 gap-2">

@@ -144,6 +144,7 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
     tiene_contrato: false,
 
     // Defendant Information
+    sinDemandado: false,
     nombreDemandado: "",
     documentoDemandado: "",
     celularDemandado: "",
@@ -222,7 +223,7 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
       case 4:
         return !!formData.situacion_laboral;
       case 5:
-        return !!formData.nombreDemandado;
+        return formData.sinDemandado ? true : !!formData.nombreDemandado;
       case 6:
         return true; // Optional section
       case 7:
@@ -308,21 +309,23 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
         );
 
       //Actualizar demandado
-      const { error: errorDemandado } = await supabase
-        .from("demandados")
-        .insert({
-          id_caso: idCaso,
-          nombre_completo: limpio.nombreDemandado,
-          documento: limpio.documentoDemandado,
-          celular: limpio.celularDemandado,
-          lugar_residencia: limpio.lugarResidenciaDemandado,
-          correo: limpio.correoDemandado,
-        });
+      if (!limpio.sinDemandado) {
+        const { error: errorDemandado } = await supabase
+          .from("demandados")
+          .insert({
+            id_caso: idCaso,
+            nombre_completo: limpio.nombreDemandado,
+            documento: limpio.documentoDemandado,
+            celular: limpio.celularDemandado,
+            lugar_residencia: limpio.lugarResidenciaDemandado,
+            correo: limpio.correoDemandado,
+          });
 
-      if (errorDemandado)
-        throw new Error(
-          `Error actualizando demandado: ${errorDemandado.message}`,
-        );
+        if (errorDemandado)
+          throw new Error(
+            `Error actualizando demandado: ${errorDemandado.message}`,
+          );
+      }
 
       setOpen(true);
       if (typeof window !== "undefined") {

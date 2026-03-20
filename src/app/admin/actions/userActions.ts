@@ -78,6 +78,7 @@ export async function updateEstudiante(
       semestre: data.semestre,
       jornada: data.jornada,
       turno: data.turno,
+      dia: data.dia,
     })
     .eq("id_perfil", userId);
 
@@ -112,6 +113,7 @@ export async function updateAsesor(
     .update({
       turno: data.turno,
       area: data.area,
+      dia: data.dia,
     })
     .eq("id_perfil", userId);
 

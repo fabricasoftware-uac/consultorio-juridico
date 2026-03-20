@@ -41,6 +41,8 @@ export default function SupportCasesPage() {
   const [statusFilter, setStatusFilter] = useState("todos");
   const [typeFilter, setTypeFilter] = useState("todos");
   const [studentFilter, setStudentFilter] = useState("todos");
+  const [dateFilter, setDateFilter] = useState("");
+  const [classFilter, setClassFilter] = useState("todos");
   const [casos, setCasos] = useState<Caso[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -85,7 +87,20 @@ export default function SupportCasesPage() {
         (ec) => ec.estudiante.perfil.nombre_completo === studentFilter,
       );
 
-    return matchesSearch && matchesStatus && matchesArea && matchesStudent;
+    // Nuevos filtros
+    const matchesDate =
+      !dateFilter || caso.fecha_creacion?.startsWith(dateFilter);
+    const matchesClass =
+      classFilter === "todos" || caso.clasificacion === classFilter;
+
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesArea &&
+      matchesStudent &&
+      matchesDate &&
+      matchesClass
+    );
   });
 
   const uniqueStudents = [
@@ -194,8 +209,8 @@ export default function SupportCasesPage() {
 
         {/* Filters */}
         <Card className="bg-white border-none shadow-sm shadow-slate-200/50 p-5 mb-8 rounded-2xl">
-          <div className="flex flex-col lg:flex-row gap-4 items-end">
-            <div className="flex-1 w-full space-y-1.5">
+          <div className="flex flex-col lg:flex-row gap-4 items-end flex-wrap">
+            <div className="flex-1 min-w-[200px] space-y-1.5">
               <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Buscar general
               </label>
@@ -248,12 +263,49 @@ export default function SupportCasesPage() {
               </Select>
             </div>
 
+            <div className="w-full lg:w-48 space-y-1.5">
+              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                Fecha de Creación
+              </label>
+              <Input
+                type="date"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                disabled={loading}
+                className="bg-slate-50 border-transparent focus:bg-white focus:border-blue-500 transition-colors rounded-xl"
+              />
+            </div>
+
+            <div className="w-full lg:w-48 space-y-1.5">
+              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                Clasificación
+              </label>
+              <Select
+                value={classFilter}
+                onValueChange={setClassFilter}
+                disabled={loading}
+              >
+                <SelectTrigger className="bg-slate-50 border-transparent focus:bg-white transition-colors rounded-xl">
+                  <SelectValue placeholder="Clasificación" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">
+                    Todas las clasificaciones
+                  </SelectItem>
+                  <SelectItem value="en_tramite">En trámite</SelectItem>
+                  <SelectItem value="solo_asesoria">Solo asesoría</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <Button
               onClick={() => {
                 setSearchTerm("");
                 setStatusFilter("todos");
                 setTypeFilter("todos");
                 setStudentFilter("todos");
+                setDateFilter("");
+                setClassFilter("todos");
               }}
               variant="outline"
               className="w-full md:w-auto shrink-0 bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl"
@@ -378,6 +430,8 @@ export default function SupportCasesPage() {
                 setStatusFilter("todos");
                 setTypeFilter("todos");
                 setStudentFilter("todos");
+                setDateFilter("");
+                setClassFilter("todos");
               }}
               className="bg-white"
             >

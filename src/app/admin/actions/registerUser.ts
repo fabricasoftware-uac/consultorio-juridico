@@ -18,6 +18,7 @@ export interface RegisterEstudianteInput {
   semestre: number;
   jornada: "diurna" | "nocturna" | "mixto";
   turno: "9-11" | "2-4" | "4-6";
+  dia: string;
 }
 
 export async function registerEstudiante(
@@ -67,6 +68,7 @@ export async function registerEstudiante(
       semestre: input.semestre,
       jornada: input.jornada,
       turno: input.turno,
+      dia: input.dia,
     });
 
   if (estudianteError) {
@@ -92,7 +94,8 @@ export interface RegisterAsesorInput {
   cedula: string;
   telefono: string;
   turno: "9-11" | "2-4" | "4-6";
-  area: "laboral" | "familia" | "penal" | "civil" | "otros";
+  area: "laboral" | "civil_familia" | "penal" | "publica" | "otros";
+  dia: string;
 }
 
 export async function registerAsesor(
@@ -134,6 +137,7 @@ export async function registerAsesor(
     id_perfil: userId,
     turno: input.turno,
     area: input.area,
+    dia: input.dia,
   });
 
   if (asesorError) {

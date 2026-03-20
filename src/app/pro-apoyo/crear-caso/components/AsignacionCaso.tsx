@@ -91,22 +91,24 @@ export function AsignacionCaso({
   }, []);
 
   const handleRegistrarCaso = () => {
-    if (!estudianteId || !asesorId) {
-      console.error("Por favor complete todos los campos requeridos");
+    if (!estudianteId) {
+      toast.error("Por favor seleccione un estudiante");
       return;
     }
 
     const estudiante = estudiantesDisponibles.find(
       (e) => e.id_perfil.toString() === estudianteId,
     );
-    const asesor = asesoresDisponibles.find(
-      (a) => a.id_perfil.toString() === asesorId,
-    );
 
-    if (!estudiante || !asesor) {
-      console.error("No se pudo encontrar el estudiante o asesor seleccionado");
+    if (!estudiante) {
+      toast.error("No se pudo encontrar el estudiante seleccionado");
       return;
     }
+
+    const asesor = asesorId
+      ? asesoresDisponibles.find((a) => a.id_perfil.toString() === asesorId)
+      : undefined;
+
     const datosCaso: Caso = {
       area: datosIniciales?.area || "otros",
       fecha_creacion:
@@ -114,7 +116,7 @@ export function AsignacionCaso({
       estado: datosIniciales?.estado || "en_proceso",
       usuarios: usuario,
       estudiantes_casos: [{ estudiante }],
-      asesores_casos: [{ asesor }],
+      asesores_casos: asesor ? [{ asesor }] : [],
       observaciones,
     };
 
@@ -398,7 +400,7 @@ export function AsignacionCaso({
                   htmlFor="asesor"
                   className="text-slate-700 font-medium ml-1"
                 >
-                  Seleccionar asesor *
+                  Seleccionar asesor (Opcional)
                 </Label>
                 <div className="w-full">
                   <SearchableSelector
@@ -540,7 +542,7 @@ export function AsignacionCaso({
             <Button
               onClick={handleRegistrarCaso}
               className="w-full sm:w-auto min-w-[200px] h-12 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/25 transition-all duration-300 hover:shadow-blue-500/40 hover:-translate-y-0.5 text-base font-medium rounded-xl"
-              disabled={!estudianteId || !asesorId}
+              disabled={!estudianteId}
             >
               Continuar a Confirmación
             </Button>
