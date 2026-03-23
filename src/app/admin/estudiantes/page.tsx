@@ -63,6 +63,7 @@ interface StudentForm {
   semestre: string;
   jornada: JornadaEnum | "";
   turno: TurnoEnum | "";
+  dia: string;
 }
 
 const EMPTY_FORM: StudentForm = {
@@ -73,6 +74,7 @@ const EMPTY_FORM: StudentForm = {
   semestre: "",
   jornada: "",
   turno: "",
+  dia: "",
 };
 
 export default function EstudiantesPage() {
@@ -114,7 +116,8 @@ export default function EstudiantesPage() {
       !form.telefono ||
       !form.semestre ||
       !form.jornada ||
-      !form.turno
+      !form.turno ||
+      !form.dia
     ) {
       toast.error("Por favor complete todos los campos obligatorios.");
       return;
@@ -135,6 +138,7 @@ export default function EstudiantesPage() {
         semestre,
         jornada: form.jornada as JornadaEnum,
         turno: form.turno as TurnoEnum,
+        dia: form.dia,
       });
 
       if (result.success) {
@@ -170,6 +174,7 @@ export default function EstudiantesPage() {
       semestre: student.semestre.toString(),
       jornada: student.jornada,
       turno: student.turno,
+      dia: student.dia || "",
     });
     setIsEditOpen(true);
   };
@@ -185,13 +190,13 @@ export default function EstudiantesPage() {
         semestre: parseInt(editForm.semestre),
         jornada: editForm.jornada,
         turno: editForm.turno,
+        dia: editForm.dia,
       });
 
       if (result.success) {
         toast.success(result.message);
         setIsEditOpen(false);
         fetchEstudiantes();
-        
       } else {
         toast.error(result.error);
       }
@@ -345,6 +350,28 @@ export default function EstudiantesPage() {
                     </Select>
                   </div>
 
+                  <div className="space-y-1.5">
+                    <Label htmlFor="student-dia" className="text-xs">
+                      Día
+                    </Label>
+                    <Select
+                      value={form.dia}
+                      onValueChange={set("dia")}
+                      disabled={isPending}
+                    >
+                      <SelectTrigger className="h-9 text-sm">
+                        <SelectValue placeholder="Seleccione día" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Lunes">Lunes</SelectItem>
+                        <SelectItem value="Martes">Martes</SelectItem>
+                        <SelectItem value="Miércoles">Miércoles</SelectItem>
+                        <SelectItem value="Jueves">Jueves</SelectItem>
+                        <SelectItem value="Viernes">Viernes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   <Button
                     type="submit"
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-2"
@@ -425,11 +452,18 @@ export default function EstudiantesPage() {
                               Semestre {student.semestre}
                             </div>
                             <div className="text-xs text-slate-400 capitalize">
-                              {student.jornada} • {student.turno}
+                              {student.jornada} • {student.turno} •{" "}
+                              {student.dia}
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant={student.perfil.activo ? "default" : "destructive"}>
+                            <Badge
+                              variant={
+                                student.perfil.activo
+                                  ? "default"
+                                  : "destructive"
+                              }
+                            >
                               {student.perfil.activo ? "Activo" : "Inactivo"}
                             </Badge>
                           </TableCell>
@@ -455,7 +489,6 @@ export default function EstudiantesPage() {
                                   <Power className="h-4 w-4" />
                                 )}
                               </Button>
-                          
                             </div>
                           </TableCell>
                         </TableRow>
@@ -556,6 +589,25 @@ export default function EstudiantesPage() {
                       <SelectItem value="9-11">9–11 am</SelectItem>
                       <SelectItem value="2-4">2–4 pm</SelectItem>
                       <SelectItem value="4-6">4–6 pm</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-dia" className="text-right">
+                  Día
+                </Label>
+                <div className="col-span-3">
+                  <Select value={editForm.dia} onValueChange={setEdit("dia")}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione día" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Lunes">Lunes</SelectItem>
+                      <SelectItem value="Martes">Martes</SelectItem>
+                      <SelectItem value="Miércoles">Miércoles</SelectItem>
+                      <SelectItem value="Jueves">Jueves</SelectItem>
+                      <SelectItem value="Viernes">Viernes</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

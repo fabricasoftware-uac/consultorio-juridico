@@ -458,7 +458,7 @@ export default function Asesor() {
                     href={`/asesor/mis-casos/${caso.id_caso}`}
                     className="flex w-full items-center justify-center bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 font-medium px-4 py-2.5 rounded-xl transition-colors duration-200 text-sm shadow-xs"
                   >
-                    Ver expediente completo
+                    Ver detalles
                   </Link>
                 </div>
               </Card>

@@ -61,6 +61,7 @@ interface AsesorForm {
   telefono: string;
   turno: TurnoEnum | "";
   area: AreaEnum | "";
+  dia: string;
 }
 
 const EMPTY_FORM: AsesorForm = {
@@ -70,6 +71,7 @@ const EMPTY_FORM: AsesorForm = {
   telefono: "",
   turno: "",
   area: "",
+  dia: "",
 };
 
 export default function AsesoresPage() {
@@ -110,7 +112,8 @@ export default function AsesoresPage() {
       !form.cedula ||
       !form.telefono ||
       !form.turno ||
-      !form.area
+      !form.area ||
+      !form.dia
     ) {
       toast.error("Por favor complete todos los campos obligatorios.");
       return;
@@ -124,6 +127,7 @@ export default function AsesoresPage() {
         telefono: form.telefono,
         turno: form.turno as TurnoEnum,
         area: form.area as AreaEnum,
+        dia: form.dia,
       });
 
       if (result.success) {
@@ -158,6 +162,7 @@ export default function AsesoresPage() {
       telefono: asesor.perfil.telefono || "",
       turno: asesor.turno,
       area: asesor.area,
+      dia: asesor.dia || "",
     });
     setIsEditOpen(true);
   };
@@ -172,6 +177,7 @@ export default function AsesoresPage() {
         telefono: editForm.telefono,
         turno: editForm.turno,
         area: editForm.area,
+        dia: editForm.dia,
       });
 
       if (result.success) {
@@ -308,13 +314,37 @@ export default function AsesoresPage() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="laboral">Laboral</SelectItem>
-                          <SelectItem value="familia">Familia</SelectItem>
+                          <SelectItem value="civil_familia">
+                            Civil y Familia
+                          </SelectItem>
                           <SelectItem value="penal">Penal</SelectItem>
-                          <SelectItem value="civil">Civil</SelectItem>
+                          <SelectItem value="publica">Pública</SelectItem>
                           <SelectItem value="otros">Otros</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="asesor-dia" className="text-xs">
+                      Día
+                    </Label>
+                    <Select
+                      value={form.dia}
+                      onValueChange={set("dia")}
+                      disabled={isPending}
+                    >
+                      <SelectTrigger className="h-9 text-sm">
+                        <SelectValue placeholder="Seleccione día" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Lunes">Lunes</SelectItem>
+                        <SelectItem value="Martes">Martes</SelectItem>
+                        <SelectItem value="Miércoles">Miércoles</SelectItem>
+                        <SelectItem value="Jueves">Jueves</SelectItem>
+                        <SelectItem value="Viernes">Viernes</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <Button
@@ -397,7 +427,7 @@ export default function AsesoresPage() {
                               {asesor.area}
                             </div>
                             <div className="text-xs text-slate-400 capitalize">
-                              {asesor.turno}
+                              {asesor.turno} • {asesor.dia}
                             </div>
                           </TableCell>
                           <TableCell>
@@ -431,7 +461,6 @@ export default function AsesoresPage() {
                                   <Power className="h-4 w-4" />
                                 )}
                               </Button>
-                              
                             </div>
                           </TableCell>
                         </TableRow>
@@ -515,10 +544,31 @@ export default function AsesoresPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="laboral">Laboral</SelectItem>
-                      <SelectItem value="familia">Familia</SelectItem>
+                      <SelectItem value="civil_familia">
+                        Civil y Familia
+                      </SelectItem>
                       <SelectItem value="penal">Penal</SelectItem>
-                      <SelectItem value="civil">Civil</SelectItem>
+                      <SelectItem value="publica">Pública</SelectItem>
                       <SelectItem value="otros">Otros</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-dia" className="text-right">
+                  Día
+                </Label>
+                <div className="col-span-3">
+                  <Select value={editForm.dia} onValueChange={setEdit("dia")}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione día" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Lunes">Lunes</SelectItem>
+                      <SelectItem value="Martes">Martes</SelectItem>
+                      <SelectItem value="Miércoles">Miércoles</SelectItem>
+                      <SelectItem value="Jueves">Jueves</SelectItem>
+                      <SelectItem value="Viernes">Viernes</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

@@ -13,6 +13,10 @@ export default function PaginaPrincipal() {
     router.push("/asesor/mis-casos");
   };
 
+  const handleNavigateToMiHorario = () => {
+    router.push("/asesor/mi-horario");
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Navbar />
@@ -42,7 +46,7 @@ export default function PaginaPrincipal() {
           </header>
 
           {/* Acciones Rápidas */}
-          <section className="grid grid-cols-1 md:grid-cols-1 gap-6 max-w-xl mx-auto">
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             <Card
               className="group cursor-pointer border-slate-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-600/10 transition-all duration-300 bg-white/50 backdrop-blur-sm overflow-hidden"
               onClick={handleNavigateToMisCasos}
@@ -62,6 +66,42 @@ export default function PaginaPrincipal() {
                 </div>
                 <Button className="w-full sm:w-auto mt-4 px-8 bg-slate-900 hover:bg-blue-600 text-white rounded-full transition-all duration-300 gap-2">
                   Continuar
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card
+              className="group cursor-pointer border-slate-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-600/10 transition-all duration-300 bg-white/50 backdrop-blur-sm overflow-hidden"
+              onClick={handleNavigateToMiHorario}
+            >
+              <CardContent className="p-8 sm:p-10 text-center space-y-6 flex flex-col items-center">
+                <div className="h-16 w-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                  <svg
+                    className="h-8 w-8"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-bold text-slate-900">
+                    Mi Horario
+                  </h3>
+                  <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+                    Configura tus días y horas de atención en el Consultorio
+                    para citas y asesorías.
+                  </p>
+                </div>
+                <Button className="w-full sm:w-auto mt-4 px-8 bg-slate-900 hover:bg-blue-600 text-white rounded-full transition-all duration-300 gap-2">
+                  Configurar
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </CardContent>
