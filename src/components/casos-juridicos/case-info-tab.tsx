@@ -187,25 +187,22 @@ export const CaseInfoTab = ({
                 <ClipboardList className="w-4 h-4 text-slate-400" />
                 Clasificación
               </Label>
-              <Select
-                value={editedData?.clasificacion || ""}
-                onValueChange={(val) => onChange("clasificacion", val)}
-              >
-                <SelectTrigger className="border-slate-200 focus:ring-blue-500/20 focus:border-blue-500 rounded-lg h-11">
-                  <SelectValue placeholder="Seleccionar clasificación" />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl border-slate-200 shadow-xl">
-                  {["en_tramite", "solo_asesoria"].map((cls) => (
-                    <SelectItem
-                      key={cls}
-                      value={cls}
-                      className="focus:bg-blue-50 focus:text-blue-700 capitalize"
-                    >
-                      {cls.replace("_", " ")}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700">
+                <p className="font-semibold capitalize text-sm">
+                  {editedData?.clasificacion?.replace("_", " ") ||
+                    "Sin clasificar"}
+                </p>
+                {(!editedData?.clasificacion ||
+                  editedData?.estado === "pendiente_aprobacion" ||
+                  editedData?.estado === "en_proceso") && (
+                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                    * La clasificación no se puede modificar manualmente aquí.
+                    Si el caso está en proceso, es porque el estudiante no ha
+                    hecho la entrevista. La clasificación se asigna mediante el
+                    botón de aprobación tras la entrevista.
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">

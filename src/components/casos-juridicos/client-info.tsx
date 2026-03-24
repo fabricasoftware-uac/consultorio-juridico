@@ -81,7 +81,18 @@ export const ClientInfo = ({
               label="Nombre completo"
               value={usuarios?.nombre_completo}
             />
-            <InfoField label="Sexo" value={usuarios?.sexo} />
+            <InfoField
+              label="Sexo"
+              value={
+                usuarios?.sexo === "M"
+                  ? "Masculino"
+                  : usuarios?.sexo === "F"
+                    ? "Femenino"
+                    : usuarios?.sexo === "O"
+                      ? "Otro"
+                      : "N/A"
+              }
+            />
             <InfoField label="Cédula" value={usuarios?.cedula} />
             <InfoField
               label="Edad"
@@ -159,14 +170,14 @@ export const ClientInfo = ({
             <div className="space-y-2">
               <Label className="text-slate-700 font-bold">Estrato</Label>
               <Select
-                value={editedData?.estrato?.toString()}
-                onValueChange={(val) => onChange("estrato", val)}
+                value={editedData?.estrato?.toString() || ""}
+                onValueChange={(val) => onChange("estrato", parseInt(val))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Estrato" />
                 </SelectTrigger>
                 <SelectContent>
-                  {["1", "2", "3", "4", "5", "6", "Otro"].map((s) => (
+                  {["1", "2", "3", "4", "5", "6"].map((s) => (
                     <SelectItem key={s} value={s}>
                       Estrato {s}
                     </SelectItem>
@@ -269,7 +280,17 @@ export const ClientInfo = ({
             <div className="space-y-6">
               <InfoField
                 label="Situación laboral"
-                value={usuarios?.situacion_laboral}
+                value={
+                  usuarios?.situacion_laboral === "dependiente"
+                    ? "Dependiente (Empleado)"
+                    : usuarios?.situacion_laboral === "desempleado"
+                      ? "Desempleado"
+                      : usuarios?.situacion_laboral === "independiente"
+                        ? "Independiente"
+                        : usuarios?.situacion_laboral === "otro"
+                          ? "Otro"
+                          : "N/A"
+                }
                 valueClassName="text-lg font-semibold"
               />
               <InfoField
@@ -300,7 +321,7 @@ export const ClientInfo = ({
                   Situación laboral
                 </Label>
                 <Select
-                  value={editedData?.situacion_laboral?.toString()}
+                  value={editedData?.situacion_laboral || ""}
                   onValueChange={(val) => onChange("situacion_laboral", val)}
                 >
                   <SelectTrigger className="border-slate-200">
@@ -308,14 +329,16 @@ export const ClientInfo = ({
                   </SelectTrigger>
                   <SelectContent>
                     {[
-                      "Empleado",
-                      "Desempleado",
-                      "Independiente",
-                      "Pensionado",
-                      "Estudiante",
+                      { value: "dependiente", label: "Dependiente (Empleado)" },
+                      { value: "desempleado", label: "Desempleado" },
+                      { value: "independiente", label: "Independiente" },
+                      {
+                        value: "otro",
+                        label: "Otro / Pensionado / Estudiante",
+                      },
                     ].map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
+                      <SelectItem key={s.value} value={s.value}>
+                        {s.label}
                       </SelectItem>
                     ))}
                   </SelectContent>

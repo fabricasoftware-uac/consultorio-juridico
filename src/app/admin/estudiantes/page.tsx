@@ -93,7 +93,6 @@ export default function EstudiantesPage() {
     setLoading(true);
     const data = await getEstudiantes();
     setEstudiantes(data);
-    console.log("DATOS",data)
     setLoading(false);
   }
 
@@ -213,8 +212,6 @@ export default function EstudiantesPage() {
       e.perfil.correo?.toLowerCase().includes(searchTerm.toLowerCase()),
 
   );
-
-  console.log(estudiantes)
 
   return (
     <div className="flex flex-col min-h-screen bg-linear-to-br from-slate-50 to-slate-100">

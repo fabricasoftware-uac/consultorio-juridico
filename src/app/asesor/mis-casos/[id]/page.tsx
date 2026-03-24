@@ -419,7 +419,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               <TabsTrigger value="supervision">Datos estudiante</TabsTrigger>
               <TabsTrigger value="client">Usuario</TabsTrigger>
               <TabsTrigger value="defendant">Accionado</TabsTrigger>
-              
             </TabsList>
 
             {/* Overview Tab */}
@@ -494,7 +493,20 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         </div>
                       </div>
 
-                      {/* Observaciones */}
+                      {/* Observaciones del estudiante */}
+                      <div className="space-y-2">
+                        <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">
+                          Observaciones del Estudiante:
+                        </span>
+                        <div className="p-4 bg-blue-50/20 rounded-xl border border-blue-100">
+                          <pre className="text-sm text-slate-700 whitespace-pre-wrap font-sans leading-relaxed">
+                            {caso.observaciones_estudiante ||
+                              "No hay observaciones registradas por el estudiante."}
+                          </pre>
+                        </div>
+                      </div>
+
+                      {/* Observaciones (Asesor) */}
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">

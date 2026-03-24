@@ -8,6 +8,7 @@ export async function getAsesores(
     id_perfil,
     turno,
     area,
+    horario,
     perfil:perfiles!${soloActivos ? "inner" : "asesores_id_perfil_fkey"} (
       nombre_completo,
       correo,

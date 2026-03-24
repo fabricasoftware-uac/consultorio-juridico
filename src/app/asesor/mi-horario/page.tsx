@@ -63,36 +63,38 @@ export default function MiHorarioPage() {
     loadData();
   }, []);
 
-  const handleChangeDia = (
+  const handleChangeDia = async (
     dia: string,
     field: keyof HorarioDia,
     value: any,
   ) => {
-    setHorario((prev) => ({
-      ...prev,
+    const prevInfo = horario[dia] || horarioPorDefecto[dia];
+    const newHorario = {
+      ...horario,
       [dia]: {
-        ...prev[dia],
+        ...prevInfo,
         [field]: value,
       },
-    }));
-  };
+    };
 
-  const handleSave = async () => {
-    if (!userId) return;
-    try {
-      setSaving(true);
-      const { error } = await supabase
-        .from("asesores")
-        .update({ horario })
-        .eq("id_perfil", userId);
+    setHorario(newHorario);
 
-      if (error) throw error;
-      toast.success("Horario guardado correctamente");
-    } catch (err) {
-      console.error(err);
-      toast.error("Error al guardar el horario");
-    } finally {
-      setSaving(false);
+    if (userId) {
+      try {
+        setSaving(true);
+        const { error } = await supabase
+          .from("asesores")
+          .update({ horario: newHorario })
+          .eq("id_perfil", userId);
+
+        if (error) throw error;
+        toast.success("Horario guardado automáticamente");
+      } catch (err) {
+        console.error(err);
+        toast.error("Error al actualizar el horario automáticamente");
+      } finally {
+        setSaving(false);
+      }
     }
   };
 
@@ -131,18 +133,12 @@ export default function MiHorarioPage() {
                 Selecciona tu turno de atención para cada día.
               </p>
             </div>
-            <Button
-              onClick={handleSave}
-              disabled={saving}
-              className="bg-blue-700 hover:bg-blue-800 text-white rounded-xl shadow-md h-11 px-6 w-full sm:w-auto"
-            >
-              {saving ? (
+            {saving && (
+              <div className="flex items-center text-sm font-medium text-slate-500 bg-slate-100 px-4 py-2 rounded-full">
                 <Spinner className="w-4 h-4 mr-2" />
-              ) : (
-                <Save className="w-4 h-4 mr-2" />
-              )}
-              {saving ? "Guardando..." : "Guardar Cambios"}
-            </Button>
+                Guardando cambios...
+              </div>
+            )}
           </div>
         </div>
 
