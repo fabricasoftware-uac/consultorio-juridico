@@ -1,9 +1,29 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { FileText, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  FileText,
+  CheckCircle,
+  AlertCircle,
+  User,
+  Mail,
+  Phone,
+  CreditCard,
+  Users,
+  UserCheck,
+  Calendar,
+  Clock,
+  MessageSquare,
+  ArrowRight,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -18,6 +38,7 @@ import { insertUsuarioNuevo } from "../../../../../supabase/queries/insertUsuari
 import { insertCasoNuevo } from "../../../../../supabase/queries/insertCasoNuevo";
 import { insertEstudiantesCasos } from "../../../../../supabase/queries/insertEstudiantesCasos";
 import { insertAsesoresCasos } from "../../../../../supabase/queries/insertAsesoresCasos";
+import { cn } from "@/components/ui/utils";
 
 interface ResumenCasoProps {
   caso: Caso;
@@ -91,191 +112,243 @@ export function ResumenCaso({ caso, usuario, onNuevoCaso }: ResumenCasoProps) {
   };
 
   return (
-    <div className="space-y-6 md:min-w-3xl">
+    <div className="w-full max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Resumen completo del caso */}
-      <Card className="shadow-lg">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <FileText className="h-6 w-6 text-blue-600" />
+      <Card className="shadow-[0_8px_30px_rgb(0,0,0,0.06)] border-slate-200/60 bg-white/80 backdrop-blur-sm overflow-hidden rounded-2xl">
+        <div className="h-1.5 w-full bg-linear-to-r from-blue-400 to-indigo-500" />
+        <CardHeader className="border-b border-slate-100 bg-slate-50/30 pb-6 pt-8 px-6 sm:px-8">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-linear-to-br from-blue-500 to-indigo-600 rounded-xl shadow-inner shadow-white/20">
+              <FileText className="h-6 w-6 text-white" />
             </div>
-            <CardTitle>Resumen de los datos</CardTitle>
+            <div className="space-y-1">
+              <CardTitle className="text-xl">Resumen de Registro</CardTitle>
+              <CardDescription className="text-sm">
+                Verifique los datos antes de finalizar el registro del caso.
+              </CardDescription>
+            </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Información del usuario */}
-          <div>
-            <h3 className="text-slate-900 mb-3">Usuario que se está registrando</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50 rounded-lg">
-              <div>
-                <span className="text-sm text-muted-foreground">
-                  Nombre completo
+        <CardContent className="p-6 sm:p-8 space-y-10">
+          {/* Sección Usuario */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 px-1">
+              <User className="w-4 h-4" /> Usuario Solicitante
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">
+                  Nombre Completo
                 </span>
-                <p className="text-slate-900">
+                <p className="text-sm font-semibold text-slate-900">
                   {caso.usuarios.nombre_completo}
                 </p>
               </div>
-              <div>
-                <span className="text-sm text-muted-foreground">Sexo</span>
-                <p className="text-slate-900">Sexo {caso.usuarios.sexo}</p>
-              </div>
-              <div>
-                <span className="text-sm text-muted-foreground">Documento</span>
-                <p className="text-slate-900">
-                  Documento {caso.usuarios.cedula}
+              <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">
+                  Cédula / Documento
+                </span>
+                <p className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <CreditCard className="w-3.5 h-3.5 text-slate-400" />
+                  {caso.usuarios.cedula}
                 </p>
               </div>
-              <div>
-                <span className="text-sm text-muted-foreground">Teléfono</span>
-                <p className="text-slate-900">{caso.usuarios.telefono}</p>
-              </div>
-              <div>
-                <span className="text-sm text-muted-foreground">
-                  Correo electrónico
+              <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">
+                  Sexo
                 </span>
-                <p className="text-slate-900">{caso.usuarios.correo}</p>
+                <p className="text-sm font-semibold text-slate-900">
+                  {caso.usuarios.sexo === "M"
+                    ? "Masculino"
+                    : caso.usuarios.sexo === "F"
+                      ? "Femenino"
+                      : "Otro"}
+                </p>
+              </div>
+              <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl space-y-1 sm:col-span-2 lg:col-span-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">
+                  Correo Electrónico
+                </span>
+                <p className="text-sm font-semibold text-slate-900 flex items-center gap-2 truncate">
+                  <Mail className="w-3.5 h-3.5 text-slate-400" />
+                  {caso.usuarios.correo || "No registrado"}
+                </p>
+              </div>
+              <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">
+                  Teléfono
+                </span>
+                <p className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <Phone className="w-3.5 h-3.5 text-slate-400" />
+                  {caso.usuarios.telefono}
+                </p>
               </div>
             </div>
           </div>
 
-          <Separator />
+          <Separator className="bg-slate-100" />
 
-          {/* Estudiante asignado */}
-          <div>
-            <h3 className="text-slate-900 mb-3">Estudiante Asignado</h3>
-            {caso.estudiantes_casos && caso.estudiantes_casos.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-blue-50 rounded-lg">
-                <div>
-                  <span className="text-sm text-muted-foreground">Nombre</span>
-                  <p className="text-slate-900">
-                    {
-                      caso.estudiantes_casos[0].estudiante.perfil
-                        .nombre_completo
-                    }
-                  </p>
-                </div>
-                <div>
-                  <span className="text-sm text-muted-foreground">
-                    Semestre
-                  </span>
-                  <p className="text-slate-900">
-                    {caso.estudiantes_casos[0].estudiante.semestre}
-                  </p>
-                </div>
-                <div>
-                  <span className="flex text-sm text-muted-foreground">
-                    Turno
-                  </span>
-                  <Badge variant="outline">
-                    {caso.estudiantes_casos[0].estudiante.turno}
-                  </Badge>
-                </div>
-              </div>
-            ) : (
-              <p className="text-gray-500 text-sm italic">
-                Sin estudiante asignado
-              </p>
-            )}
-          </div>
-
-          <Separator />
-
-          {/* Asesor asignado */}
-          <div>
-            {caso.asesores_casos && caso.asesores_casos.length > 0 ? (
-              <>
-                <h3 className="text-slate-900 mb-3">Asesor Asignado</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-purple-50 rounded-lg">
-                  <div>
-                    <span className="text-sm text-muted-foreground">
-                      Nombre
-                    </span>
-                    <p className="text-slate-900">
-                      {caso.asesores_casos[0]?.asesor.perfil.nombre_completo}
-                    </p>
+          {/* Asignaciones */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 px-1">
+                <Users className="w-4 h-4" /> Estudiante Asignado
+              </h3>
+              {caso.estudiantes_casos && caso.estudiantes_casos.length > 0 ? (
+                <div className="p-5 bg-blue-50/50 border border-blue-100 rounded-2xl relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Users className="w-12 h-12 text-blue-600" />
                   </div>
-                  <div>
-                    <span className="flex text-sm text-muted-foreground">
-                      Área
-                    </span>
-                    <Badge variant="outline">
-                      {caso.asesores_casos[0]?.asesor.area}
-                    </Badge>
-                  </div>
-                  <div>
-                    <span className="flex text-sm text-muted-foreground">
-                      Turno
-                    </span>
-                    <Badge variant="secondary">
-                      {caso.asesores_casos[0]?.asesor.turno}
-                    </Badge>
+                  <div className="space-y-3 relative z-10">
+                    <div>
+                      <p className="text-lg font-bold text-blue-900">
+                        {
+                          caso.estudiantes_casos[0].estudiante.perfil
+                            .nombre_completo
+                        }
+                      </p>
+                      <div className="flex flex-wrap items-center gap-2 mt-1">
+                        <Badge
+                          variant="secondary"
+                          className="bg-blue-100 text-blue-700 hover:bg-blue-100 border-blue-200"
+                        >
+                          {caso.estudiantes_casos[0].estudiante.semestre}º
+                          Semestre
+                        </Badge>
+                        <Badge
+                          variant="outline"
+                          className="bg-white/50 text-blue-600 border-blue-200 flex items-center gap-1"
+                        >
+                          <Clock className="w-3 h-3" />{" "}
+                          {caso.estudiantes_casos[0].estudiante.turno}
+                        </Badge>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </>
-            ) : (
-              <p className="text-gray-500 text-sm italic">
-                Sin asesor asignado
-              </p>
-            )}
-          </div>
-
-          <Separator />
-
-          {/* Información del caso */}
-          <div>
-            <h3 className="text-slate-900 mb-3">Información del Caso</h3>
-            <div className="space-y-4 p-4 bg-slate-50 rounded-lg">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <span className="text-sm text-muted-foreground">
-                    Fecha de creación
-                  </span>
-                  <p className="text-slate-900">
-                    {caso.fecha_creacion.split("T")[0]}
-                  </p>
+              ) : (
+                <div className="p-5 bg-slate-50 border border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center text-slate-400 py-8">
+                  <Users className="w-8 h-8 mb-2 opacity-30" />
+                  <p className="text-sm italic">Sin estudiante asignado</p>
                 </div>
-                <div>
-                  <span className="text-sm text-muted-foreground">Estado</span>
-                  <div className="mt-1">
-                    <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-                      Pendiente de aprobación
-                    </Badge>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 px-1">
+                <UserCheck className="w-4 h-4" /> Asesor de Apoyo
+              </h3>
+              {caso.asesores_casos && caso.asesores_casos.length > 0 ? (
+                <div className="p-5 bg-indigo-50/50 border border-indigo-100 rounded-2xl relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <UserCheck className="w-12 h-12 text-indigo-600" />
+                  </div>
+                  <div className="space-y-3 relative z-10">
+                    <div>
+                      <p className="text-lg font-bold text-indigo-900">
+                        {caso.asesores_casos[0]?.asesor.perfil.nombre_completo}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-2 mt-1">
+                        <Badge className="bg-indigo-600 text-white hover:bg-indigo-700 capitalize">
+                          {caso.asesores_casos[0]?.asesor.area}
+                        </Badge>
+                        <Badge
+                          variant="outline"
+                          className="bg-white/50 text-indigo-600 border-indigo-200"
+                        >
+                          {caso.asesores_casos[0]?.asesor.turno}
+                        </Badge>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-              {caso.observaciones && (
-                <div>
-                  <span className="text-sm text-muted-foreground">
-                    Observaciones
-                  </span>
-                  <p className="text-slate-900 mt-1 whitespace-pre-wrap">
-                    {caso.observaciones}
+              ) : (
+                <div className="p-5 bg-slate-50 border border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center text-slate-400 py-8">
+                  <UserCheck className="w-8 h-8 mb-2 opacity-30" />
+                  <p className="text-sm italic">
+                    No se asignó un asesor (Opcional)
                   </p>
                 </div>
               )}
             </div>
           </div>
+
+          <Separator className="bg-slate-100" />
+
+          {/* Información del caso */}
+          <div className="space-y-6">
+            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 px-1">
+              <Calendar className="w-4 h-4" /> Detalles del Caso
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex items-center gap-4 p-4 bg-slate-50 border border-slate-100 rounded-xl">
+                <div className="p-2.5 bg-white rounded-lg shadow-sm">
+                  <Calendar className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block">
+                    Fecha de Registro
+                  </span>
+                  <p className="text-sm font-semibold text-slate-800">
+                    {new Date().toLocaleDateString("es-ES", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 p-4 bg-slate-50 border border-slate-100 rounded-xl">
+                <div className="p-2.5 bg-white rounded-lg shadow-sm">
+                  <Clock className="w-5 h-5 text-yellow-600" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block">
+                    Estado Inicial
+                  </span>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+                    <p className="text-sm font-bold text-yellow-700">
+                      En proceso
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {caso.observaciones && (
+              <div className="p-5 bg-white border border-slate-200 rounded-2xl space-y-3">
+                <div className="flex items-center gap-2 text-slate-500 font-semibold text-sm">
+                  <MessageSquare className="w-4 h-4" />
+                  <span>Observaciones</span>
+                </div>
+                <p className="text-sm text-slate-700 leading-relaxed italic border-l-4 border-blue-200 pl-4 py-1">
+                  "{caso.observaciones}"
+                </p>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
       {/* Botón de acción */}
-      <div className="flex justify-center">
+      <div className="pt-4 flex justify-end">
         <Button
           onClick={handleConfirmacion}
           disabled={isLoading}
-          className="bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
-          size="lg"
+          className="w-full sm:w-auto min-w-[250px] h-14 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-xl shadow-blue-500/25 transition-all duration-300 hover:shadow-blue-500/40 hover:-translate-y-1 text-lg font-bold rounded-2xl group"
         >
           {isLoading ? (
-            <div className="flex items-center">
-              <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+            <div className="flex items-center gap-3">
+              <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
               Procesando...
             </div>
           ) : (
-            <>
-              <CheckCircle2 className="mr-2 h-5 w-5" />
-              Registrar datos
-            </>
+            <div className="flex items-center gap-3">
+              <CheckCircle className="h-6 w-6" />
+              Registrar Caso
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </div>
           )}
         </Button>
       </div>
@@ -285,12 +358,12 @@ export function ResumenCaso({ caso, usuario, onNuevoCaso }: ResumenCasoProps) {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-blue-700">
-              <CheckCircle2 className="h-6 w-6 text-green-600" />
+              <CheckCircle className="h-6 w-6 text-green-600" />
               Datos registrados exitosamente
             </DialogTitle>
             <DialogDescription>
-              Los datos se han registrado correctamente en el sistema. Puedes crear
-              uno nuevo o cerrar esta ventana.
+              Los datos se han registrado correctamente en el sistema. Puedes
+              crear uno nuevo o cerrar esta ventana.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex justify-center items-center">

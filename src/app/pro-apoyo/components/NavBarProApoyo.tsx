@@ -4,7 +4,7 @@ export function Navbar() {
   const links = [
     { href: "/pro-apoyo/inicio", label: "Inicio" },
     { href: "/pro-apoyo/gestionar-caso", label: "Casos" },
-    { href: "/pro-apoyo/crear-caso", label: "Crear Caso" },
+    { href: "/pro-apoyo/crear-caso", label: "Recepcion" },
     { href: "/centro-ayuda", label: "Centro de Ayuda" },
   ];
 

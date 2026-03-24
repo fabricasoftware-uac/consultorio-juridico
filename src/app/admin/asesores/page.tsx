@@ -195,26 +195,27 @@ export default function AsesoresPage() {
     field: keyof HorarioDia,
     value: any,
   ) => {
-    setScheduleForm((prev) => ({
-      ...prev,
+    if (!scheduleAsesor) return;
+
+    const prevInfo = scheduleForm[dia] || horarioPorDefecto[dia];
+    const newForm = {
+      ...scheduleForm,
       [dia]: {
-        ...prev[dia],
+        ...prevInfo,
         [field]: value,
       },
-    }));
-  };
+    };
 
-  const handleScheduleUpdate = async () => {
-    if (!scheduleAsesor) return;
+    setScheduleForm(newForm);
 
     startTransition(async () => {
       const result = await updateAsesorHorario(
         scheduleAsesor.id_perfil,
-        scheduleForm,
+        newForm,
       );
       if (result.success) {
-        toast.success(result.message);
-        setIsScheduleOpen(false);
+        toast.success("Horario guardado automáticamente");
+        // Refetch to keep the table data in sync with the modal
         fetchAsesores();
       } else {
         toast.error(result.error);
@@ -414,7 +415,6 @@ export default function AsesoresPage() {
                             <div className="text-sm capitalize">
                               {asesor.area}
                             </div>
-                            
                           </TableCell>
                           <TableCell>
                             <Badge
@@ -564,23 +564,20 @@ export default function AsesoresPage() {
               />
             </div>
             <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setIsScheduleOpen(false)}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                className="bg-blue-600 hover:bg-blue-700"
-                onClick={handleScheduleUpdate}
-                disabled={isPending}
-              >
-                {isPending ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                ) : null}
-                Guardar Horario
-              </Button>
+              <div className="flex justify-end gap-3 w-full">
+                {isPending && (
+                  <span className="flex items-center text-sm text-slate-500 mr-2">
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    Guardando...
+                  </span>
+                )}
+                <Button
+                  variant="outline"
+                  onClick={() => setIsScheduleOpen(false)}
+                >
+                  Cerrar
+                </Button>
+              </div>
             </DialogFooter>
           </DialogContent>
         </Dialog>

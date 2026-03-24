@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, Users, UserCheck } from "lucide-react";
+import { CheckCircle2, Users, UserCheck, X } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/components/ui/utils";
@@ -50,6 +50,22 @@ export function AsignacionCaso({
   const [asesorSeleccionado, setAsesorSeleccionado] = useState<Asesor | null>(
     null,
   );
+  const [mostrarTodos, setMostrarTodos] = useState(false);
+  const [diaActual, setDiaActual] = useState("");
+
+  useEffect(() => {
+    const dias = [
+      "Domingo",
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Jueves",
+      "Viernes",
+      "Sábado",
+    ];
+    const hoy = dias[new Date().getDay()];
+    setDiaActual(hoy);
+  }, []);
 
   // Si vienen datos iniciales (por ejemplo al editar un caso)
   useEffect(() => {
@@ -89,6 +105,12 @@ export function AsignacionCaso({
 
     getData();
   }, []);
+
+  const estudiantesFiltrados = mostrarTodos
+    ? estudiantesDisponibles
+    : estudiantesDisponibles.filter(
+        (e) => e.dia?.toLowerCase() === diaActual.toLowerCase(),
+      );
 
   const handleRegistrarCaso = () => {
     if (!estudianteId) {
@@ -196,7 +218,7 @@ export function AsignacionCaso({
         <CardContent className="space-y-8 pt-8 px-4 sm:px-6">
           {/* Estudiante */}
           <div className="space-y-5 relative">
-            <div className="absolute left-6 top-8 bottom-[-2rem] w-px bg-slate-200 hidden md:block" />
+            <div className="absolute left-6 top-8 -bottom-8 w-px bg-slate-200 hidden md:block" />
             <div className="flex items-center gap-3">
               <div className="relative z-10 hidden md:flex h-12 w-12 rounded-full bg-blue-50 border-4 border-white items-center justify-center shadow-sm">
                 <Users className="h-5 w-5 text-blue-600" />
@@ -212,25 +234,42 @@ export function AsignacionCaso({
                   Asignar a un estudiante
                 </h3>
                 <p className="text-sm text-slate-500">
-                  Seleccione el practicante encargado del caso
+                  Seleccione el practicante encargado del caso para hoy{" "}
+                  {diaActual}
                 </p>
               </div>
             </div>
 
-            <div className="md:pl-[4.5rem] w-full">
-              <div className="space-y-2 max-w-full">
-                <Label
-                  htmlFor="estudiante"
-                  className="text-slate-700 font-medium ml-1"
-                >
-                  Seleccionar estudiante *
-                </Label>
+            <div className="md:pl-18 w-full">
+              <div className="space-y-4 max-w-full">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <Label
+                    htmlFor="estudiante"
+                    className="text-slate-700 font-medium ml-1"
+                  >
+                    Seleccionar estudiante *
+                  </Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setMostrarTodos(!mostrarTodos)}
+                    className="text-[11px] h-7 text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-bold uppercase tracking-wider"
+                  >
+                    {mostrarTodos
+                      ? "Ver solo estudiantes de hoy"
+                      : "Ver todos los estudiantes"}
+                  </Button>
+                </div>
                 <div className="w-full">
                   <SearchableSelector
-                    items={estudiantesDisponibles}
+                    items={estudiantesFiltrados}
                     value={estudianteId}
                     onValueChange={setEstudianteId}
-                    placeholder="Seleccione un estudiante"
+                    placeholder={
+                      mostrarTodos
+                        ? "Seleccione un estudiante"
+                        : `Estudiantes de hoy (${diaActual})`
+                    }
                     searchPlaceholder="Buscar por nombre o cédula..."
                     getItemValue={(e) => e.id_perfil.toString()}
                     getItemLabel={(e) => e.perfil.nombre_completo}
@@ -242,13 +281,15 @@ export function AsignacionCaso({
                             {estudiante.perfil.nombre_completo}
                           </span>
                           <span className="text-[11px] text-slate-500 flex flex-wrap items-center gap-1.5 mt-0.5">
-                            <span className="font-medium font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">
+                            <span className="font-medium font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">
                               CC: {estudiante.perfil.cedula}
                             </span>
                             <span className="hidden sm:inline">•</span>
-                            <span>Semestre: {estudiante.semestre}</span>
+                            <span className="font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+                              {estudiante.dia}
+                            </span>
                             <span className="hidden sm:inline">•</span>
-                            <span>Turno: {estudiante.turno}</span>
+                            <span>{estudiante.turno}</span>
                           </span>
                         </div>
                         <Badge
@@ -258,7 +299,7 @@ export function AsignacionCaso({
                               : "secondary"
                           }
                           className={cn(
-                            "text-[10px] h-6 px-2.5 flex-shrink-0 self-start sm:self-auto",
+                            "text-[10px] h-6 px-2.5 shrink-0 self-start sm:self-auto",
                             estudiante.total_casos! === 0 &&
                               "bg-green-100 text-green-700 hover:bg-green-100 border-green-200",
                             estudiante.total_casos! > 0 &&
@@ -283,7 +324,7 @@ export function AsignacionCaso({
                   estudiantesDisponibles.find(
                     (e) => e.id_perfil.toString() === estudianteId,
                   ))) && (
-                <div className="mt-5 p-4 sm:p-5 bg-gradient-to-br from-slate-50 to-white rounded-xl border border-slate-200/60 shadow-sm space-y-4">
+                <div className="mt-5 p-4 sm:p-5 bg-linear-to-br from-slate-50 to-white rounded-xl border border-slate-200/60 shadow-sm space-y-4">
                   <div className="flex items-center justify-between">
                     <h4 className="font-semibold text-slate-800 flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
@@ -321,6 +362,14 @@ export function AsignacionCaso({
                         </div>
                         <div className="space-y-1">
                           <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
+                            Día de atención
+                          </p>
+                          <p className="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md inline-block">
+                            {est.dia}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
                             Turno / Jornada
                           </p>
                           <p
@@ -348,7 +397,7 @@ export function AsignacionCaso({
                             >
                               {est.total_casos}/{casosMaximos}
                             </span>
-                            <div className="h-1.5 flex-1 max-w-[4rem] bg-slate-100 rounded-full overflow-hidden">
+                            <div className="h-1.5 flex-1 max-w-16 bg-slate-100 rounded-full overflow-hidden">
                               <div
                                 className={cn(
                                   "h-full transition-all duration-500",
@@ -385,29 +434,49 @@ export function AsignacionCaso({
                 </h3>
               </div>
               <div className="hidden md:block">
-                <h3 className="text-lg font-semibold text-slate-900">
-                  Asignar a un asesor
-                </h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-semibold text-slate-900">
+                    Asignar a un asesor
+                  </h3>
+                  <Badge
+                    variant="outline"
+                    className="bg-slate-50 text-slate-500 font-normal"
+                  >
+                    Opcional
+                  </Badge>
+                </div>
                 <p className="text-sm text-slate-500">
                   Seleccione el asesor encargado de supervisar el caso
                 </p>
               </div>
             </div>
 
-            <div className="md:pl-[4.5rem] w-full">
+            <div className="md:pl-18 w-full">
               <div className="space-y-2 max-w-full">
                 <Label
                   htmlFor="asesor"
-                  className="text-slate-700 font-medium ml-1"
+                  className="text-slate-700 font-medium ml-1 flex items-center justify-between"
                 >
-                  Seleccionar asesor (Opcional)
+                  <span>Seleccionar asesor</span>
+                  {asesorId && (
+                    <button
+                      onClick={() => {
+                        setAsesorId("");
+                        setAsesorSeleccionado(null);
+                      }}
+                      className="text-xs text-red-500 hover:text-red-700 font-semibold flex items-center gap-1 bg-red-50 px-2 py-0.5 rounded-md transition-colors"
+                      type="button"
+                    >
+                      <X className="w-3 h-3" /> Quitar selección
+                    </button>
+                  )}
                 </Label>
                 <div className="w-full">
                   <SearchableSelector
                     items={asesoresDisponibles}
                     value={asesorId}
                     onValueChange={setAsesorId}
-                    placeholder="Seleccione un asesor"
+                    placeholder="Sin asignar..."
                     searchPlaceholder="Buscar por nombre o cédula..."
                     getItemValue={(a) => a.id_perfil.toString()}
                     getItemLabel={(a) => a.perfil.nombre_completo}
@@ -441,7 +510,7 @@ export function AsignacionCaso({
                   asesoresDisponibles.find(
                     (a) => a.id_perfil.toString() === asesorId,
                   ))) && (
-                <div className="mt-5 p-4 sm:p-5 bg-gradient-to-br from-slate-50 to-white rounded-xl border border-slate-200/60 shadow-sm space-y-4">
+                <div className="mt-5 p-4 sm:p-5 bg-linear-to-br from-slate-50 to-white rounded-xl border border-slate-200/60 shadow-sm space-y-4">
                   <div className="flex items-center justify-between">
                     <h4 className="font-semibold text-slate-800 flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
