@@ -93,6 +93,7 @@ export default function EstudiantesPage() {
     setLoading(true);
     const data = await getEstudiantes();
     setEstudiantes(data);
+    console.log("DATOS",data)
     setLoading(false);
   }
 
@@ -210,7 +211,10 @@ export default function EstudiantesPage() {
         .includes(searchTerm.toLowerCase()) ||
       e.perfil.cedula?.includes(searchTerm) ||
       e.perfil.correo?.toLowerCase().includes(searchTerm.toLowerCase()),
+
   );
+
+  console.log(estudiantes)
 
   return (
     <div className="flex flex-col min-h-screen bg-linear-to-br from-slate-50 to-slate-100">
@@ -296,10 +300,11 @@ export default function EstudiantesPage() {
                   <div className="grid grid-cols-3 gap-2">
                     <div className="space-y-1.5">
                       <Label htmlFor="student-semestre" className="text-xs">
-                        Sem.
+                        Semestre
                       </Label>
                       <Input
                         id="student-semestre"
+                        placeholder="Ingresa el semestre"
                         type="number"
                         min={1}
                         max={10}
@@ -452,7 +457,7 @@ export default function EstudiantesPage() {
                               Semestre {student.semestre}
                             </div>
                             <div className="text-xs text-slate-400 capitalize">
-                              {student.jornada} • {student.turno} •{" "}
+                              {student.jornada} • {student.turno} •
                               {student.dia}
                             </div>
                           </TableCell>

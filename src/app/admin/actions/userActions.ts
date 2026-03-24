@@ -149,3 +149,22 @@ export async function updateProApoyo(
     message: "Profesional de apoyo actualizado exitosamente.",
   };
 }
+
+export async function updateAsesorHorario(
+  userId: string,
+  horario: any,
+): Promise<ActionResult> {
+  const { error: aseError } = await supabaseAdmin
+    .from("asesores")
+    .update({ horario })
+    .eq("id_perfil", userId);
+
+  if (aseError)
+    return {
+      success: false,
+      error: "Error al actualizar el horario del asesor.",
+    };
+
+  revalidatePath("/admin/asesores");
+  return { success: true, message: "Horario actualizado exitosamente." };
+}

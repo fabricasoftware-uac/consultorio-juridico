@@ -9,6 +9,7 @@ export async function getEstudiantes(
     semestre,
     jornada,
     turno,
+    dia,
     perfil:perfiles!${soloActivos ? "inner" : "estudiantes_id_perfil_fkey"} (
       nombre_completo,
       correo,

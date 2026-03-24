@@ -6,8 +6,8 @@ import { Navbar } from "../components/NavbarAdmin";
 import { registerAsesor } from "../actions/registerUser";
 import {
   toggleUserStatus,
-  deleteUser,
   updateAsesor,
+  updateAsesorHorario,
 } from "../actions/userActions";
 import { getAsesores } from "../../../../supabase/queries/getAsesores";
 import type { AreaEnum, TurnoEnum, Asesor } from "../../types/database";
@@ -15,11 +15,18 @@ import {
   Users,
   Loader2,
   Pencil,
-  Trash2,
   Power,
   PowerOff,
   Search,
+  Calendar,
 } from "lucide-react";
+
+import {
+  ScheduleEditor,
+  HorarioDia,
+  HorarioSemana,
+  horarioPorDefecto,
+} from "@/components/ScheduleEditor";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -85,6 +92,12 @@ export default function AsesoresPage() {
   const [editingAsesor, setEditingAsesor] = useState<Asesor | null>(null);
   const [editForm, setEditForm] = useState<AsesorForm>(EMPTY_FORM);
   const [isEditOpen, setIsEditOpen] = useState(false);
+
+  // Schedule Edit State
+  const [scheduleAsesor, setScheduleAsesor] = useState<Asesor | null>(null);
+  const [scheduleForm, setScheduleForm] =
+    useState<HorarioSemana>(horarioPorDefecto);
+  const [isScheduleOpen, setIsScheduleOpen] = useState(false);
 
   async function fetchAsesores() {
     setLoading(true);
@@ -165,6 +178,48 @@ export default function AsesoresPage() {
       dia: asesor.dia || "",
     });
     setIsEditOpen(true);
+  };
+
+  const openSchedule = (asesor: Asesor) => {
+    setScheduleAsesor(asesor);
+    if (asesor.horario) {
+      setScheduleForm({ ...horarioPorDefecto, ...(asesor.horario as any) });
+    } else {
+      setScheduleForm(horarioPorDefecto);
+    }
+    setIsScheduleOpen(true);
+  };
+
+  const handleScheduleChange = (
+    dia: string,
+    field: keyof HorarioDia,
+    value: any,
+  ) => {
+    setScheduleForm((prev) => ({
+      ...prev,
+      [dia]: {
+        ...prev[dia],
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleScheduleUpdate = async () => {
+    if (!scheduleAsesor) return;
+
+    startTransition(async () => {
+      const result = await updateAsesorHorario(
+        scheduleAsesor.id_perfil,
+        scheduleForm,
+      );
+      if (result.success) {
+        toast.success(result.message);
+        setIsScheduleOpen(false);
+        fetchAsesores();
+      } else {
+        toast.error(result.error);
+      }
+    });
   };
 
   const handleUpdate = async () => {
@@ -280,73 +335,6 @@ export default function AsesoresPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="asesor-turno" className="text-xs">
-                        Turno
-                      </Label>
-                      <Select
-                        value={form.turno}
-                        onValueChange={set("turno")}
-                        disabled={isPending}
-                      >
-                        <SelectTrigger className="h-9 text-sm">
-                          <SelectValue placeholder="Horario" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="9-11">9–11 am</SelectItem>
-                          <SelectItem value="2-4">2–4 pm</SelectItem>
-                          <SelectItem value="4-6">4–6 pm</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="asesor-area" className="text-xs">
-                        Área
-                      </Label>
-                      <Select
-                        value={form.area}
-                        onValueChange={set("area")}
-                        disabled={isPending}
-                      >
-                        <SelectTrigger className="h-9 text-sm">
-                          <SelectValue placeholder="Especialidad" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="laboral">Laboral</SelectItem>
-                          <SelectItem value="civil_familia">
-                            Civil y Familia
-                          </SelectItem>
-                          <SelectItem value="penal">Penal</SelectItem>
-                          <SelectItem value="publica">Pública</SelectItem>
-                          <SelectItem value="otros">Otros</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label htmlFor="asesor-dia" className="text-xs">
-                      Día
-                    </Label>
-                    <Select
-                      value={form.dia}
-                      onValueChange={set("dia")}
-                      disabled={isPending}
-                    >
-                      <SelectTrigger className="h-9 text-sm">
-                        <SelectValue placeholder="Seleccione día" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Lunes">Lunes</SelectItem>
-                        <SelectItem value="Martes">Martes</SelectItem>
-                        <SelectItem value="Miércoles">Miércoles</SelectItem>
-                        <SelectItem value="Jueves">Jueves</SelectItem>
-                        <SelectItem value="Viernes">Viernes</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
                   <Button
                     type="submit"
                     className="w-full bg-purple-600 hover:bg-purple-700 text-white mt-2"
@@ -386,7 +374,7 @@ export default function AsesoresPage() {
                   <TableHeader className="bg-slate-50">
                     <TableRow>
                       <TableHead>Nombre / Cédula</TableHead>
-                      <TableHead>Especialidad / Turno</TableHead>
+                      <TableHead>Especialidad</TableHead>
                       <TableHead>Estado</TableHead>
                       <TableHead className="text-right">Acciones</TableHead>
                     </TableRow>
@@ -426,9 +414,7 @@ export default function AsesoresPage() {
                             <div className="text-sm capitalize">
                               {asesor.area}
                             </div>
-                            <div className="text-xs text-slate-400 capitalize">
-                              {asesor.turno} • {asesor.dia}
-                            </div>
+                            
                           </TableCell>
                           <TableCell>
                             <Badge
@@ -448,6 +434,15 @@ export default function AsesoresPage() {
                                 onClick={() => openEdit(asesor)}
                               >
                                 <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                                onClick={() => openSchedule(asesor)}
+                                title="Editar horario"
+                              >
+                                <Calendar className="h-4 w-4" />
                               </Button>
                               <Button
                                 variant="ghost"
@@ -514,26 +509,6 @@ export default function AsesoresPage() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-turno" className="text-right">
-                  Turno
-                </Label>
-                <div className="col-span-3">
-                  <Select
-                    value={editForm.turno}
-                    onValueChange={setEdit("turno")}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccione turno" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="9-11">9–11 am</SelectItem>
-                      <SelectItem value="2-4">2–4 pm</SelectItem>
-                      <SelectItem value="4-6">4–6 pm</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-area" className="text-right">
                   Área
                 </Label>
@@ -548,27 +523,8 @@ export default function AsesoresPage() {
                         Civil y Familia
                       </SelectItem>
                       <SelectItem value="penal">Penal</SelectItem>
-                      <SelectItem value="publica">Pública</SelectItem>
+                      <SelectItem value="publica">Público</SelectItem>
                       <SelectItem value="otros">Otros</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-dia" className="text-right">
-                  Día
-                </Label>
-                <div className="col-span-3">
-                  <Select value={editForm.dia} onValueChange={setEdit("dia")}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccione día" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Lunes">Lunes</SelectItem>
-                      <SelectItem value="Martes">Martes</SelectItem>
-                      <SelectItem value="Miércoles">Miércoles</SelectItem>
-                      <SelectItem value="Jueves">Jueves</SelectItem>
-                      <SelectItem value="Viernes">Viernes</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -588,6 +544,42 @@ export default function AsesoresPage() {
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
                 ) : null}
                 Guardar Cambios
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Schedule Dialog */}
+        <Dialog open={isScheduleOpen} onOpenChange={setIsScheduleOpen}>
+          <DialogContent className="sm:max-w-[700px] h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                Editar Horario: {scheduleAsesor?.perfil.nombre_completo}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <ScheduleEditor
+                horario={scheduleForm}
+                onChangeDia={handleScheduleChange}
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsScheduleOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={handleScheduleUpdate}
+                disabled={isPending}
+              >
+                {isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : null}
+                Guardar Horario
               </Button>
             </DialogFooter>
           </DialogContent>
