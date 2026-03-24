@@ -655,7 +655,7 @@ export function Step7DetallesCaso({ formData, handleInputChange }: StepProps) {
               <SelectItem value="laboral">Laboral</SelectItem>
               <SelectItem value="civil_familia">Civil y Familia</SelectItem>
               <SelectItem value="penal">Penal</SelectItem>
-              <SelectItem value="publico">Publico</SelectItem>
+              <SelectItem value="publica">Publico</SelectItem>
               <SelectItem value="otro">Otro</SelectItem>
             </SelectContent>
           </Select>
