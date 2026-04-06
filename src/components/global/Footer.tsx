@@ -51,7 +51,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="https://drive.google.com/file/d/1N_LD7mKw_GmZTmpQeBR81WbcJhWHDM3o/view?usp=sharing"
+                  href="https://drive.google.com/file/d/1DX1UTXmN0F0VfxMUYmjS1dF_EaliFuHY/view?usp=sharing"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center text-gray-600 hover:text-blue-600 text-sm transition-all"
