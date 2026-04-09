@@ -612,7 +612,11 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                           <div>
                             <p className="font-semibold">Caso Aprobado</p>
                             <p className="text-sm opacity-80">
-                              En seguimiento activo
+                              {caso.clasificacion === "en_tramite" ? (
+                                "Continúa el proceso"
+                              ) : (
+                                "Queda como asesoría"
+                              )}
                             </p>
                           </div>
                         </div>
