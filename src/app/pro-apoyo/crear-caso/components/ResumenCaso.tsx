@@ -39,6 +39,7 @@ import { insertCasoNuevo } from "../../../../../supabase/queries/insertCasoNuevo
 import { insertEstudiantesCasos } from "../../../../../supabase/queries/insertEstudiantesCasos";
 import { insertAsesoresCasos } from "../../../../../supabase/queries/insertAsesoresCasos";
 import { cn } from "@/components/ui/utils";
+import { cleanData } from "@/lib/utils";
 
 interface ResumenCasoProps {
   caso: Caso;
@@ -62,7 +63,8 @@ export function ResumenCaso({ caso, usuario, onNuevoCaso }: ResumenCasoProps) {
   const insertData = async () => {
     setIsLoading(true);
     try {
-      const usuarioData = await insertUsuarioNuevo(usuario);
+      const limpio = cleanData(usuario);
+      const usuarioData = await insertUsuarioNuevo(limpio);
 
       const id_usuario = usuarioData?.[0]?.id_usuario;
       if (!id_usuario) {

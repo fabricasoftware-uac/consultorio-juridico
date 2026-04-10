@@ -40,7 +40,7 @@ export type Usuario = {
   estado_civil?: EstadoCivilEnum | null;
   estrato?: number | null;
   direccion?: string | null;
-  correo: string;
+  correo?: string | null;
   tipo_vivienda?: string | null;
   situacion_laboral?: situacionLaboral | null;
   otros_ingresos?: boolean | null;

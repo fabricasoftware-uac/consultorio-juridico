@@ -63,8 +63,7 @@ export function RegistroUsuario({
       formData.nombre_completo.trim() !== "" &&
       formData.sexo !== "" &&
       formData.cedula.trim() !== "" &&
-      formData.telefono.trim() !== "" &&
-      formData.correo.trim() !== ""
+      formData.telefono.trim() !== ""
     );
   };
 
@@ -188,7 +187,7 @@ export function RegistroUsuario({
                     className="text-slate-700 font-semibold flex items-center gap-2"
                   >
                     <Mail className="w-4 h-4 text-slate-400" /> Correo
-                    electrónico *
+                    electrónico (Opcional)
                   </Label>
                   <Input
                     id="correoElectronico"
@@ -197,7 +196,6 @@ export function RegistroUsuario({
                     value={formData.correo || ""}
                     onChange={(e) => handleChange("correo", e.target.value)}
                     className="bg-white border-slate-200 focus-visible:ring-blue-500/30 h-11"
-                    required
                   />
                 </div>
               </div>
@@ -209,7 +207,7 @@ export function RegistroUsuario({
                 className="w-full sm:w-auto min-w-[200px] h-12 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/25 transition-all duration-300 hover:shadow-blue-500/40 hover:-translate-y-0.5 text-base font-medium rounded-xl"
                 disabled={!isFormValid()}
               >
-                Continuar a Asignación
+                Continuar
               </Button>
             </div>
           </form>
