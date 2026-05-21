@@ -1,6 +1,5 @@
 "use client";
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
 import { use, useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
