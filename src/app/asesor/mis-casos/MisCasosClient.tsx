@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +28,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { supabase } from "@/lib/supabase/supabase-client";
 import { ArrowLeft, Check, Search, FilterX, FileText } from "lucide-react";
 import { getStatusBadge } from "@/components/ui/status-badge";
+import { useRealtimeCasos } from "@/lib/hooks/useRealtimeCasos";
 
 export default function Asesor() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,28 +40,27 @@ export default function Asesor() {
   const [casos, setCasos] = useState<Caso[] | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      try {
-        const [
-          {
-            data: { user },
-          },
-          data,
-        ] = await Promise.all([supabase.auth.getUser(), getCasos()]);
-
-        setCurrentUserId(user?.id || null);
-        setCasos(data || []);
-      } catch (error) {
-        console.error("Error fetching cases:", error);
-        setCasos([]);
-      } finally {
-        setLoading(false);
-      }
+  const refetch = useCallback(async () => {
+    try {
+      const data = await getCasos();
+      setCasos(data ?? []);
+    } catch (error) {
+      console.error("Error fetching cases:", error);
     }
-    fetchData();
   }, []);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setCurrentUserId(user?.id ?? null);
+    });
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    refetch().finally(() => setLoading(false));
+  }, [refetch, setLoading]);
+
+  useRealtimeCasos(refetch);
 
   // 1. First, filter only cases where the advisor is current active assignment
   const advisorActiveCasos = (casos ?? []).filter((caso) => {

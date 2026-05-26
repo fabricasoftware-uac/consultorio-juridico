@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import { Navbar } from "../components/NavBarEstudiante";
 import { Caso } from "app/types/database";
 import { getCasos } from "../../../../supabase/queries/getCasos";
 import { supabase } from "@/lib/supabase/supabase-client";
+import { useRealtimeCasos } from "@/lib/hooks/useRealtimeCasos";
 import {
   Pagination,
   PaginationContent,
@@ -47,28 +48,27 @@ export default function MisCasosClient() {
   const [casos, setCasos] = useState<Caso[] | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      try {
-        const [
-          {
-            data: { user },
-          },
-          data,
-        ] = await Promise.all([supabase.auth.getUser(), getCasos()]);
-
-        setCurrentUserId(user?.id || null);
-        setCasos(data || []);
-      } catch (error) {
-        console.error("Error fetching cases:", error);
-        setCasos([]);
-      } finally {
-        setLoading(false);
-      }
+  const refetch = useCallback(async () => {
+    try {
+      const data = await getCasos();
+      setCasos(data ?? []);
+    } catch (error) {
+      console.error("Error fetching cases:", error);
     }
-    fetchData();
   }, []);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setCurrentUserId(user?.id ?? null);
+    });
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    refetch().finally(() => setLoading(false));
+  }, [refetch, setLoading]);
+
+  useRealtimeCasos(refetch);
 
   // 1. First, filter only cases where the student is current active assignment
   const studentActiveCasos = (casos ?? []).filter((caso) => {

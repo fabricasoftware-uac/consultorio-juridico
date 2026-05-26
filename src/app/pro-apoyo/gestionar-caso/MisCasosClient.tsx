@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import { Navbar } from "../components/NavBarProApoyo";
 import { Caso } from "app/types/database";
 import { getCasos } from "../../../../supabase/queries/getCasos";
 import { supabase } from "@/lib/supabase/supabase-client";
+import { useRealtimeCasos } from "@/lib/hooks/useRealtimeCasos";
 import {
   Pagination,
   PaginationContent,
@@ -49,21 +50,21 @@ export default function SupportCasesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
-  useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      try {
-        const data = await getCasos();
-        setCasos(data || []);
-      } catch (error) {
-        console.error("Error fetching cases:", error);
-        setCasos([]);
-      } finally {
-        setLoading(false);
-      }
+  const refetch = useCallback(async () => {
+    try {
+      const data = await getCasos();
+      setCasos(data ?? []);
+    } catch (error) {
+      console.error("Error fetching cases:", error);
     }
-    fetchData();
   }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    refetch().finally(() => setLoading(false));
+  }, [refetch, setLoading]);
+
+  useRealtimeCasos(refetch);
 
   const filteredCases = (casos ?? []).filter((caso) => {
     const nombre = caso.usuarios?.nombre_completo?.toLowerCase() || "";
