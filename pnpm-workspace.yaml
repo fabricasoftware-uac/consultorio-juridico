@@ -1,3 +1,9 @@
+allowBuilds:
+  '@prisma/engines': true
+  '@snaplet/seed': true
+  sharp: true
+  supabase: true
+
 ignoredBuiltDependencies:
   - '@snaplet/seed'
 
