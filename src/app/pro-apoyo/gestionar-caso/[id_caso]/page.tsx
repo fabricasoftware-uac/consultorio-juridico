@@ -76,9 +76,10 @@ export default function Page({
     useState<Demandado | null>(null);
   const [isEditingCaseInfo, setIsEditingCaseInfo] = useState(false);
   const [editedCaseData, setEditedCaseData] = useState<Caso | null>(null);
-  const [isEditingNotes, setIsEditingNotes] = useState(false);
-  const [editedNotes, setEditedNotes] = useState<string>("");
-  const [newNote, setNewNote] = useState("");
+  const [isEditingStudentNotes, setIsEditingStudentNotes] = useState(false);
+  const [editedStudentNotes, setEditedStudentNotes] = useState<string>("");
+  const [isEditingAsesorNotes, setIsEditingAsesorNotes] = useState(false);
+  const [editedAsesorNotes, setEditedAsesorNotes] = useState<string>("");
   const [caso, setCaso] = useState<Caso>();
 
   const [demandado, setDemandado] = useState<Demandado | null>(null);
@@ -318,41 +319,60 @@ export default function Page({
     }
   };
 
-  // Notes editing functions
-  const handleEditNotes = () => {
-    setEditedNotes(caso?.observaciones || "");
-    setNewNote("");
-    setIsEditingNotes(true);
+  // Student notes editing
+  const handleEditStudentNotes = () => {
+    setEditedStudentNotes(caso?.observaciones_estudiante || "");
+    setIsEditingStudentNotes(true);
   };
 
-  const handleSaveNotes = () => {
-    setIsEditingNotes(false);
-    setEditedNotes("");
-    setNewNote("");
-  };
-
-  const handleCancelNotesEdit = () => {
-    setIsEditingNotes(false);
-    setEditedNotes("");
-    setNewNote("");
-  };
-
-  const handleAddNote = () => {
-    if (newNote.trim()) {
-      setEditedNotes(editedNotes + "\n" + newNote);
-      setNewNote("");
+  const handleSaveStudentNotes = async () => {
+    try {
+      const { error } = await supabase
+        .from("casos")
+        .update({ observaciones_estudiante: editedStudentNotes })
+        .eq("id_caso", id_caso);
+      if (error) throw error;
+      setIsEditingStudentNotes(false);
+      setEditedStudentNotes("");
+      await traerDatos();
+      toast.success("Observaciones del estudiante actualizadas");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al guardar observaciones del estudiante");
     }
   };
 
-  const handleEditNote = (index: number, value: string) => {
-    const updatedNotes = [...editedNotes.split("\n")];
-    updatedNotes[index] = value;
-    setEditedNotes(updatedNotes.join("\n"));
+  const handleCancelStudentNotes = () => {
+    setIsEditingStudentNotes(false);
+    setEditedStudentNotes("");
   };
 
-  const handleDeleteNote = (index: number) => {
-    const updatedNotes = editedNotes.split("\n").filter((_, i) => i !== index);
-    setEditedNotes(updatedNotes.join("\n"));
+  // Asesor notes editing
+  const handleEditAsesorNotes = () => {
+    setEditedAsesorNotes(caso?.observaciones || "");
+    setIsEditingAsesorNotes(true);
+  };
+
+  const handleSaveAsesorNotes = async () => {
+    try {
+      const { error } = await supabase
+        .from("casos")
+        .update({ observaciones: editedAsesorNotes })
+        .eq("id_caso", id_caso);
+      if (error) throw error;
+      setIsEditingAsesorNotes(false);
+      setEditedAsesorNotes("");
+      await traerDatos();
+      toast.success("Observaciones del asesor actualizadas");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al guardar observaciones del asesor");
+    }
+  };
+
+  const handleCancelAsesorNotes = () => {
+    setIsEditingAsesorNotes(false);
+    setEditedAsesorNotes("");
   };
   const displayStudentData = isEditingStudent
     ? editedStudentData
@@ -362,7 +382,6 @@ export default function Page({
     ? editedDefendantData
     : demandado;
   const displayCaseData = isEditingCaseInfo ? editedCaseData : caso;
-  const displayNotes = isEditingNotes ? editedNotes : caso?.observaciones || "";
 
   if (loading) {
     return (
@@ -508,21 +527,53 @@ export default function Page({
                     </div>
                   </Card>
 
+                  {/* Observaciones del Estudiante */}
                   <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
-                    <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center gap-3">
-                      <div className="p-2 bg-yellow-100 rounded-lg text-yellow-600">
-                        <ClipboardList className="w-5 h-5" />
+                    <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
+                          <ClipboardList className="w-5 h-5" />
+                        </div>
+                        <h3 className="font-bold text-slate-800 tracking-tight">
+                          Observaciones del Estudiante
+                        </h3>
                       </div>
-                      <h3 className="font-bold text-slate-800 tracking-tight">
-                        Observaciones
-                      </h3>
+                      {!isEditingStudentNotes ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleEditStudentNotes}
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        >
+                          <Edit3 className="w-4 h-4 mr-1" />
+                          Editar
+                        </Button>
+                      ) : (
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleCancelStudentNotes}
+                          >
+                            Cancelar
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={handleSaveStudentNotes}
+                            className="bg-blue-600 hover:bg-blue-700"
+                          >
+                            <Check className="w-4 h-4 mr-1" />
+                            Guardar
+                          </Button>
+                        </div>
+                      )}
                     </div>
 
                     <div className="p-6">
-                      {!isEditingCaseInfo ? (
+                      {!isEditingStudentNotes ? (
                         <div className="space-y-4">
-                          {displayNotes ? (
-                            displayNotes
+                          {caso?.observaciones_estudiante ? (
+                            caso.observaciones_estudiante
                               .split("\n")
                               .filter((note) => note.trim() !== "")
                               .map((note: string, index: number) => (
@@ -530,7 +581,7 @@ export default function Page({
                                   key={index}
                                   className="p-5 bg-white rounded-xl border border-slate-100 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)] relative overflow-hidden group transition-all"
                                 >
-                                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-yellow-400 opacity-60" />
+                                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-400 opacity-60" />
                                   <p className="text-slate-700 leading-relaxed pl-3 whitespace-pre-wrap">
                                     {note}
                                   </p>
@@ -539,25 +590,97 @@ export default function Page({
                           ) : (
                             <div className="p-8 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
                               <p className="text-slate-400 text-sm italic">
-                                No hay observaciones registradas
+                                El estudiante no ha registrado observaciones
                               </p>
                             </div>
                           )}
                         </div>
                       ) : (
-                        <div className="space-y-4">
-                          <Textarea
-                            value={editedCaseData?.observaciones || ""}
-                            onChange={(e) =>
-                              handleCaseDataChange(
-                                "observaciones",
-                                e.target.value,
-                              )
-                            }
-                            placeholder="Escribir observaciones importantes sobre el seguimiento del caso..."
-                            className="min-h-48 border-slate-200 focus:ring-blue-500/20 focus:border-blue-500 rounded-xl leading-relaxed"
-                          />
+                        <Textarea
+                          value={editedStudentNotes}
+                          onChange={(e) => setEditedStudentNotes(e.target.value)}
+                          placeholder="Escribir observaciones realizadas por el estudiante..."
+                          className="min-h-32 border-slate-200 focus:ring-blue-500/20 focus:border-blue-500 rounded-xl leading-relaxed"
+                        />
+                      )}
+                    </div>
+                  </Card>
+
+                  {/* Observaciones del Asesor */}
+                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                    <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-purple-100 rounded-lg text-purple-600">
+                          <ClipboardList className="w-5 h-5" />
                         </div>
+                        <h3 className="font-bold text-slate-800 tracking-tight">
+                          Observaciones del Asesor
+                        </h3>
+                      </div>
+                      {!isEditingAsesorNotes ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleEditAsesorNotes}
+                          className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                        >
+                          <Edit3 className="w-4 h-4 mr-1" />
+                          Editar
+                        </Button>
+                      ) : (
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleCancelAsesorNotes}
+                          >
+                            Cancelar
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={handleSaveAsesorNotes}
+                            className="bg-purple-600 hover:bg-purple-700"
+                          >
+                            <Check className="w-4 h-4 mr-1" />
+                            Guardar
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-6">
+                      {!isEditingAsesorNotes ? (
+                        <div className="space-y-4">
+                          {caso?.observaciones ? (
+                            caso.observaciones
+                              .split("\n")
+                              .filter((note) => note.trim() !== "")
+                              .map((note: string, index: number) => (
+                                <div
+                                  key={index}
+                                  className="p-5 bg-white rounded-xl border border-slate-100 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)] relative overflow-hidden group transition-all"
+                                >
+                                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-400 opacity-60" />
+                                  <p className="text-slate-700 leading-relaxed pl-3 whitespace-pre-wrap">
+                                    {note}
+                                  </p>
+                                </div>
+                              ))
+                          ) : (
+                            <div className="p-8 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                              <p className="text-slate-400 text-sm italic">
+                                El asesor no ha registrado observaciones
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <Textarea
+                          value={editedAsesorNotes}
+                          onChange={(e) => setEditedAsesorNotes(e.target.value)}
+                          placeholder="Escribir observaciones realizadas por el asesor..."
+                          className="min-h-32 border-slate-200 focus:ring-purple-500/20 focus:border-purple-500 rounded-xl leading-relaxed"
+                        />
                       )}
                     </div>
                   </Card>

@@ -37,11 +37,12 @@ import {
   Users,
 } from "lucide-react";
 import { formatDate } from "@/lib/format-date";
+import { CaseFilters } from "@/components/casos-juridicos/case-filters";
 
 export default function SupportCasesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("todos");
-  const [typeFilter, setTypeFilter] = useState("todos");
+  const [areaFilter, setAreaFilter] = useState("todos");
   const [studentFilter, setStudentFilter] = useState("todos");
   const [dateSort, setDateSort] = useState("recientes");
   const [classFilter, setClassFilter] = useState("todos");
@@ -82,7 +83,7 @@ export default function SupportCasesPage() {
     // Estado, área y estudiante
     const matchesStatus =
       statusFilter === "todos" || caso.estado === statusFilter;
-    const matchesArea = typeFilter === "todos" || caso.area === typeFilter;
+    const matchesArea = areaFilter === "todos" || caso.area === areaFilter;
     const matchesStudent =
       studentFilter === "todos" ||
       caso.estudiantes_casos?.some(
@@ -213,119 +214,30 @@ export default function SupportCasesPage() {
         </div>
 
         {/* Filters */}
-        <Card className="bg-white border-none shadow-sm shadow-slate-200/50 p-5 mb-8 rounded-2xl">
-          <div className="flex flex-col lg:flex-row gap-4 items-end flex-wrap">
-            <div className="flex-1 min-w-[200px] space-y-1.5">
-              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                Buscar general
-              </label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
-                <Input
-                  placeholder="Cliente, documento, descripción..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 bg-slate-50 border-transparent focus:bg-white focus:border-blue-500 transition-colors rounded-xl"
-                />
-              </div>
-            </div>
-
-            <div className="w-full lg:w-48 space-y-1.5">
-              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                Estado
-              </label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="bg-slate-50 border-transparent focus:bg-white transition-colors rounded-xl">
-                  <SelectValue placeholder="Estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos los estados</SelectItem>
-                  <SelectItem value="aprobado">Aprobado</SelectItem>
-                  <SelectItem value="en_proceso">En proceso</SelectItem>
-                  <SelectItem value="pendiente_aprobacion">
-                    Pendiente
-                  </SelectItem>
-                  <SelectItem value="archivado">Archivado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="w-full lg:w-48 space-y-1.5">
-              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                Tipo
-              </label>
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="bg-slate-50 border-transparent focus:bg-white transition-colors rounded-xl">
-                  <SelectValue placeholder="Tipo de caso" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos los tipos</SelectItem>
-                  <SelectItem value="civil">Derecho Civil</SelectItem>
-                  <SelectItem value="laboral">Derecho Laboral</SelectItem>
-                  <SelectItem value="familiar">Derecho Familiar</SelectItem>
-                  <SelectItem value="penal">Derecho Penal</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="w-full lg:w-48 space-y-1.5">
-              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                Ordenar por fecha
-              </label>
-              <Select
-                value={dateSort}
-                onValueChange={setDateSort}
-                disabled={loading}
-              >
-                <SelectTrigger className="bg-slate-50 border-transparent focus:bg-white transition-colors rounded-xl">
-                  <SelectValue placeholder="Orden" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="recientes">Más recientes</SelectItem>
-                  <SelectItem value="antiguos">Más antiguos</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="w-full lg:w-48 space-y-1.5">
-              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                Clasificación
-              </label>
-              <Select
-                value={classFilter}
-                onValueChange={setClassFilter}
-                disabled={loading}
-              >
-                <SelectTrigger className="bg-slate-50 border-transparent focus:bg-white transition-colors rounded-xl">
-                  <SelectValue placeholder="Clasificación" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">
-                    Todas las clasificaciones
-                  </SelectItem>
-                  <SelectItem value="en_tramite">En trámite</SelectItem>
-                  <SelectItem value="solo_asesoria">Solo asesoría</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Button
-              onClick={() => {
-                setSearchTerm("");
-                setStatusFilter("todos");
-                setTypeFilter("todos");
-                setStudentFilter("todos");
-                setDateSort("recientes");
-                setClassFilter("todos");
-              }}
-              variant="outline"
-              className="w-full md:w-auto shrink-0 bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl"
-            >
-              <FilterX className="w-4 h-4 mr-2" />
-              Limpiar
-            </Button>
-          </div>
-        </Card>
+        <CaseFilters
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          statusFilter={statusFilter}
+          onStatusChange={setStatusFilter}
+          areaFilter={areaFilter}
+          onAreaChange={setAreaFilter}
+          dateSort={dateSort}
+          onDateSortChange={setDateSort}
+          classFilter={classFilter}
+          onClassChange={setClassFilter}
+          loading={loading}
+          searchPlaceholder="Cliente, documento, descripción..."
+          onClear={() => {
+            setSearchTerm("");
+            setStatusFilter("todos");
+            setAreaFilter("todos");
+            setStudentFilter("todos");
+            setDateSort("recientes");
+            setClassFilter("todos");
+          }}
+        >
+          
+        </CaseFilters>
 
         {/* Case List Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
@@ -439,7 +351,7 @@ export default function SupportCasesPage() {
               onClick={() => {
                 setSearchTerm("");
                 setStatusFilter("todos");
-                setTypeFilter("todos");
+                setAreaFilter("todos");
                 setStudentFilter("todos");
                 setDateSort("recientes");
                 setClassFilter("todos");
