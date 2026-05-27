@@ -42,7 +42,7 @@ next-env.d.ts
 
 #supabase 
 /supabase/.branches
-/supabase/temp
+/supabase/.temp
 
 # dotenvx
 /supabase/env.keys
