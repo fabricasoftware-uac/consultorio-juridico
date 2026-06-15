@@ -14,6 +14,9 @@ export async function insertCasoNuevo(
       estado: caso.estado,
       observaciones: caso.observaciones,
       tipo_proceso: caso.tipo_proceso || "en_proceso",
+      fecha_vencimiento_estudiante: new Date(
+        Date.now() + 3 * 24 * 60 * 60 * 1000,
+      ).toISOString(),
     })
     .select();
 
