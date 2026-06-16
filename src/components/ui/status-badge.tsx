@@ -14,9 +14,9 @@ export const getStatusBadge = (status: string) => {
       color: "bg-blue-50 text-blue-700 border-blue-200",
       text: "En proceso",
     },
-    requiere_ajustes: {
+    en_correccion: {
       color: "bg-orange-50 text-orange-700 border-orange-200",
-      text: "Requiere ajustes",
+      text: "En corrección",
     },
     cerrado: {
       color: "bg-slate-50 text-slate-700 border-slate-200",

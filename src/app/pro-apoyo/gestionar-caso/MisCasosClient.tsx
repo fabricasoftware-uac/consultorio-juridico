@@ -328,10 +328,12 @@ export default function SupportCasesPage() {
                   <CountdownTimer
                     fechaVencimiento={caso.fecha_vencimiento_estudiante}
                     label="Estudiante"
+                    estado={caso.estado}
                   />
                   <CountdownTimer
                     fechaVencimiento={caso.fecha_vencimiento_asesor}
                     label="Asesor"
+                    estado={caso.estado}
                   />
                 </div>
 

@@ -348,10 +348,11 @@ export default function Asesor() {
                 </div>
 
                 <div className="mb-3">
-                  <CountdownTimer
-                    fechaVencimiento={caso.fecha_vencimiento_asesor}
-                    label="Aprobación"
-                  />
+                <CountdownTimer
+                  fechaVencimiento={caso.fecha_vencimiento_asesor}
+                  label="Aprobación"
+                  estado={caso.estado}
+                />
                 </div>
 
                 <div className="mt-auto pt-4 border-t border-slate-50 flex flex-col gap-3">

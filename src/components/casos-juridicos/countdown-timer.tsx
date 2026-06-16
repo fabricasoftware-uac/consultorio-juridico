@@ -4,9 +4,12 @@ import { useEffect, useState } from "react";
 import { Clock, AlertTriangle } from "lucide-react";
 import { cn } from "@/components/ui/utils";
 
+const ESTADOS_TERMINALES = new Set(["aprobado", "cerrado", "archivado"]);
+
 interface CountdownTimerProps {
   fechaVencimiento: string | null | undefined;
   label?: string;
+  estado?: string | null;
 }
 
 function calcularDiferencia(ms: number) {
@@ -21,7 +24,9 @@ function calcularDiferencia(ms: number) {
 export function CountdownTimer({
   fechaVencimiento,
   label,
+  estado,
 }: CountdownTimerProps) {
+  if (estado && ESTADOS_TERMINALES.has(estado)) return null;
   const [ahora, setAhora] = useState(Date.now());
 
   useEffect(() => {

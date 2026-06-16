@@ -173,7 +173,7 @@ export default function Page({
                     Caso #{id_caso.slice(0, 8)}
                   </h1>
                   {caso && getStatusBadge(caso.estado)}
-                  {caso?.estado === "requiere_ajustes" && (
+                  {caso?.estado === "en_correccion" && (
                     <Button
                       onClick={handleReenviar}
                       disabled={enviando}

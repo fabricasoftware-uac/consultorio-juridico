@@ -160,14 +160,14 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       setIsSolicitandoAjustes(true);
       const { error } = await supabase
         .from("casos")
-        .update({ estado: "requiere_ajustes" })
+        .update({ estado: "en_correccion" })
         .eq("id_caso", id_caso);
       if (error) throw error;
       await traerDatos();
-      toast.success("Se solicitaron ajustes al estudiante");
+      toast.success("Caso devuelto al estudiante para corrección");
     } catch (err) {
       console.error(err);
-      toast.error("Error al solicitar ajustes");
+      toast.error("Error al devolver el caso");
     } finally {
       setIsSolicitandoAjustes(false);
     }

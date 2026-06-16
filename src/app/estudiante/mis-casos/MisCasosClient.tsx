@@ -306,6 +306,7 @@ export default function MisCasosClient() {
                 <CountdownTimer
                   fechaVencimiento={caso.fecha_vencimiento_estudiante}
                   label="Entrega"
+                  estado={caso.estado}
                 />
               </div>
 
@@ -317,12 +318,12 @@ export default function MisCasosClient() {
                   Ver detalles
                 </Link>
                 {(caso.estado === "en_proceso" ||
-                  caso.estado === "requiere_ajustes") && (
+                  caso.estado === "en_correccion") && (
                   <Link
                     href={`/estudiante/mis-casos/${caso.id_caso}/entrevista`}
                     className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2.5 rounded-xl transition-colors duration-200 text-center text-sm shadow-md shadow-green-600/20"
                   >
-                    {caso.estado === "requiere_ajustes"
+                    {caso.estado === "en_correccion"
                       ? "Continuar entrevista"
                       : "Ir a entrevista"}
                   </Link>

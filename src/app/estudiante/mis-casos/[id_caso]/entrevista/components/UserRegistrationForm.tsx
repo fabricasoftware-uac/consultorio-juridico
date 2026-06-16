@@ -49,6 +49,7 @@ import { getDemandadoByCasoId } from "../../../../../../../supabase/queries/getD
 import { supabase } from "@/lib/supabase/supabase-client";
 import { Switch } from "@/components/ui/switch";
 import { Tienne } from "next/font/google";
+import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useRouter } from "next/navigation";
 import { cleanData } from "@/lib/utils";
@@ -328,10 +329,10 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
           );
       }
 
-      setOpen(true);
       if (typeof window !== "undefined") {
         localStorage.removeItem(`entrevista_draft_${idCaso}`);
       }
+      toast.success("Entrevista completada exitosamente");
       router.push(`/estudiante/mis-casos`);
       clearForm();
     } catch (err) {

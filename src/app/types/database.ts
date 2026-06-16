@@ -4,7 +4,7 @@ export type EstadoEnum =
   | "aprobado"
   | "en_proceso"
   | "pendiente_aprobacion"
-  | "requiere_ajustes"
+  | "en_correccion"
   | "cerrado"
   | "archivado";
 export type AreaEnum =
