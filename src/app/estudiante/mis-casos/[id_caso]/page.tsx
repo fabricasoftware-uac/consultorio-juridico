@@ -27,9 +27,10 @@ import { ClientInfo } from "@/components/casos-juridicos/client-info";
 import { DefendantInfo } from "@/components/casos-juridicos/defendant-info";
 import { AdvisorInfo } from "@/components/casos-juridicos/advisor-info";
 import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Send } from "lucide-react";
 import { supabase } from "@/lib/supabase/supabase-client";
 import { formatDate } from "@/lib/format-date";
+import { toast } from "sonner";
 
 export default function Page({
   params,
@@ -40,6 +41,7 @@ export default function Page({
   const [activeTab, setActiveTab] = useState("overview");
   const [newNote, setNewNote] = useState("");
   const [caso, setCaso] = useState<Caso>();
+  const [enviando, setEnviando] = useState(false);
   const [demandado, setDemandado] = useState<Demandado | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
@@ -98,6 +100,24 @@ export default function Page({
     }
   };
 
+  const handleReenviar = async () => {
+    try {
+      setEnviando(true);
+      const { error } = await supabase
+        .from("casos")
+        .update({ estado: "pendiente_aprobacion" })
+        .eq("id_caso", id_caso);
+      if (error) throw error;
+      await traerDatos();
+      toast.success("Caso reenviado para aprobación del asesor");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al reenviar el caso");
+    } finally {
+      setEnviando(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -153,6 +173,17 @@ export default function Page({
                     Caso #{id_caso.slice(0, 8)}
                   </h1>
                   {caso && getStatusBadge(caso.estado)}
+                  {caso?.estado === "requiere_ajustes" && (
+                    <Button
+                      onClick={handleReenviar}
+                      disabled={enviando}
+                      size="sm"
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      <Send className="w-4 h-4 mr-1" />
+                      {enviando ? "Enviando..." : "Reenviar para aprobación"}
+                    </Button>
+                  )}
                 </div>
                 <p className="text-lg text-gray-600 flex items-center gap-2">
                   <span className="text-gray-400 font-medium">Usuario:</span>

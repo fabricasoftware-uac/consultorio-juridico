@@ -128,6 +128,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
   // Clasificación Rápida de Casos
   const [isSavingClasificacion, setIsSavingClasificacion] = useState(false);
+  const [isSolicitandoAjustes, setIsSolicitandoAjustes] = useState(false);
 
   const handleClasificarCaso = async (clasificacion: string) => {
     try {
@@ -151,6 +152,24 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       toast.error("Error al clasificar el caso");
     } finally {
       setIsSavingClasificacion(false);
+    }
+  };
+
+  const handleSolicitarAjustes = async () => {
+    try {
+      setIsSolicitandoAjustes(true);
+      const { error } = await supabase
+        .from("casos")
+        .update({ estado: "requiere_ajustes" })
+        .eq("id_caso", id_caso);
+      if (error) throw error;
+      await traerDatos();
+      toast.success("Se solicitaron ajustes al estudiante");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al solicitar ajustes");
+    } finally {
+      setIsSolicitandoAjustes(false);
     }
   };
 
@@ -270,7 +289,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     if (!caso) return;
     setEditedCaseData({
       area: caso.area,
-      aprobacion_asesor: caso?.aprobacion_asesor,
       tipo_proceso: caso?.tipo_proceso,
       resumen_hechos: caso?.resumen_hechos,
       estado: caso?.estado,
@@ -296,10 +314,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       try {
         const { error: errorCaso } = await supabase
           .from("casos")
-          .update({
-            area: limpio.area,
-            aprobacion_asesor: limpio.aprobacion_asesor,
-            tipo_proceso: limpio.tipo_proceso,
+        .update({
+          area: limpio.area,
+          tipo_proceso: limpio.tipo_proceso,
             estado: limpio.estado,
             clasificacion: limpio.clasificacion,
           })
@@ -443,19 +460,27 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     </div>
                     <div className="flex flex-col sm:flex-row gap-3 min-w-fit">
                       <Button
+                        onClick={handleSolicitarAjustes}
+                        variant="outline"
+                        className="w-full sm:w-auto bg-white border-orange-300 text-orange-700 hover:bg-orange-100"
+                        disabled={isSolicitandoAjustes}
+                      >
+                        Solicitar ajustes
+                      </Button>
+                      <Button
                         onClick={() => handleClasificarCaso("solo_asesoria")}
                         variant="outline"
                         className="w-full sm:w-auto bg-white border-amber-300 text-amber-700 hover:bg-amber-100"
                         disabled={isSavingClasificacion}
                       >
-                        Queda solo como asesoría
+                        Solo asesoría
                       </Button>
                       <Button
                         onClick={() => handleClasificarCaso("en_tramite")}
                         className="w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white"
                         disabled={isSavingClasificacion}
                       >
-                        El caso debe continuar
+                        Aprobar y continuar
                       </Button>
                     </div>
                   </div>

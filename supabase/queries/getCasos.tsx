@@ -10,7 +10,6 @@ export async function getCasos(): Promise<Caso[]> {
     area,
     estado,
     clasificacion,
-    aprobacion_asesor,
     fecha_creacion,
     fecha_cierre,
     fecha_vencimiento_estudiante,

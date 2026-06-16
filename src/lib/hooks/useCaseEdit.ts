@@ -129,7 +129,6 @@ export function useCaseEdit(idCaso: string, onRefresh: () => Promise<void>) {
       if (!fetchCase) return;
       setEditedCaseData({
         area: fetchCase.area,
-        aprobacion_asesor: fetchCase.aprobacion_asesor,
         tipo_proceso: fetchCase.tipo_proceso,
         estudiantes_casos: fetchCase.estudiantes_casos,
         asesores_casos: fetchCase.asesores_casos,
@@ -157,7 +156,6 @@ export function useCaseEdit(idCaso: string, onRefresh: () => Promise<void>) {
           .from("casos")
           .update({
             area: limpio.area,
-            aprobacion_asesor: limpio.aprobacion_asesor,
             tipo_proceso: limpio.tipo_proceso,
             resumen_hechos: limpio.resumen_hechos,
             estado: limpio.estado,

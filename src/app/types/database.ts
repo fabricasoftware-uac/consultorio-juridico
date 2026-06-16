@@ -4,6 +4,7 @@ export type EstadoEnum =
   | "aprobado"
   | "en_proceso"
   | "pendiente_aprobacion"
+  | "requiere_ajustes"
   | "cerrado"
   | "archivado";
 export type AreaEnum =
@@ -115,7 +116,6 @@ export type Caso = {
   fecha_vencimiento_asesor?: string | null;
   estado: EstadoEnum;
   fecha_cierre?: string | null;
-  aprobacion_asesor?: boolean;
   area: AreaEnum;
   tipo_proceso?: string;
   clasificacion?: ClasificacionEnum | null;

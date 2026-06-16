@@ -262,7 +262,6 @@ export default function Page({
     if (!caso) return;
     setEditedCaseData({
       area: caso.area,
-      aprobacion_asesor: caso?.aprobacion_asesor,
       tipo_proceso: caso?.tipo_proceso,
       estudiantes_casos: caso?.estudiantes_casos,
       asesores_casos: caso?.asesores_casos,
@@ -288,7 +287,6 @@ export default function Page({
           .from("casos")
           .update({
             area: limpio.area,
-            aprobacion_asesor: limpio.aprobacion_asesor,
             tipo_proceso: limpio.tipo_proceso,
             resumen_hechos: limpio.resumen_hechos,
             estado: limpio.estado,

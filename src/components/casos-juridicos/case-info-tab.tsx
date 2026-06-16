@@ -4,8 +4,6 @@ import {
   Briefcase,
   Activity,
   ClipboardList,
-  ShieldCheck,
-  CheckCircle2,
   Edit3,
   Check,
 } from "lucide-react";
@@ -123,29 +121,6 @@ export const CaseInfoTab = ({
             icon={ClipboardList}
           />
 
-          <div className="space-y-1">
-            <div className="flex items-center text-slate-500 mb-1">
-              <ShieldCheck className="w-4 h-4 mr-2 opacity-70" />
-              <Label className="text-xs font-bold uppercase tracking-wider">
-                Aprobación Asesor
-              </Label>
-            </div>
-            <div className="pl-6 pt-1">
-              {caseData?.aprobacion_asesor ? (
-                <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none px-3 py-1 font-bold">
-                  <CheckCircle2 className="w-3 h-3 mr-1" />
-                  APROBADO
-                </Badge>
-              ) : (
-                <Badge
-                  variant="outline"
-                  className="border-slate-200 text-slate-400 font-bold px-3 py-1 uppercase"
-                >
-                  Pendiente
-                </Badge>
-              )}
-            </div>
-          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -224,34 +199,13 @@ export const CaseInfoTab = ({
                 <Activity className="w-4 h-4 text-slate-400" />
                 Estado del caso
               </Label>
-              <Select
-                value={editedData?.estado || ""}
-                onValueChange={(val) => onChange("estado", val)}
-              >
-                <SelectTrigger className="border-slate-200 focus:ring-blue-500/20 focus:border-blue-500 rounded-lg h-11">
-                  <SelectValue placeholder="Seleccionar estado" />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl border-slate-200 shadow-xl">
-                  {[
-                    {
-                      value: "pendiente_aprobacion",
-                      label: "Pendiente de aprobación",
-                    },
-                    { value: "aprobado", label: "Aprobado" },
-                    { value: "en_proceso", label: "En proceso" },
-                    { value: "cerrado", label: "Cerrado" },
-                    { value: "archivado", label: "Archivado" },
-                  ].map((estado) => (
-                    <SelectItem
-                      key={estado.value}
-                      value={estado.value}
-                      className="focus:bg-blue-50 focus:text-blue-700"
-                    >
-                      {estado.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="pl-6 pt-1">
+                {editedData && getStatusBadge(editedData.estado)}
+              </div>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                * El estado se gestiona mediante las acciones disponibles en la
+                página (aprobar, solicitar ajustes, archivar, cerrar).
+              </p>
             </div>
           </div>
         </div>

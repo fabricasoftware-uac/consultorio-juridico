@@ -23,9 +23,11 @@ const AREA_OPTIONS = [
 
 const STATUS_OPTIONS = [
   { value: "todos", label: "Todos los estados" },
-  { value: "aprobado", label: "Aprobado" },
-  { value: "en_proceso", label: "En Proceso" },
+  { value: "en_proceso", label: "En proceso" },
   { value: "pendiente_aprobacion", label: "Pendiente de aprobación" },
+  { value: "requiere_ajustes", label: "Requiere ajustes" },
+  { value: "aprobado", label: "Aprobado" },
+  { value: "cerrado", label: "Cerrado" },
   { value: "archivado", label: "Archivado" },
 ] as const;
 

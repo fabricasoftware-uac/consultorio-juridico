@@ -316,12 +316,15 @@ export default function MisCasosClient() {
                 >
                   Ver detalles
                 </Link>
-                {caso.estado === "en_proceso" && (
+                {(caso.estado === "en_proceso" ||
+                  caso.estado === "requiere_ajustes") && (
                   <Link
                     href={`/estudiante/mis-casos/${caso.id_caso}/entrevista`}
                     className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2.5 rounded-xl transition-colors duration-200 text-center text-sm shadow-md shadow-green-600/20"
                   >
-                    Ir a entrevista
+                    {caso.estado === "requiere_ajustes"
+                      ? "Continuar entrevista"
+                      : "Ir a entrevista"}
                   </Link>
                 )}
               </div>
