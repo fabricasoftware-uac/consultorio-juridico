@@ -1,7 +1,7 @@
 "use client";
 export const dynamic = "force-dynamic";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +38,7 @@ import { DefendantInfo } from "@/components/casos-juridicos/defendant-info";
 import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
 import { ObservacionesChat } from "@/components/casos-juridicos/observaciones-chat";
 import { CasoAuditoria } from "@/components/casos-juridicos/caso-auditoria";
+import { useRealtimeCaso } from "@/lib/hooks/useRealtimeCaso";
 import { StudentInfo } from "@/components/casos-juridicos/student-info";
 import { SectionCard } from "@/components/casos-juridicos/shared-ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -362,9 +363,15 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     }
   };
 
-  useEffect(() => {
+  const refetch = useCallback(() => {
     traerDatos();
-  }, []);
+  }, [id_caso]);
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  useRealtimeCaso(id_caso, refetch);
 
   if (loading) {
     return (

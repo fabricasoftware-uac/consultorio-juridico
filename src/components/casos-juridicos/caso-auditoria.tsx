@@ -11,6 +11,7 @@ import {
   UserCheck,
   Clock,
 } from "lucide-react";
+import { supabase } from "@/lib/supabase/supabase-client";
 import { getAuditEventsByCaso } from "../../../supabase/queries/auditoriaCasos";
 import type { AuditEvent } from "../../../supabase/queries/auditoriaCasos";
 
@@ -31,11 +32,35 @@ export function CasoAuditoria({ idCaso }: CasoAuditoriaProps) {
   const [eventos, setEventos] = useState<AuditEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const cargar = () => {
     getAuditEventsByCaso(idCaso).then((data) => {
       setEventos(data);
       setLoading(false);
     });
+  };
+
+  useEffect(() => {
+    cargar();
+  }, [idCaso]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(`historial-${idCaso}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "auditoria_casos",
+          filter: `id_caso=eq.${idCaso}`,
+        },
+        () => cargar(),
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [idCaso]);
 
   if (loading) {

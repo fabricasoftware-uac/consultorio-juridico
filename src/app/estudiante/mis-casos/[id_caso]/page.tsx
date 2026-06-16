@@ -1,6 +1,6 @@
 "use client";
 export const dynamic = "force-dynamic";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useState, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +29,7 @@ import { AdvisorInfo } from "@/components/casos-juridicos/advisor-info";
 import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
 import { ObservacionesChat } from "@/components/casos-juridicos/observaciones-chat";
 import { CasoAuditoria } from "@/components/casos-juridicos/caso-auditoria";
+import { useRealtimeCaso } from "@/lib/hooks/useRealtimeCaso";
 import { AlertTriangle, MessageSquare, Send } from "lucide-react";
 import { supabase } from "@/lib/supabase/supabase-client";
 import { formatDate } from "@/lib/format-date";
@@ -76,9 +77,15 @@ export default function Page({
     }
   }
 
-  useEffect(() => {
+  const refetch = useCallback(() => {
     traerDatos();
-  }, []);
+  }, [id_caso]);
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  useRealtimeCaso(id_caso, refetch);
 
   useEffect(() => {
     if (caso) {

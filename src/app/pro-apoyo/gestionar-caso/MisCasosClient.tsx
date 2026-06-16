@@ -37,6 +37,7 @@ import {
   Users,
 } from "lucide-react";
 import { formatDate } from "@/lib/format-date";
+import { formatArea } from "@/lib/utils";
 import { CaseFilters } from "@/components/casos-juridicos/case-filters";
 import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
 
@@ -268,7 +269,7 @@ export default function SupportCasesPage() {
                     Área
                   </span>
                   <p className="text-sm font-semibold text-slate-800">
-                    {caso.area}
+                    {formatArea(caso.area)}
                   </p>
                 </div>
 

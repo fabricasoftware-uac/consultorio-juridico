@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageSquare, Send } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase/supabase-client";
 import {
   getObservacionesByCaso,
   insertAuditEvent,
@@ -38,6 +39,26 @@ export function ObservacionesChat({
 
   useEffect(() => {
     cargar();
+  }, [idCaso]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(`observaciones-${idCaso}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "auditoria_casos",
+          filter: `id_caso=eq.${idCaso}`,
+        },
+        () => cargar(),
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [idCaso]);
 
   useEffect(() => {

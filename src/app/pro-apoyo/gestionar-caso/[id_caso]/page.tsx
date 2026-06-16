@@ -1,7 +1,8 @@
 "use client";
 export const dynamic = "force-dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import React from "react";
+import { useRealtimeCaso } from "@/lib/hooks/useRealtimeCaso";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -113,9 +114,15 @@ export default function Page({
     }
   }
 
-  useEffect(() => {
+  const refetch = useCallback(() => {
     traerDatos();
   }, [id_caso]);
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  useRealtimeCaso(id_caso, refetch);
 
   const handleStudentDataChange = (
     index: number,

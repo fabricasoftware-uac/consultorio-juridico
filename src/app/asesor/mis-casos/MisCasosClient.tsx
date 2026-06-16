@@ -29,6 +29,7 @@ import { supabase } from "@/lib/supabase/supabase-client";
 import { ArrowLeft, Check, Search, FilterX, FileText } from "lucide-react";
 import { getStatusBadge } from "@/components/ui/status-badge";
 import { CaseFilters } from "@/components/casos-juridicos/case-filters";
+import { formatArea } from "@/lib/utils";
 import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
 import { useRealtimeCasos } from "@/lib/hooks/useRealtimeCasos";
 
@@ -301,7 +302,7 @@ export default function Asesor() {
                       Área
                     </span>
                     <p className="text-sm font-semibold text-slate-800">
-                      {caso.area}
+                      {formatArea(caso.area)}
                     </p>
                   </div>
 

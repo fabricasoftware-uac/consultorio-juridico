@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/pagination";
 import { getStatusBadge } from "@/components/ui/status-badge";
 import { formatDate } from "@/lib/format-date";
+import { formatArea } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
 import { CaseFilters } from "@/components/casos-juridicos/case-filters";
 import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
@@ -265,7 +266,7 @@ export default function MisCasosClient() {
                     <FileText className="w-3 h-3" /> Área
                   </span>
                   <p className="text-sm font-semibold text-slate-800">
-                    {caso.area}
+                    {formatArea(caso.area)}
                   </p>
                 </div>
 
