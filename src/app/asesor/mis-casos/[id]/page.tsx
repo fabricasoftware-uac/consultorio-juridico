@@ -37,6 +37,7 @@ import { ClientInfo } from "@/components/casos-juridicos/client-info";
 import { DefendantInfo } from "@/components/casos-juridicos/defendant-info";
 import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
 import { ObservacionesChat } from "@/components/casos-juridicos/observaciones-chat";
+import { CasoAuditoria } from "@/components/casos-juridicos/caso-auditoria";
 import { StudentInfo } from "@/components/casos-juridicos/student-info";
 import { SectionCard } from "@/components/casos-juridicos/shared-ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -610,6 +611,23 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     </div>
                     <div className="p-6">
                       <LlamadosList idCaso={id_caso} />
+                    </div>
+                  </Card>
+
+                  {/* Historial del Caso */}
+                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                    <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center gap-3">
+                      <div className="p-2 bg-slate-100 rounded-lg text-slate-600">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <h3 className="font-bold text-slate-800 tracking-tight">
+                        Historial del Caso
+                      </h3>
+                    </div>
+                    <div className="p-6">
+                      <CasoAuditoria idCaso={id_caso} />
                     </div>
                   </Card>
                 </div>

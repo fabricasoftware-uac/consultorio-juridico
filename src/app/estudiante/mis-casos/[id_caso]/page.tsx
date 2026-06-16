@@ -28,6 +28,7 @@ import { DefendantInfo } from "@/components/casos-juridicos/defendant-info";
 import { AdvisorInfo } from "@/components/casos-juridicos/advisor-info";
 import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
 import { ObservacionesChat } from "@/components/casos-juridicos/observaciones-chat";
+import { CasoAuditoria } from "@/components/casos-juridicos/caso-auditoria";
 import { AlertTriangle, MessageSquare, Send } from "lucide-react";
 import { supabase } from "@/lib/supabase/supabase-client";
 import { formatDate } from "@/lib/format-date";
@@ -360,6 +361,22 @@ export default function Page({
                     </div>
                     <div className="p-6">
                       <LlamadosList idCaso={id_caso} />
+                    </div>
+                  </Card>
+
+                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                    <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center gap-3">
+                      <div className="p-2 bg-slate-100 rounded-lg text-slate-600">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <h3 className="font-bold text-slate-800 tracking-tight">
+                        Historial del Caso
+                      </h3>
+                    </div>
+                    <div className="p-6">
+                      <CasoAuditoria idCaso={id_caso} />
                     </div>
                   </Card>
                 </div>
