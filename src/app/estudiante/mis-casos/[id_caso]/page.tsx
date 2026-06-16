@@ -296,7 +296,11 @@ export default function Page({
                         Mis Observaciones
                       </h3>
                     </div>
-                    <ObservacionesChat idCaso={id_caso} />
+                    <ObservacionesChat
+                      idCaso={id_caso}
+                      observaciones={caso?.observaciones}
+                      observacionesEstudiante={caso?.observaciones_estudiante}
+                    />
                   </Card>
                 </div>
 

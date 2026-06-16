@@ -14,11 +14,15 @@ import type { ObservacionConAutor } from "../../../supabase/queries/auditoriaCas
 interface ObservacionesChatProps {
   idCaso: string;
   placeholder?: string;
+  observaciones?: string | null;
+  observacionesEstudiante?: string | null;
 }
 
 export function ObservacionesChat({
   idCaso,
   placeholder = "Escribe una observación...",
+  observaciones: obsLegacy,
+  observacionesEstudiante,
 }: ObservacionesChatProps) {
   const [observaciones, setObservaciones] = useState<ObservacionConAutor[]>([]);
   const [texto, setTexto] = useState("");
@@ -50,6 +54,9 @@ export function ObservacionesChat({
     toast.success("Observación guardada");
   };
 
+  const tieneLegacy = obsLegacy?.trim() || observacionesEstudiante?.trim();
+  const tieneNuevas = observaciones.length > 0;
+
   if (loading) {
     return (
       <div className="p-4 text-center text-sm text-slate-400 italic">
@@ -58,18 +65,45 @@ export function ObservacionesChat({
     );
   }
 
+  if (!tieneLegacy && !tieneNuevas) {
+    return (
+      <div className="p-6 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+        <MessageSquare className="w-6 h-6 text-slate-300 mx-auto mb-2" />
+        <p className="text-sm text-slate-400 italic">
+          No hay observaciones aún.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
-      {observaciones.length === 0 ? (
-        <div className="p-6 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
-          <MessageSquare className="w-6 h-6 text-slate-300 mx-auto mb-2" />
-          <p className="text-sm text-slate-400 italic">
-            No hay observaciones aún.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
-          {observaciones.map((obs) => (
+      <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+        {obsLegacy?.trim() && (
+          <div className="p-4 bg-yellow-50 rounded-xl border border-yellow-100">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-xs font-bold text-yellow-700 bg-yellow-100 px-2 py-0.5 rounded">
+                Profesional (archivo)
+              </span>
+            </div>
+            <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
+              {obsLegacy}
+            </p>
+          </div>
+        )}
+        {observacionesEstudiante?.trim() && (
+          <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
+                Estudiante (archivo)
+              </span>
+            </div>
+            <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
+              {observacionesEstudiante}
+            </p>
+          </div>
+        )}
+        {observaciones.map((obs) => (
             <div
               key={obs.id}
               className="p-4 bg-white rounded-xl border border-slate-100 shadow-sm"
@@ -94,25 +128,24 @@ export function ObservacionesChat({
           ))}
           <div ref={bottomRef} />
         </div>
-      )}
 
-      <div className="flex gap-2">
-        <Textarea
-          value={texto}
-          onChange={(e) => setTexto(e.target.value)}
-          placeholder={placeholder}
-          rows={2}
-          className="resize-none text-sm border-slate-200 focus:ring-blue-500/20 focus:border-blue-500 rounded-xl"
-        />
-        <Button
-          onClick={handleEnviar}
-          disabled={!texto.trim() || enviando}
-          className="self-end bg-blue-600 hover:bg-blue-700 text-white shrink-0"
-          size="icon"
-        >
-          <Send className="w-4 h-4" />
-        </Button>
+        <div className="flex gap-2">
+          <Textarea
+            value={texto}
+            onChange={(e) => setTexto(e.target.value)}
+            placeholder={placeholder}
+            rows={2}
+            className="resize-none text-sm border-slate-200 focus:ring-blue-500/20 focus:border-blue-500 rounded-xl"
+          />
+          <Button
+            onClick={handleEnviar}
+            disabled={!texto.trim() || enviando}
+            className="self-end bg-blue-600 hover:bg-blue-700 text-white shrink-0"
+            size="icon"
+          >
+            <Send className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
-    </div>
   );
 }

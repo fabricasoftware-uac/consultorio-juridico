@@ -540,7 +540,11 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">
                           Observaciones
                         </span>
-                        <ObservacionesChat idCaso={id_caso} />
+                        <ObservacionesChat
+                          idCaso={id_caso}
+                          observaciones={caso?.observaciones}
+                          observacionesEstudiante={caso?.observaciones_estudiante}
+                        />
                       </div>
                     </div>
                   </SectionCard>
