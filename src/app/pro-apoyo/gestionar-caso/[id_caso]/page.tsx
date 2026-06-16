@@ -31,6 +31,7 @@ import {
   FileText,
   Edit3,
   Check,
+  MessageSquare,
   Briefcase,
   Activity,
   ClipboardList,
@@ -58,6 +59,7 @@ import { ClientInfo } from "@/components/casos-juridicos/client-info";
 import { DefendantInfo } from "@/components/casos-juridicos/defendant-info";
 import { StudentInfo } from "@/components/casos-juridicos/student-info";
 import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
+import { ObservacionesChat } from "@/components/casos-juridicos/observaciones-chat";
 
 export default function Page({
   params,
@@ -526,161 +528,17 @@ export default function Page({
                     </div>
                   </Card>
 
-                  {/* Observaciones del Estudiante */}
                   <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
-                    <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
-                          <ClipboardList className="w-5 h-5" />
-                        </div>
-                        <h3 className="font-bold text-slate-800 tracking-tight">
-                          Observaciones del Estudiante
-                        </h3>
+                    <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center gap-3">
+                      <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
+                        <MessageSquare className="w-5 h-5" />
                       </div>
-                      {!isEditingStudentNotes ? (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleEditStudentNotes}
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                        >
-                          <Edit3 className="w-4 h-4 mr-1" />
-                          Editar
-                        </Button>
-                      ) : (
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleCancelStudentNotes}
-                          >
-                            Cancelar
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={handleSaveStudentNotes}
-                            className="bg-blue-600 hover:bg-blue-700"
-                          >
-                            <Check className="w-4 h-4 mr-1" />
-                            Guardar
-                          </Button>
-                        </div>
-                      )}
+                      <h3 className="font-bold text-slate-800 tracking-tight">
+                        Observaciones
+                      </h3>
                     </div>
-
                     <div className="p-6">
-                      {!isEditingStudentNotes ? (
-                        <div className="space-y-4">
-                          {caso?.observaciones_estudiante ? (
-                            caso.observaciones_estudiante
-                              .split("\n")
-                              .filter((note) => note.trim() !== "")
-                              .map((note: string, index: number) => (
-                                <div
-                                  key={index}
-                                  className="p-5 bg-white rounded-xl border border-slate-100 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)] relative overflow-hidden group transition-all"
-                                >
-                                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-400 opacity-60" />
-                                  <p className="text-slate-700 leading-relaxed pl-3 whitespace-pre-wrap">
-                                    {note}
-                                  </p>
-                                </div>
-                              ))
-                          ) : (
-                            <div className="p-8 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
-                              <p className="text-slate-400 text-sm italic">
-                                El estudiante no ha registrado observaciones
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <Textarea
-                          value={editedStudentNotes}
-                          onChange={(e) => setEditedStudentNotes(e.target.value)}
-                          placeholder="Escribir observaciones realizadas por el estudiante..."
-                          className="min-h-32 border-slate-200 focus:ring-blue-500/20 focus:border-blue-500 rounded-xl leading-relaxed"
-                        />
-                      )}
-                    </div>
-                  </Card>
-
-                  {/* Observaciones del Asesor */}
-                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
-                    <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-purple-100 rounded-lg text-purple-600">
-                          <ClipboardList className="w-5 h-5" />
-                        </div>
-                        <h3 className="font-bold text-slate-800 tracking-tight">
-                          Observaciones del Asesor
-                        </h3>
-                      </div>
-                      {!isEditingAsesorNotes ? (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleEditAsesorNotes}
-                          className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-                        >
-                          <Edit3 className="w-4 h-4 mr-1" />
-                          Editar
-                        </Button>
-                      ) : (
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleCancelAsesorNotes}
-                          >
-                            Cancelar
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={handleSaveAsesorNotes}
-                            className="bg-purple-600 hover:bg-purple-700"
-                          >
-                            <Check className="w-4 h-4 mr-1" />
-                            Guardar
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="p-6">
-                      {!isEditingAsesorNotes ? (
-                        <div className="space-y-4">
-                          {caso?.observaciones ? (
-                            caso.observaciones
-                              .split("\n")
-                              .filter((note) => note.trim() !== "")
-                              .map((note: string, index: number) => (
-                                <div
-                                  key={index}
-                                  className="p-5 bg-white rounded-xl border border-slate-100 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)] relative overflow-hidden group transition-all"
-                                >
-                                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-400 opacity-60" />
-                                  <p className="text-slate-700 leading-relaxed pl-3 whitespace-pre-wrap">
-                                    {note}
-                                  </p>
-                                </div>
-                              ))
-                          ) : (
-                            <div className="p-8 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
-                              <p className="text-slate-400 text-sm italic">
-                                El asesor no ha registrado observaciones
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <Textarea
-                          value={editedAsesorNotes}
-                          onChange={(e) => setEditedAsesorNotes(e.target.value)}
-                          placeholder="Escribir observaciones realizadas por el asesor..."
-                          className="min-h-32 border-slate-200 focus:ring-purple-500/20 focus:border-purple-500 rounded-xl leading-relaxed"
-                        />
-                      )}
+                      <ObservacionesChat idCaso={id_caso} />
                     </div>
                   </Card>
                 </div>

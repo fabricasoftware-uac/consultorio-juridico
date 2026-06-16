@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase/supabase-client";
 import type { Caso } from "../../src/app/types/database";
+import { insertAuditEvent } from "./auditoriaCasos";
 
 export async function insertCasoNuevo(
   caso: Caso,
@@ -23,6 +24,16 @@ export async function insertCasoNuevo(
   if (error) {
     console.error("Error al insertar el caso:", error);
     throw error;
+  }
+
+  const inserted = data?.[0];
+  if (inserted?.id_caso) {
+    await insertAuditEvent(
+      inserted.id_caso,
+      "creacion",
+      `Caso creado en área ${inserted.area} con estado ${inserted.estado}.`,
+      { area: inserted.area, estado: inserted.estado },
+    );
   }
 
   return data ?? [];

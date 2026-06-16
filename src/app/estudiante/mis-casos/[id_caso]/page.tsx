@@ -27,7 +27,8 @@ import { ClientInfo } from "@/components/casos-juridicos/client-info";
 import { DefendantInfo } from "@/components/casos-juridicos/defendant-info";
 import { AdvisorInfo } from "@/components/casos-juridicos/advisor-info";
 import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
-import { AlertTriangle, Send } from "lucide-react";
+import { ObservacionesChat } from "@/components/casos-juridicos/observaciones-chat";
+import { AlertTriangle, MessageSquare, Send } from "lucide-react";
 import { supabase } from "@/lib/supabase/supabase-client";
 import { formatDate } from "@/lib/format-date";
 import { toast } from "sonner";
@@ -289,74 +290,13 @@ export default function Page({
                   <Card className="p-6">
                     <div className="flex items-center mb-4">
                       <div className="p-2 bg-blue-100 rounded-lg mr-3">
-                        <svg
-                          className="w-5 h-5 text-blue-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                          />
-                        </svg>
+                        <MessageSquare className="w-5 h-5 text-blue-600" />
                       </div>
-                      <div className="flex justify-between items-center w-full">
-                        <h3 className="text-gray-900 font-semibold">
-                          Mis Observaciones
-                        </h3>
-                        {!editando ? (
-                          <Button
-                            onClick={() => setEditando(true)}
-                            variant="outline"
-                            className="text-blue-600 border-blue-600 hover:bg-blue-50"
-                          >
-                            Editar
-                          </Button>
-                        ) : (
-                          <div className="space-x-2 flex">
-                            <Button
-                              onClick={handleGuardar}
-                              disabled={guardando}
-                              className="bg-blue-600 hover:bg-blue-700 text-white"
-                            >
-                              {guardando ? "Guardando..." : "Guardar"}
-                            </Button>
-                            <Button
-                              onClick={() => {
-                                setEditando(false);
-                                setObservacionesEstudiante(
-                                  caso?.observaciones_estudiante || "",
-                                );
-                              }}
-                              variant="outline"
-                            >
-                              Cancelar
-                            </Button>
-                          </div>
-                        )}
-                      </div>
+                      <h3 className="text-gray-900 font-semibold">
+                        Mis Observaciones
+                      </h3>
                     </div>
-
-                    <div className="space-y-3 mt-2">
-                      {!editando ? (
-                        <p className="text-gray-700 bg-gray-50 p-4 rounded-md min-h-20 whitespace-pre-wrap border border-gray-100 leading-relaxed">
-                          {observacionesEstudiante ||
-                            "No has registrado observaciones para este caso aún."}
-                        </p>
-                      ) : (
-                        <Textarea
-                          value={observacionesEstudiante}
-                          onChange={(e) =>
-                            setObservacionesEstudiante(e.target.value)
-                          }
-                          className="min-h-32 focus:border-blue-500 focus:ring-blue-500/20"
-                          placeholder="Escribe tus observaciones aquí..."
-                        />
-                      )}
-                    </div>
+                    <ObservacionesChat idCaso={id_caso} />
                   </Card>
                 </div>
 

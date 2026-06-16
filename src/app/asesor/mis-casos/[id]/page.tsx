@@ -18,6 +18,7 @@ import {
 } from "app/types/database";
 import { Textarea } from "@/components/ui/textarea";
 import { updateObservaciones } from "../../../../../supabase/queries/updateObservaciones";
+import { insertAuditEvent } from "../../../../../supabase/queries/auditoriaCasos";
 import { toast } from "sonner";
 import { cleanData } from "@/lib/utils";
 import { supabase } from "@/lib/supabase/supabase-client";
@@ -35,6 +36,7 @@ import { CaseInfoTab } from "@/components/casos-juridicos/case-info-tab";
 import { ClientInfo } from "@/components/casos-juridicos/client-info";
 import { DefendantInfo } from "@/components/casos-juridicos/defendant-info";
 import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
+import { ObservacionesChat } from "@/components/casos-juridicos/observaciones-chat";
 import { StudentInfo } from "@/components/casos-juridicos/student-info";
 import { SectionCard } from "@/components/casos-juridicos/shared-ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -145,6 +147,12 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         throw errorCaso;
       }
 
+      await insertAuditEvent(
+        id_caso,
+        "aprobacion",
+        `El asesor aprobó el caso con clasificación "${clasificacion}".`,
+        { clasificacion },
+      );
       await traerDatos();
       toast.success("Caso clasificado y aprobado exitosamente");
     } catch (err) {
@@ -163,6 +171,11 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         .update({ estado: "en_correccion" })
         .eq("id_caso", id_caso);
       if (error) throw error;
+      await insertAuditEvent(
+        id_caso,
+        "correccion",
+        "El asesor solicitó ajustes al estudiante. El caso requiere correcciones.",
+      );
       await traerDatos();
       toast.success("Caso devuelto al estudiante para corrección");
     } catch (err) {
@@ -522,82 +535,12 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         </div>
                       </div>
 
-                      {/* Observaciones del estudiante */}
+                      {/* Observaciones */}
                       <div className="space-y-2">
                         <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">
-                          Observaciones del Estudiante:
+                          Observaciones
                         </span>
-                        <div className="p-4 bg-blue-50/20 rounded-xl border border-blue-100">
-                          <pre className="text-sm text-slate-700 whitespace-pre-wrap font-sans leading-relaxed">
-                            {caso.observaciones_estudiante ||
-                              "No hay observaciones registradas por el estudiante."}
-                          </pre>
-                        </div>
-                      </div>
-
-                      {/* Observaciones (Asesor) */}
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">
-                            Observaciones:
-                          </span>
-                          {!isEditing && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={startEditing}
-                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                            >
-                              <Pencil className="w-4 h-4 mr-2" />
-                              Agregar Observacion
-                            </Button>
-                          )}
-                        </div>
-
-                        {isEditing ? (
-                          <div className="space-y-3">
-                            <Textarea
-                              value={editObservaciones}
-                              onChange={(e) =>
-                                setEditObservaciones(e.target.value)
-                              }
-                              placeholder="Ingrese las observaciones aquí..."
-                              className="min-h-[150px] bg-white border-slate-200 focus:ring-blue-500/20"
-                              disabled={isSaving}
-                            />
-                            <div className="flex justify-end space-x-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setIsEditing(false)}
-                                disabled={isSaving}
-                              >
-                                <X className="w-4 h-4 mr-2" />
-                                Cancelar
-                              </Button>
-                              <Button
-                                size="sm"
-                                onClick={handleUpdateObservaciones}
-                                disabled={isSaving}
-                                className="bg-blue-600 hover:bg-blue-700 text-white"
-                              >
-                                {isSaving ? (
-                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                ) : (
-                                  <Save className="w-4 h-4 mr-2" />
-                                )}
-                                Guardar cambios
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                            <pre className="text-sm text-slate-700 whitespace-pre-wrap font-sans leading-relaxed">
-                              {caso.observaciones ||
-                                "No hay observaciones registradas."}
-                            </pre>
-                          </div>
-                        )}
+                        <ObservacionesChat idCaso={id_caso} />
                       </div>
                     </div>
                   </SectionCard>

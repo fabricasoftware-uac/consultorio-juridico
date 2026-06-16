@@ -46,6 +46,7 @@ import { ProgressIndicator } from "@radix-ui/react-progress";
 import { Caso, Demandado } from "app/types/database";
 import { getCasoById } from "../../../../../../../supabase/queries/getCasoById";
 import { getDemandadoByCasoId } from "../../../../../../../supabase/queries/getDemandadoByCasoId";
+import { insertAuditEvent } from "../../../../../../../supabase/queries/auditoriaCasos";
 import { supabase } from "@/lib/supabase/supabase-client";
 import { Switch } from "@/components/ui/switch";
 import { Tienne } from "next/font/google";
@@ -345,6 +346,11 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
           );
       }
 
+      await insertAuditEvent(
+        idCaso,
+        "entrevista",
+        "El estudiante completó la entrevista y envió el caso para aprobación del asesor.",
+      );
       if (typeof window !== "undefined") {
         localStorage.removeItem(`entrevista_draft_${idCaso}`);
       }
