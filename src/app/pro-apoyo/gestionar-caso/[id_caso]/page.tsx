@@ -463,9 +463,7 @@ export default function Page({
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList
-              className={`grid w-full grid-cols-4 lg:grid-cols-${displayCaseData?.estudiantes_casos.length ? "4" : "3"}`}
-            >
+            <TabsList className="w-full overflow-x-auto flex-nowrap">
               <TabsTrigger value="overview">Resumen</TabsTrigger>
               {displayCaseData?.estudiantes_casos.length ? (
                 <TabsTrigger value="supervision">Datos estudiante</TabsTrigger>

@@ -418,7 +418,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="w-full overflow-x-auto flex-nowrap">
               <TabsTrigger value="overview">Resumen</TabsTrigger>
               <TabsTrigger value="supervision">Datos estudiante</TabsTrigger>
               <TabsTrigger value="client">Usuario</TabsTrigger>
