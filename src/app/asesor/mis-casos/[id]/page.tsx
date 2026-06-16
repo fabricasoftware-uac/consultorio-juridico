@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { cleanData } from "@/lib/utils";
 import { supabase } from "@/lib/supabase/supabase-client";
 import {
+  AlertTriangle,
   Pencil,
   Save,
   X,
@@ -33,6 +34,7 @@ import { getStatusBadge } from "@/components/ui/status-badge";
 import { CaseInfoTab } from "@/components/casos-juridicos/case-info-tab";
 import { ClientInfo } from "@/components/casos-juridicos/client-info";
 import { DefendantInfo } from "@/components/casos-juridicos/defendant-info";
+import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
 import { StudentInfo } from "@/components/casos-juridicos/student-info";
 import { SectionCard } from "@/components/casos-juridicos/shared-ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -625,6 +627,19 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       </div>
                     </Card>
                   )}
+
+                  {/* Llamados de Atención */}
+                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                    <div className="bg-amber-50 border-b border-amber-100 p-4 flex items-center gap-3">
+                      <AlertTriangle className="w-5 h-5 text-amber-600" />
+                      <h3 className="font-bold text-amber-800 tracking-tight">
+                        Llamados de Atención
+                      </h3>
+                    </div>
+                    <div className="p-6">
+                      <LlamadosList idCaso={id_caso} />
+                    </div>
+                  </Card>
                 </div>
               </div>
             </TabsContent>

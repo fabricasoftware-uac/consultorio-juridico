@@ -26,6 +26,7 @@ import { formatDate } from "@/lib/format-date";
 import { cleanData } from "@/lib/utils";
 import { supabase } from "@/lib/supabase/supabase-client";
 import {
+  AlertTriangle,
   Notebook,
   FileText,
   Edit3,
@@ -52,9 +53,11 @@ import { getStatusBadge } from "@/components/ui/status-badge";
 import { ReasignarEquipo } from "./components/ReasignarEquipo";
 import { toast } from "sonner";
 import { CaseInfoTab } from "@/components/casos-juridicos/case-info-tab";
+import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
 import { ClientInfo } from "@/components/casos-juridicos/client-info";
 import { DefendantInfo } from "@/components/casos-juridicos/defendant-info";
 import { StudentInfo } from "@/components/casos-juridicos/student-info";
+import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
 
 export default function Page({
   params,
@@ -709,6 +712,30 @@ export default function Page({
                           </div>
                         )}
                       </div>
+                      <div className="flex flex-wrap gap-2 pt-2">
+                        <CountdownTimer
+                          fechaVencimiento={caso?.fecha_vencimiento_estudiante}
+                          label="Estudiante"
+                        />
+                        <CountdownTimer
+                          fechaVencimiento={caso?.fecha_vencimiento_asesor}
+                          label="Asesor"
+                        />
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                    <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center gap-3">
+                      <div className="p-2 bg-amber-100 rounded-lg text-amber-600">
+                        <AlertTriangle className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-bold text-slate-800 tracking-tight">
+                        Llamados de Atención
+                      </h3>
+                    </div>
+                    <div className="p-6">
+                      <LlamadosList idCaso={id_caso} />
                     </div>
                   </Card>
 

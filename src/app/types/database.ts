@@ -111,6 +111,8 @@ export type Caso = {
   observaciones?: string | null;
   observaciones_estudiante?: string | null;
   fecha_creacion: string;
+  fecha_vencimiento_estudiante?: string | null;
+  fecha_vencimiento_asesor?: string | null;
   estado: EstadoEnum;
   fecha_cierre?: string | null;
   aprobacion_asesor?: boolean;

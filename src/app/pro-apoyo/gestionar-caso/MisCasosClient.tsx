@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { formatDate } from "@/lib/format-date";
 import { CaseFilters } from "@/components/casos-juridicos/case-filters";
+import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
 
 export default function SupportCasesPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -309,21 +310,32 @@ export default function SupportCasesPage() {
                   </div>
                 </div>
 
-                <div className="pt-2">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                    Resumen
-                  </span>
-                  <p className="text-sm text-slate-600 line-clamp-2 mt-0.5 leading-relaxed">
-                    {caso.resumen_hechos ?? (
-                      <span className="italic opacity-70">
-                        No hay resumen redactado.
-                      </span>
-                    )}
-                  </p>
+                  <div className="pt-2">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      Resumen
+                    </span>
+                    <p className="text-sm text-slate-600 line-clamp-2 mt-0.5 leading-relaxed">
+                      {caso.resumen_hechos ?? (
+                        <span className="italic opacity-70">
+                          No hay resumen redactado.
+                        </span>
+                      )}
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <div className="mt-auto pt-4 border-t border-slate-50">
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <CountdownTimer
+                    fechaVencimiento={caso.fecha_vencimiento_estudiante}
+                    label="Estudiante"
+                  />
+                  <CountdownTimer
+                    fechaVencimiento={caso.fecha_vencimiento_asesor}
+                    label="Asesor"
+                  />
+                </div>
+
+                <div className="mt-auto pt-4 border-t border-slate-50">
                 <Link
                   className="flex w-full items-center justify-center bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 font-medium px-4 py-2.5 rounded-xl transition-colors duration-200 text-sm shadow-xs"
                   href={`/pro-apoyo/gestionar-caso/${caso.id_caso}`}

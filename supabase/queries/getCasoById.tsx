@@ -14,6 +14,8 @@ export async function getCasoById(id_caso: string): Promise<Caso> {
       observaciones_estudiante,
       fecha_creacion,
       fecha_cierre,
+      fecha_vencimiento_estudiante,
+      fecha_vencimiento_asesor,
       usuarios (
         id_usuario,
         nombre_completo,

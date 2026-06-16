@@ -30,6 +30,7 @@ import { getStatusBadge } from "@/components/ui/status-badge";
 import { formatDate } from "@/lib/format-date";
 import { Spinner } from "@/components/ui/spinner";
 import { CaseFilters } from "@/components/casos-juridicos/case-filters";
+import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
 import {
   ArrowLeft,
   Check,
@@ -299,6 +300,13 @@ export default function MisCasosClient() {
                     </p>
                   </div>
                 )}
+              </div>
+
+              <div className="mt-2 mb-3">
+                <CountdownTimer
+                  fechaVencimiento={caso.fecha_vencimiento_estudiante}
+                  label="Entrega"
+                />
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 mt-auto pt-4 border-t border-slate-50">

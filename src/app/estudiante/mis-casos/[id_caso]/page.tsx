@@ -26,6 +26,8 @@ import { CaseInfoTab } from "@/components/casos-juridicos/case-info-tab";
 import { ClientInfo } from "@/components/casos-juridicos/client-info";
 import { DefendantInfo } from "@/components/casos-juridicos/defendant-info";
 import { AdvisorInfo } from "@/components/casos-juridicos/advisor-info";
+import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
+import { AlertTriangle } from "lucide-react";
 import { supabase } from "@/lib/supabase/supabase-client";
 import { formatDate } from "@/lib/format-date";
 
@@ -369,6 +371,20 @@ export default function Page({
                           </p>
                         </div>
                       )}
+                    </div>
+                  </Card>
+
+                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                    <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center gap-3">
+                      <div className="p-2 bg-amber-100 rounded-lg text-amber-600">
+                        <AlertTriangle className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-bold text-slate-800 tracking-tight">
+                        Llamados de Atención
+                      </h3>
+                    </div>
+                    <div className="p-6">
+                      <LlamadosList idCaso={id_caso} />
                     </div>
                   </Card>
                 </div>

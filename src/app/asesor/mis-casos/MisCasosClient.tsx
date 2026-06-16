@@ -29,6 +29,7 @@ import { supabase } from "@/lib/supabase/supabase-client";
 import { ArrowLeft, Check, Search, FilterX, FileText } from "lucide-react";
 import { getStatusBadge } from "@/components/ui/status-badge";
 import { CaseFilters } from "@/components/casos-juridicos/case-filters";
+import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
 import { useRealtimeCasos } from "@/lib/hooks/useRealtimeCasos";
 
 export default function Asesor() {
@@ -344,6 +345,13 @@ export default function Asesor() {
                       )}
                     </p>
                   </div>
+                </div>
+
+                <div className="mb-3">
+                  <CountdownTimer
+                    fechaVencimiento={caso.fecha_vencimiento_asesor}
+                    label="Aprobación"
+                  />
                 </div>
 
                 <div className="mt-auto pt-4 border-t border-slate-50 flex flex-col gap-3">
