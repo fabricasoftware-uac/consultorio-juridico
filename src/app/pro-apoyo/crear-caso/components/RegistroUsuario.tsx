@@ -55,7 +55,11 @@ export function RegistroUsuario({
   };
 
   const handleChange = (campo: keyof Usuario, valor: string) => {
-    setFormData((prev) => ({ ...prev, [campo]: valor }));
+    const soloDigitos = campo === "cedula" || campo === "telefono";
+    setFormData((prev) => ({
+      ...prev,
+      [campo]: soloDigitos ? valor.replace(/\D/g, "") : valor,
+    }));
   };
   const isFormValid = () => {
     if (!formData) return false;

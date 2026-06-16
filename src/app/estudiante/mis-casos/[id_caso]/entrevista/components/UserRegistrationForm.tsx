@@ -198,13 +198,28 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
     }
   }, [formData, idCaso]);
 
+  const CAMPOS_SOLO_DIGITOS = new Set([
+    "edad",
+    "documentoDemandado",
+    "celularDemandado",
+    "cedulaSolicitante",
+    "estrato",
+    "valor_otros_ingresos",
+    "salarioInicial",
+    "salarioActual",
+  ]);
+
   const handleInputChange = <K extends keyof FormData>(
     field: K,
     value: FormData[K],
   ) => {
+    const limpio =
+      CAMPOS_SOLO_DIGITOS.has(field as string) && typeof value === "string"
+        ? (value.replace(/\D/g, "") as FormData[K])
+        : value;
     setFormData((prev) => ({
       ...prev,
-      [field]: value,
+      [field]: limpio,
     }));
   };
 
@@ -216,6 +231,7 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
         return !!(
           formData.direccion &&
           formData.edad &&
+          Number(formData.edad) > 0 &&
           formData.estado_civil &&
           formData.estrato &&
           formData.tipo_vivienda

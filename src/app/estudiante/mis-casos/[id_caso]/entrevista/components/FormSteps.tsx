@@ -126,6 +126,7 @@ export function Step2InfoSolicitante({
           <Input
             id="edad"
             type="number"
+            min={0}
             value={formData.edad || ""}
             onChange={(e) => handleInputChange("edad", e.target.value)}
             placeholder="Edad"
