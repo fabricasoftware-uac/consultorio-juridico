@@ -53,8 +53,9 @@ SECURITY DEFINER SET search_path = ''
 AS $$
 DECLARE
   total INTEGER := 0;
+  vencidos_actuales INTEGER := 0; -- Variable temporal para solucionar el error
 BEGIN
-  -- Estudiantes vencidos (3 días desde fecha_creacion)
+  -- 1. Estudiantes vencidos
   INSERT INTO public.llamados_atencion (id_caso, id_usuario, tipo, motivo)
   SELECT
     c.id_caso,
@@ -69,9 +70,11 @@ BEGIN
       SELECT 1 FROM public.llamados_atencion la
       WHERE la.id_caso = c.id_caso AND la.tipo = 'estudiante'
     );
+  
+  -- Captura limpia
   GET DIAGNOSTICS total = ROW_COUNT;
 
-  -- Asesores vencidos (2 días desde asignación)
+  -- 2. Asesores vencidos
   INSERT INTO public.llamados_atencion (id_caso, id_usuario, tipo, motivo)
   SELECT
     c.id_caso,
@@ -86,7 +89,12 @@ BEGIN
       SELECT 1 FROM public.llamados_atencion la
       WHERE la.id_caso = c.id_caso AND la.tipo = 'asesor'
     );
-  GET DIAGNOSTICS total = total + ROW_COUNT;
+  
+  -- Captura limpia en la variable temporal
+  GET DIAGNOSTICS vencidos_actuales = ROW_COUNT;
+  
+  -- Hacemos la suma de manera estándar fuera del GET DIAGNOSTICS
+  total := total + vencidos_actuales;
 
   RETURN total;
 END;
