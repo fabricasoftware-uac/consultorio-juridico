@@ -87,7 +87,8 @@ export async function updateSession(request: NextRequest) {
     pathname === "/" ||
     pathname.startsWith("/recuperar-contrasena") ||
     pathname.startsWith("/auth") ||
-    pathname.startsWith("/centro-ayuda");
+    pathname.startsWith("/centro-ayuda") ||
+    pathname.startsWith("/api/cron");
 
   if (!session && !isPublicRoute) {
     const url = request.nextUrl.clone();
