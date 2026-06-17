@@ -29,6 +29,7 @@ import { AdvisorInfo } from "@/components/casos-juridicos/advisor-info";
 import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
 import { ObservacionesChat } from "@/components/casos-juridicos/observaciones-chat";
 import { CasoAuditoria } from "@/components/casos-juridicos/caso-auditoria";
+import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
 import { useRealtimeCaso } from "@/lib/hooks/useRealtimeCaso";
 import { AlertTriangle, MessageSquare, Send } from "lucide-react";
 import { supabase } from "@/lib/supabase/supabase-client";
@@ -114,7 +115,12 @@ export default function Page({
       setEnviando(true);
       const { error } = await supabase
         .from("casos")
-        .update({ estado: "pendiente_aprobacion" })
+        .update({
+          estado: "pendiente_aprobacion",
+          fecha_vencimiento_asesor: new Date(
+            Date.now() + 2 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
+        })
         .eq("id_caso", id_caso);
       if (error) throw error;
       await traerDatos();
@@ -354,6 +360,13 @@ export default function Page({
                           </p>
                         </div>
                       )}
+                      <div className="flex flex-wrap gap-2 pt-2">
+                        <CountdownTimer
+                          fechaVencimiento={caso?.fecha_vencimiento_estudiante}
+                          label="Entrega"
+                          estado={caso?.estado}
+                        />
+                      </div>
                     </div>
                   </Card>
 

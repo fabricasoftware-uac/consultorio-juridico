@@ -37,6 +37,7 @@ import { ClientInfo } from "@/components/casos-juridicos/client-info";
 import { DefendantInfo } from "@/components/casos-juridicos/defendant-info";
 import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
 import { ObservacionesChat } from "@/components/casos-juridicos/observaciones-chat";
+import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
 import { CasoAuditoria } from "@/components/casos-juridicos/caso-auditoria";
 import { useRealtimeCaso } from "@/lib/hooks/useRealtimeCaso";
 import { StudentInfo } from "@/components/casos-juridicos/student-info";
@@ -579,6 +580,15 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                           <div className="w-2 h-2 rounded-full bg-purple-400" />
                           {formatDate(caso.fecha_creacion)}
                         </div>
+                      </div>
+                      <div className="flex flex-wrap gap-2 pt-2">
+                        {caso.estado !== "en_proceso" && (
+                        <CountdownTimer
+                          fechaVencimiento={caso.fecha_vencimiento_asesor}
+                          label="Aprobación"
+                          estado={caso.estado}
+                        />
+                        )}
                       </div>
                     </div>
                   </Card>

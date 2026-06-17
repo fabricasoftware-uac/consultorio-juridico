@@ -278,6 +278,9 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
           resumen_hechos: limpio.resumen_hechos,
           observaciones_estudiante: limpio.observaciones_estudiante,
           estado: "pendiente_aprobacion",
+          fecha_vencimiento_asesor: new Date(
+            Date.now() + 2 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
         })
         .eq("id_caso", idCaso);
 
