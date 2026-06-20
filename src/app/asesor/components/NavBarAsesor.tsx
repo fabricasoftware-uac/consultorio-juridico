@@ -5,10 +5,16 @@ export function Navbar() {
     { href: "/asesor/inicio", label: "Inicio" },
     { href: "/asesor/mis-casos", label: "Mis Casos" },
     { href: "/asesor/mi-horario", label: "Mi Horario" },
+    { href: "/asesor/notificaciones", label: "Notificaciones" },
     { href: "/centro-ayuda", label: "Centro de Ayuda" },
   ];
 
   return (
-    <GlobalNavbar roleName="Asesor" basePath="/asesor/inicio" links={links} />
+    <GlobalNavbar
+      roleName="Asesor"
+      basePath="/asesor/inicio"
+      links={links}
+      role="asesor"
+    />
   );
 }

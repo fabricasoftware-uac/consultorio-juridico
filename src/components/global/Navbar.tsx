@@ -17,9 +17,10 @@ interface NavbarProps {
   roleName: string;
   basePath: string;
   links: NavLink[];
+  role?: string;
 }
 
-export function Navbar({ roleName, basePath, links }: NavbarProps) {
+export function Navbar({ roleName, basePath, links, role }: NavbarProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -65,14 +66,14 @@ export function Navbar({ roleName, basePath, links }: NavbarProps) {
             );
           })}
           <div className="ml-2 pl-2 border-l border-slate-200 flex items-center gap-1">
-            <CampanitaNotificaciones />
+            <CampanitaNotificaciones role={role} />
             <LogoutButton />
           </div>
         </div>
 
         {/* Mobile: campanita + menu button */}
         <div className="md:hidden flex items-center gap-2">
-          <CampanitaNotificaciones />
+          <CampanitaNotificaciones role={role} />
           <button
             className="p-2 rounded-md text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors focus:outline-hidden"
             onClick={() => setOpen(!open)}

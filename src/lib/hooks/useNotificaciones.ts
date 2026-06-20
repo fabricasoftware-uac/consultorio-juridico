@@ -112,7 +112,7 @@ export function useNotificaciones() {
       userIdRef.current = user.id;
 
       channel = supabase
-        .channel(`notif-${user.id}`)
+        .channel(`notif-${user.id}-${Math.random().toString(36).slice(2, 8)}`)
         .on(
           "postgres_changes",
           {
@@ -123,6 +123,7 @@ export function useNotificaciones() {
           },
           () => {
             cargarConteo();
+            cargarLista();
             if (!mutedRef.current) playChime();
           },
         )
@@ -134,7 +135,7 @@ export function useNotificaciones() {
     return () => {
       if (channel) supabase.removeChannel(channel);
     };
-  }, [cargarConteo]);
+  }, [cargarConteo, cargarLista]);
 
   return { noLeidas, notificaciones, loading, muted, toggleMute, cargarLista, marcarLeida, marcarTodasLeidas };
 }

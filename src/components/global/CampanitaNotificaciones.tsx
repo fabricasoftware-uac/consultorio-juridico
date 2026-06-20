@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Bell, CheckCheck, MessageSquare, Send, CheckCircle2, UserCheck, AlertTriangle, FileText, Volume2, VolumeX } from "lucide-react";
+import Link from "next/link";
+import { Bell, CheckCheck, MessageSquare, Send, CheckCircle2, UserCheck, AlertTriangle, FileText, Volume2, VolumeX, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useNotificaciones } from "@/lib/hooks/useNotificaciones";
@@ -55,7 +56,7 @@ function NotificacionItem({ n, onLeer }: { n: Notificacion; onLeer: (id: number)
   );
 }
 
-export function CampanitaNotificaciones() {
+export function CampanitaNotificaciones({ role }: { role?: string }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const { noLeidas, notificaciones, loading, muted, toggleMute, cargarLista, marcarLeida, marcarTodasLeidas } = useNotificaciones();
@@ -125,11 +126,27 @@ export function CampanitaNotificaciones() {
             ) : notificaciones.length === 0 ? (
               <p className="text-center text-sm text-slate-400 py-8">No hay notificaciones</p>
             ) : (
-              notificaciones.map((n) => (
-                <NotificacionItem key={n.id} n={n} onLeer={marcarLeida} />
-              ))
+              <>
+                {notificaciones.slice(0, 10).map((n) => (
+                  <NotificacionItem key={n.id} n={n} onLeer={marcarLeida} />
+                ))}
+                {notificaciones.length > 10 && (
+                  <p className="text-center text-[11px] text-slate-400 py-1">
+                    +{notificaciones.length - 10} más
+                  </p>
+                )}
+              </>
             )}
           </div>
+          {role && notificaciones.length > 0 && (
+            <Link
+              href={`/${role}/notificaciones`}
+              className="flex items-center justify-center gap-1 p-2 border-t border-slate-100 text-xs font-medium text-blue-600 hover:bg-blue-50 transition-colors rounded-b-2xl"
+            >
+              Ver todas
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          )}
         </Card>
       )}
     </div>

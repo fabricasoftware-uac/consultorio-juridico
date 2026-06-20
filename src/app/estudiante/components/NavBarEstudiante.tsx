@@ -4,6 +4,7 @@ export function Navbar() {
   const links = [
     { href: "/estudiante/inicio", label: "Inicio" },
     { href: "/estudiante/mis-casos", label: "Mis Casos" },
+    { href: "/estudiante/notificaciones", label: "Notificaciones" },
     { href: "/centro-ayuda", label: "Centro de Ayuda" },
   ];
 
@@ -12,6 +13,7 @@ export function Navbar() {
       roleName="Estudiante"
       basePath="/estudiante/inicio"
       links={links}
+      role="estudiante"
     />
   );
 }
