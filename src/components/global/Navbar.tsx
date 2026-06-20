@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Logo } from "@/components/global/LogoUac";
 import LogoutButton from "@/components/global/LogoutBtn";
+import { CampanitaNotificaciones } from "@/components/global/CampanitaNotificaciones";
 
 export interface NavLink {
   href: string;
@@ -63,19 +64,23 @@ export function Navbar({ roleName, basePath, links }: NavbarProps) {
               </Link>
             );
           })}
-          <div className="ml-2 pl-2 border-l border-slate-200">
+          <div className="ml-2 pl-2 border-l border-slate-200 flex items-center gap-1">
+            <CampanitaNotificaciones />
             <LogoutButton />
           </div>
         </div>
 
-        {/* Mobile menu button */}
-        <button
-          className="md:hidden p-2 rounded-md text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors focus:outline-hidden"
-          onClick={() => setOpen(!open)}
-          aria-label="Toggle menu"
-        >
-          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        {/* Mobile: campanita + menu button */}
+        <div className="md:hidden flex items-center gap-2">
+          <CampanitaNotificaciones />
+          <button
+            className="p-2 rounded-md text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors focus:outline-hidden"
+            onClick={() => setOpen(!open)}
+            aria-label="Toggle menu"
+          >
+            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Navigation */}
