@@ -92,6 +92,18 @@ export function ReasignarEquipo({ idCaso, type, casosData, onRefresh }: Props) {
       } else {
         await insertAsesoresCasos(idCaso, selectedId);
       }
+
+      // Flush notificaciones inmediatamente
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        fetch("/api/cron/enviar-notificaciones", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        }).catch(() => {});
+      }
+
       setOpen(false);
       onRefresh();
       toast.success(

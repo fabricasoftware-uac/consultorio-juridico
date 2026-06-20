@@ -40,6 +40,7 @@ import { insertEstudiantesCasos } from "../../../../../supabase/queries/insertEs
 import { insertAsesoresCasos } from "../../../../../supabase/queries/insertAsesoresCasos";
 import { cn } from "@/components/ui/utils";
 import { cleanData } from "@/lib/utils";
+import { supabase } from "@/lib/supabase/supabase-client";
 
 interface ResumenCasoProps {
   caso: Caso;
@@ -80,6 +81,16 @@ export function ResumenCaso({ caso, usuario, onNuevoCaso }: ResumenCasoProps) {
         await insertEstudiantesCasos(id_caso.toString(), id_estudiante);
         if (id_asesor) {
           await insertAsesoresCasos(id_caso.toString(), id_asesor);
+        }
+        // Flush notificaciones inmediatamente
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          fetch("/api/cron/enviar-notificaciones", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${session.access_token}` },
+          }).catch(() => {});
         }
       } else {
         console.error("Faltan IDs para vincular estudiante al caso.");
