@@ -45,12 +45,21 @@ export function RegistroUsuario({
       cedula: "",
       telefono: "",
       correo: "",
+      enfoque_diverso: null,
+      caracterizacion_lgbtiq: null,
     },
   );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onContinuar(formData);
+    const payload = {
+      ...formData,
+      caracterizacion_lgbtiq:
+        formData.enfoque_diverso === true
+          ? formData.caracterizacion_lgbtiq || null
+          : null,
+    };
+    onContinuar(payload);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -60,6 +69,18 @@ export function RegistroUsuario({
       ...prev,
       [campo]: soloDigitos ? valor.replace(/\D/g, "") : valor,
     }));
+  };
+
+  const handleEnfoqueChange = (valor: string) => {
+    if (valor === "true") {
+      setFormData((prev) => ({ ...prev, enfoque_diverso: true }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        enfoque_diverso: valor === "false" ? false : null,
+        caracterizacion_lgbtiq: null,
+      }));
+    }
   };
   const isFormValid = () => {
     if (!formData) return false;
@@ -140,12 +161,15 @@ export function RegistroUsuario({
                       <SelectValue placeholder="Seleccione el sexo" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="M">Masculino</SelectItem>
-                      <SelectItem value="F">Femenino</SelectItem>
-                      <SelectItem value="O">Otro</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                        <SelectItem value="MASCULINO">Masculino</SelectItem>
+                        <SelectItem value="FEMENINO">Femenino</SelectItem>
+                        <SelectItem value="INTERSEXUAL">Intersexual</SelectItem>
+                        <SelectItem value="PREFIERO_NO_RESPONDER">
+                          Prefiero no responder
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
                 <div className="space-y-2">
                   <Label
@@ -203,6 +227,82 @@ export function RegistroUsuario({
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Caracterización con enfoque diferencial */}
+            <div className="mt-8 p-6 bg-blue-50/30 rounded-2xl border border-blue-100 space-y-5">
+              <div>
+                <h4 className="font-bold text-slate-800 text-base">
+                  Caracterización con enfoque diferencial
+                </h4>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  Información voluntaria del usuario: Estos datos se solicitan
+                  únicamente para fines de caracterización poblacional y para
+                  garantizar un enfoque diferencial en la prestación del
+                  servicio. Pregunte al usuario si desea responder.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-slate-700">
+                  ¿Se reconoce como parte de una población con orientación
+                  sexual o identidad de género diversa?
+                </Label>
+                <Select
+                  value={
+                    formData.enfoque_diverso === true
+                      ? "true"
+                      : formData.enfoque_diverso === false
+                        ? "false"
+                        : ""
+                  }
+                  onValueChange={handleEnfoqueChange}
+                >
+                  <SelectTrigger className="bg-white border-slate-200 h-11">
+                    <SelectValue placeholder="Seleccione una opción" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">Sí</SelectItem>
+                    <SelectItem value="false">No</SelectItem>
+                    <SelectItem value="null">Prefiero no responder</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {formData.enfoque_diverso === true && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-slate-700">
+                    Si desea indicarlo, ¿cómo se identifica?
+                  </Label>
+                  <Select
+                    value={formData.caracterizacion_lgbtiq || ""}
+                    onValueChange={(value) =>
+                      handleChange(
+                        "caracterizacion_lgbtiq",
+                        value === "" ? "" : value,
+                      )
+                    }
+                  >
+                    <SelectTrigger className="bg-white border-slate-200 h-11">
+                      <SelectValue placeholder="Seleccione una opción" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="GAY">Gay</SelectItem>
+                      <SelectItem value="LESBIANA">Lesbiana</SelectItem>
+                      <SelectItem value="BISEXUAL">Bisexual</SelectItem>
+                      <SelectItem value="HOMBRE_TRANS">
+                        Hombre trans
+                      </SelectItem>
+                      <SelectItem value="MUJER_TRANS">Mujer trans</SelectItem>
+                      <SelectItem value="NO_BINARIO">No binario</SelectItem>
+                      <SelectItem value="OTRA">Otra</SelectItem>
+                      <SelectItem value="PREFIERO_NO_RESPONDER">
+                        Prefiero no responder
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
 
             <div className="pt-8 flex justify-end">

@@ -1,5 +1,5 @@
 import React from "react";
-import { User, Phone, Mail, MapPin, Smile, DollarSign } from "lucide-react";
+import { User, Phone, Mail, MapPin, Smile, DollarSign, Shield } from "lucide-react";
 import { InfoField, SectionCard } from "./shared-ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -83,15 +83,7 @@ export const ClientInfo = ({
             />
             <InfoField
               label="Sexo"
-              value={
-                usuarios?.sexo === "M"
-                  ? "Masculino"
-                  : usuarios?.sexo === "F"
-                    ? "Femenino"
-                    : usuarios?.sexo === "O"
-                      ? "Otro"
-                      : "N/A"
-              }
+              value={usuarios?.sexo?.replace(/_/g, " ") || "N/A"}
             />
             <InfoField label="Cédula" value={usuarios?.cedula} />
             <InfoField
@@ -129,9 +121,10 @@ export const ClientInfo = ({
                   <SelectValue placeholder="Sexo" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="M">Masculino</SelectItem>
-                  <SelectItem value="F">Femenino</SelectItem>
-                  <SelectItem value="O">Otro</SelectItem>
+                  <SelectItem value="MASCULINO">Masculino</SelectItem>
+                  <SelectItem value="FEMENINO">Femenino</SelectItem>
+                  <SelectItem value="INTERSEXUAL">Intersexual</SelectItem>
+                  <SelectItem value="PREFIERO_NO_RESPONDER">Prefiero no responder</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -388,6 +381,113 @@ export const ClientInfo = ({
                     placeholder="Ej: Arriendos, ventas..."
                   />
                 </div>
+              </div>
+            )}
+          </div>
+        )}
+      </SectionCard>
+
+      {/* Caracterización con enfoque diferencial */}
+      <SectionCard
+        title="Caracterización con enfoque diferencial"
+        icon={Shield}
+        iconBgColor="bg-blue-100"
+        iconColor="text-blue-600"
+      >
+        {!isEditing ? (
+          <div className="space-y-4">
+            <div>
+              <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                ¿Se reconoce como parte de una población diversa?
+              </Label>
+              <p className="text-base font-semibold text-slate-800 mt-1">
+                {usuarios?.enfoque_diverso === true
+                  ? "Sí"
+                  : usuarios?.enfoque_diverso === false
+                    ? "No"
+                    : "Prefirió no responder"}
+              </p>
+            </div>
+            {usuarios?.enfoque_diverso === true &&
+              usuarios?.caracterizacion_lgbtiq && (
+                <div>
+                  <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Se identifica como
+                  </Label>
+                  <p className="text-base font-semibold text-slate-800 mt-1">
+                    {usuarios.caracterizacion_lgbtiq.replace(/_/g, " ")}
+                  </p>
+                </div>
+              )}
+            <p className="text-xs text-slate-400 italic">
+              Información voluntaria proporcionada por el usuario.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-slate-700">
+                ¿Se reconoce como parte de una población con orientación sexual
+                o identidad de género diversa?
+              </Label>
+              <Select
+                value={
+                  editedData?.enfoque_diverso === true
+                    ? "true"
+                    : editedData?.enfoque_diverso === false
+                      ? "false"
+                      : ""
+                }
+                onValueChange={(val) => {
+                  if (val === "true") {
+                    onChange("enfoque_diverso", true);
+                  } else {
+                    onChange(
+                      "enfoque_diverso",
+                      val === "false" ? false : null,
+                    );
+                    onChange("caracterizacion_lgbtiq", null);
+                  }
+                }}
+              >
+                <SelectTrigger className="bg-white border-slate-200 h-11">
+                  <SelectValue placeholder="Seleccione una opción" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="true">Sí</SelectItem>
+                  <SelectItem value="false">No</SelectItem>
+                  <SelectItem value="null">Prefiero no responder</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {editedData?.enfoque_diverso === true && (
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-slate-700">
+                  Si desea indicarlo, ¿cómo se identifica?
+                </Label>
+                <Select
+                  value={editedData?.caracterizacion_lgbtiq || ""}
+                  onValueChange={(val) =>
+                    onChange("caracterizacion_lgbtiq", val || null)
+                  }
+                >
+                  <SelectTrigger className="bg-white border-slate-200 h-11">
+                    <SelectValue placeholder="Seleccione una opción" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="GAY">Gay</SelectItem>
+                    <SelectItem value="LESBIANA">Lesbiana</SelectItem>
+                    <SelectItem value="BISEXUAL">Bisexual</SelectItem>
+                    <SelectItem value="HOMBRE_TRANS">Hombre trans</SelectItem>
+                    <SelectItem value="MUJER_TRANS">Mujer trans</SelectItem>
+                    <SelectItem value="NO_BINARIO">No binario</SelectItem>
+                    <SelectItem value="OTRA">Otra</SelectItem>
+                    <SelectItem value="PREFIERO_NO_RESPONDER">
+                      Prefiero no responder
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             )}
           </div>

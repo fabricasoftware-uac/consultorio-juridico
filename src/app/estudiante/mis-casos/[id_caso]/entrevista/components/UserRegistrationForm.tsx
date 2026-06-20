@@ -165,6 +165,10 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
     salarioInicial: "",
     salarioActual: "",
 
+    // Characterization
+    enfoque_diverso: null as boolean | null,
+    caracterizacion_lgbtiq: null as string | null,
+
     // Case Information
     resumen_hechos: "",
     observaciones_estudiante: "",
@@ -303,6 +307,10 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
           concepto_otros_ingresos: limpio.concepto_otros_ingresos,
           tiene_contrato: limpio.tiene_contrato,
           tiene_representado: limpio.tiene_representado,
+          enfoque_diverso: limpio.enfoque_diverso,
+          caracterizacion_lgbtiq: limpio.enfoque_diverso === true
+            ? (limpio.caracterizacion_lgbtiq || null)
+            : null,
         })
         .eq("id_usuario", caso?.id_usuario);
 

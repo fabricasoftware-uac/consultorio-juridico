@@ -30,10 +30,28 @@ export type situacionLaboral =
 
 // --- USUARIOS --------------------------------------------------
 
+export type SexoEnum =
+  | "MASCULINO"
+  | "FEMENINO"
+  | "INTERSEXUAL"
+  | "PREFIERO_NO_RESPONDER"
+  | "";
+
+export type CaracterizacionLgbtiqEnum =
+  | "GAY"
+  | "LESBIANA"
+  | "BISEXUAL"
+  | "HOMBRE_TRANS"
+  | "MUJER_TRANS"
+  | "NO_BINARIO"
+  | "OTRA"
+  | "PREFIERO_NO_RESPONDER"
+  | "";
+
 export type Usuario = {
   id_usuario?: string;
   nombre_completo: string;
-  sexo: "M" | "F" | "O" | "";
+  sexo: SexoEnum;
   cedula: string;
   telefono: string;
   edad?: number | null;
@@ -49,6 +67,8 @@ export type Usuario = {
   concepto_otros_ingresos?: string | null;
   tiene_contrato?: boolean;
   tiene_representado?: boolean;
+  enfoque_diverso?: boolean | null;
+  caracterizacion_lgbtiq?: CaracterizacionLgbtiqEnum | null;
 };
 
 // --- PERFILES --------------------------------------------------

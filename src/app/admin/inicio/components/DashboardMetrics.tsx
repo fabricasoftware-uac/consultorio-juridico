@@ -28,11 +28,9 @@ export function DashboardMetrics() {
 
         const totalUsers = usersData?.length || 0;
         const men =
-          usersData?.filter((u) => u.sexo === "M" || u.sexo === "m").length ||
-          0;
+          usersData?.filter((u) => u.sexo === "MASCULINO").length || 0;
         const women =
-          usersData?.filter((u) => u.sexo === "F" || u.sexo === "f").length ||
-          0;
+          usersData?.filter((u) => u.sexo === "FEMENINO").length || 0;
 
         // Fetch cases
         const { data: casesData, error: casesError } = await supabase

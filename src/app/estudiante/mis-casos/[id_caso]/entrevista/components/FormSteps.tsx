@@ -122,6 +122,13 @@ export function Step2InfoSolicitante({
           />
         </div>
         <div className="space-y-2">
+          <Label>Sexo</Label>
+          <Input
+            value={caso?.usuarios.sexo?.replace(/_/g, " ") || ""}
+            disabled
+          />
+        </div>
+        <div className="space-y-2">
           <Label htmlFor="edad">Edad del Solicitante *</Label>
           <Input
             id="edad"
@@ -238,6 +245,86 @@ export function Step2InfoSolicitante({
           </Select>
         </div>
       </CardContent>
+
+      {/* Caracterización con enfoque diferencial */}
+      <div className="px-6 pb-6">
+        <div className="p-5 bg-blue-50/30 rounded-2xl border border-blue-100 space-y-4">
+          <div>
+            <h4 className="font-bold text-slate-800 text-sm">
+              Caracterización con enfoque diferencial
+            </h4>
+            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+              Información voluntaria del usuario: Estos datos se solicitan
+              únicamente para fines de caracterización poblacional y para
+              garantizar un enfoque diferencial en la prestación del servicio.
+              Pregunte al usuario si desea responder.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold text-slate-700">
+              ¿Se reconoce como parte de una población con orientación sexual o
+              identidad de género diversa?
+            </Label>
+            <Select
+              value={
+                formData.enfoque_diverso === true
+                  ? "true"
+                  : formData.enfoque_diverso === false
+                    ? "false"
+                    : ""
+              }
+              onValueChange={(val) => {
+                if (val === "true") {
+                  handleInputChange("enfoque_diverso", true);
+                } else {
+                  handleInputChange("enfoque_diverso", val === "false" ? false : null);
+                  handleInputChange("caracterizacion_lgbtiq", null);
+                }
+              }}
+            >
+              <SelectTrigger className="bg-white border-slate-200 h-11">
+                <SelectValue placeholder="Seleccione una opción" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="true">Sí</SelectItem>
+                <SelectItem value="false">No</SelectItem>
+                <SelectItem value="null">Prefiero no responder</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {formData.enfoque_diverso === true && (
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-slate-700">
+                Si desea indicarlo, ¿cómo se identifica?
+              </Label>
+              <Select
+                value={formData.caracterizacion_lgbtiq || ""}
+                onValueChange={(val) =>
+                  handleInputChange("caracterizacion_lgbtiq", val || null)
+                }
+              >
+                <SelectTrigger className="bg-white border-slate-200 h-11">
+                  <SelectValue placeholder="Seleccione una opción" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="GAY">Gay</SelectItem>
+                  <SelectItem value="LESBIANA">Lesbiana</SelectItem>
+                  <SelectItem value="BISEXUAL">Bisexual</SelectItem>
+                  <SelectItem value="HOMBRE_TRANS">Hombre trans</SelectItem>
+                  <SelectItem value="MUJER_TRANS">Mujer trans</SelectItem>
+                  <SelectItem value="NO_BINARIO">No binario</SelectItem>
+                  <SelectItem value="OTRA">Otra</SelectItem>
+                  <SelectItem value="PREFIERO_NO_RESPONDER">
+                    Prefiero no responder
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </div>
+      </div>
     </Card>
   );
 }

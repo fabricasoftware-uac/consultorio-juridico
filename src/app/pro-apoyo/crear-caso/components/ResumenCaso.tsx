@@ -160,11 +160,7 @@ export function ResumenCaso({ caso, usuario, onNuevoCaso }: ResumenCasoProps) {
                   Sexo
                 </span>
                 <p className="text-sm font-semibold text-slate-900">
-                  {caso.usuarios.sexo === "M"
-                    ? "Masculino"
-                    : caso.usuarios.sexo === "F"
-                      ? "Femenino"
-                      : "Otro"}
+                  {caso.usuarios.sexo?.replace(/_/g, " ") || "No especificado"}
                 </p>
               </div>
               <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl space-y-1 sm:col-span-2 lg:col-span-1">
