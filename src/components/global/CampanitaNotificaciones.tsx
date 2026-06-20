@@ -90,7 +90,7 @@ export function CampanitaNotificaciones({ role }: { role?: string }) {
       </button>
 
       {open && (
-        <Card className="absolute right-0 top-full mt-2 w-80 sm:w-96 max-h-[70vh] overflow-hidden shadow-xl border-slate-200 rounded-2xl z-50">
+        <Card className="fixed right-2 left-2 top-14 sm:absolute sm:right-0 sm:left-auto sm:top-full mt-2 sm:w-96 max-w-sm mx-auto sm:mx-0 max-h-[70vh] overflow-hidden shadow-xl border-slate-200 rounded-2xl z-50">
           <div className="p-3 border-b border-slate-100 flex items-center justify-between">
             <h3 className="text-sm font-bold text-slate-800">Notificaciones</h3>
             <div className="flex items-center gap-1">
