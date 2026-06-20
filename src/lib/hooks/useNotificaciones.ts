@@ -27,11 +27,45 @@ async function api(path: string, options?: RequestInit) {
   }
 }
 
+function playChime() {
+  if (typeof window === "undefined" || document.visibilityState !== "visible") return;
+  try {
+    const ctx = new AudioContext();
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc1.type = "sine";   osc1.frequency.value = 800;
+    osc2.type = "sine";   osc2.frequency.value = 1000;
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+    osc1.connect(gain);   osc2.connect(gain);
+    gain.connect(ctx.destination);
+    osc1.start(ctx.currentTime);           osc1.stop(ctx.currentTime + 0.15);
+    osc2.start(ctx.currentTime + 0.12);     osc2.stop(ctx.currentTime + 0.35);
+    setTimeout(() => ctx.close(), 500);
+  } catch { /* silencioso si el navegador bloquea AudioContext */ }
+}
+
 export function useNotificaciones() {
   const [noLeidas, setNoLeidas] = useState(0);
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
   const [loading, setLoading] = useState(false);
+  const [muted, setMuted] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("notif-muted") === "true";
+  });
+  const mutedRef = useRef(muted);
   const userIdRef = useRef<string | null>(null);
+
+  useEffect(() => { mutedRef.current = muted; }, [muted]);
+
+  const toggleMute = useCallback(() => {
+    setMuted((prev) => {
+      const next = !prev;
+      localStorage.setItem("notif-muted", String(next));
+      return next;
+    });
+  }, []);
 
   const cargarConteo = useCallback(async () => {
     const data = await api("/api/notificaciones?solo=conteo");
@@ -68,7 +102,6 @@ export function useNotificaciones() {
     setNotificaciones((prev) => prev.map((n) => ({ ...n, leida: true })));
   }, []);
 
-  // Conteo inicial + Realtime
   useEffect(() => {
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
@@ -90,8 +123,7 @@ export function useNotificaciones() {
           },
           () => {
             cargarConteo();
-            // Si el dropdown está abierto, actualiza la lista también
-            setNotificaciones((prev) => prev.length > 0 ? prev : prev);
+            if (!mutedRef.current) playChime();
           },
         )
         .subscribe();
@@ -104,5 +136,5 @@ export function useNotificaciones() {
     };
   }, [cargarConteo]);
 
-  return { noLeidas, notificaciones, loading, cargarLista, marcarLeida, marcarTodasLeidas };
+  return { noLeidas, notificaciones, loading, muted, toggleMute, cargarLista, marcarLeida, marcarTodasLeidas };
 }

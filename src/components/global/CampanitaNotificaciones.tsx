@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Bell, CheckCheck, MessageSquare, Send, CheckCircle2, UserCheck, AlertTriangle, FileText } from "lucide-react";
+import { Bell, CheckCheck, MessageSquare, Send, CheckCircle2, UserCheck, AlertTriangle, FileText, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useNotificaciones } from "@/lib/hooks/useNotificaciones";
@@ -58,7 +58,7 @@ function NotificacionItem({ n, onLeer }: { n: Notificacion; onLeer: (id: number)
 export function CampanitaNotificaciones() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const { noLeidas, notificaciones, loading, cargarLista, marcarLeida, marcarTodasLeidas } = useNotificaciones();
+  const { noLeidas, notificaciones, loading, muted, toggleMute, cargarLista, marcarLeida, marcarTodasLeidas } = useNotificaciones();
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -92,12 +92,21 @@ export function CampanitaNotificaciones() {
         <Card className="absolute right-0 top-full mt-2 w-80 sm:w-96 max-h-[70vh] overflow-hidden shadow-xl border-slate-200 rounded-2xl z-50">
           <div className="p-3 border-b border-slate-100 flex items-center justify-between">
             <h3 className="text-sm font-bold text-slate-800">Notificaciones</h3>
-            {noLeidas > 0 && (
-              <Button variant="ghost" size="sm" onClick={marcarTodasLeidas} className="text-xs text-blue-600 h-7">
-                <CheckCheck className="w-3.5 h-3.5 mr-1" />
-                Leer todas
-              </Button>
-            )}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={toggleMute}
+                className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-600"
+                title={muted ? "Activar sonido" : "Silenciar"}
+              >
+                {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+              </button>
+              {noLeidas > 0 && (
+                <Button variant="ghost" size="sm" onClick={marcarTodasLeidas} className="text-xs text-blue-600 h-7">
+                  <CheckCheck className="w-3.5 h-3.5 mr-1" />
+                  Leer todas
+                </Button>
+              )}
+            </div>
           </div>
           <div className="overflow-y-auto max-h-[60vh] p-2 space-y-0.5">
             {loading && notificaciones.length === 0 ? (
