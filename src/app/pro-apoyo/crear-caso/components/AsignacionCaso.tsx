@@ -132,7 +132,7 @@ export function AsignacionCaso({
       : undefined;
 
     const datosCaso: Caso = {
-      area: datosIniciales?.area || "otros",
+      area: datosIniciales?.area || "no_asignada",
       fecha_creacion:
         datosIniciales?.fecha_creacion || new Date().toISOString(),
       estado: datosIniciales?.estado || "en_proceso",

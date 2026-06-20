@@ -14,7 +14,7 @@ export async function insertCasoNuevo(
       fecha_creacion: caso.fecha_creacion,
       estado: caso.estado,
       observaciones: caso.observaciones,
-      tipo_proceso: caso.tipo_proceso || "en_proceso",
+      tipo_proceso: caso.tipo_proceso || "No creado",
       fecha_vencimiento_estudiante: new Date(
         Date.now() + 3 * 24 * 60 * 60 * 1000,
       ).toISOString(),

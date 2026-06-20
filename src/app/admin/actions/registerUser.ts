@@ -94,7 +94,7 @@ export interface RegisterAsesorInput {
   cedula: string;
   telefono: string;
   turno: "9-11" | "2-4" | "4-6";
-  area: "laboral" | "civil_familia" | "penal" | "publica" | "otros";
+  area: "no_asignada" | "laboral" | "civil_familia" | "penal" | "publica" | "otros";
   dia: string;
 }
 

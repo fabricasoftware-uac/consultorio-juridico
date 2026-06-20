@@ -14,6 +14,7 @@ import { Search, FilterX } from "lucide-react";
 
 const AREA_OPTIONS = [
   { value: "todos", label: "Todas las áreas" },
+  { value: "no_asignada", label: "No asignada" },
   { value: "laboral", label: "Derecho Laboral" },
   { value: "civil_familia", label: "Derecho Civil y familiar" },
   { value: "penal", label: "Derecho Penal" },

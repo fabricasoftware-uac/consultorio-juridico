@@ -8,6 +8,7 @@ export type EstadoEnum =
   | "cerrado"
   | "archivado";
 export type AreaEnum =
+  | "no_asignada"
   | "laboral"
   | "civil_familia"
   | "penal"

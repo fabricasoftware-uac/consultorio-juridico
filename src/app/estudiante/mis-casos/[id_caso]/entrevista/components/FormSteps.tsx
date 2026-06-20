@@ -740,11 +740,12 @@ export function Step7DetallesCaso({ formData, handleInputChange }: StepProps) {
               <SelectValue placeholder="Seleccione el área" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="no_asignada">No asignada</SelectItem>
               <SelectItem value="laboral">Laboral</SelectItem>
               <SelectItem value="civil_familia">Civil y Familia</SelectItem>
               <SelectItem value="penal">Penal</SelectItem>
-              <SelectItem value="publica">Publico</SelectItem>
-              <SelectItem value="otro">Otro</SelectItem>
+              <SelectItem value="publica">Público</SelectItem>
+              <SelectItem value="otros">Otros</SelectItem>
             </SelectContent>
           </Select>
         </div>

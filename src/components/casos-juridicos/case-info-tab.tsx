@@ -34,6 +34,7 @@ interface CaseInfoTabProps {
 }
 
 const AREAS = [
+  { value: "no_asignada", label: "No asignada" },
   { value: "laboral", label: "Derecho Laboral" },
   { value: "civil_familia", label: "Derecho Civil y familiar" },
   { value: "penal", label: "Derecho Penal" },
@@ -98,7 +99,7 @@ export const CaseInfoTab = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-blue-50/30 rounded-xl p-4 border border-blue-100/50">
             <InfoField
-              label="Tipo de caso"
+              label="Área del caso"
               value={formatArea(caseData?.area)}
               icon={Briefcase}
               valueClassName="text-lg font-semibold text-slate-800"
@@ -144,7 +145,7 @@ export const CaseInfoTab = ({
             <div className="space-y-2">
               <Label className="text-sm font-bold text-slate-700 flex items-center gap-2">
                 <Briefcase className="w-4 h-4 text-blue-500" />
-                Tipo de caso
+                Área del caso
               </Label>
               <Select
                 value={editedData?.area || ""}

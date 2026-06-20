@@ -1,4 +1,5 @@
 const AREA_LABELS: Record<string, string> = {
+  no_asignada: "No asignada",
   laboral: "Derecho Laboral",
   civil_familia: "Derecho Civil y familiar",
   penal: "Derecho Penal",
