@@ -291,71 +291,13 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
       if (errorCaso)
         throw new Error(`Error actualizando caso: ${errorCaso.message}`);
 
-      //Actualizar usuario
-      const { error: errorUsuario } = await supabase
-        .from("usuarios")
-        .update({
-          edad: Number(limpio.edad),
-          contacto_familiar: limpio.contacto_familiar,
-          estado_civil: limpio.estado_civil,
-          estrato: Number(limpio.estrato),
-          direccion: limpio.direccion,
-          tipo_vivienda: limpio.tipo_vivienda,
-          situacion_laboral: limpio.situacion_laboral,
-          otros_ingresos: limpio.otros_ingresos,
-          valor_otros_ingresos: Number(limpio.valor_otros_ingresos),
-          concepto_otros_ingresos: limpio.concepto_otros_ingresos,
-          tiene_contrato: limpio.tiene_contrato,
-          tiene_representado: limpio.tiene_representado,
-          enfoque_diverso: limpio.enfoque_diverso,
-          caracterizacion_lgbtiq: limpio.enfoque_diverso === true
-            ? (limpio.caracterizacion_lgbtiq || null)
-            : null,
-        })
-        .eq("id_usuario", caso?.id_usuario);
-
-      if (errorUsuario)
-        throw new Error(`Error actualizando usuario: ${errorUsuario.message}`);
-
-      //Actualizar contrato laboral
-      const { error: errorContrato } = await supabase
-        .from("contratos_laborales")
-        .insert({
-          id_usuario: caso?.id_usuario,
-          tipo_contrato: limpio.tipoContrato,
-          representante_legal: limpio.nombreRepresentanteLegal,
-          correo_patrono: limpio.correoEmpleador,
-          direccion_empresa: limpio.direccionEmpresa,
-          fecha_inicio: limpio.fechaInicio,
-          fecha_fin: limpio.fechaTerminacion,
-          continua: limpio.continuaContrato,
-          salario_inicial: limpio.salarioInicial,
-          salario_actual: limpio.salarioActual,
-        });
-
-      if (errorContrato)
-        throw new Error(
-          `Error actualizando contrato: ${errorContrato.message}`,
-        );
-
-      //Actualizar demandado
-      if (!limpio.sinDemandado) {
-        const { error: errorDemandado } = await supabase
-          .from("demandados")
-          .insert({
-            id_caso: idCaso,
-            nombre_completo: limpio.nombreDemandado,
-            documento: limpio.documentoDemandado,
-            celular: limpio.celularDemandado,
-            lugar_residencia: limpio.lugarResidenciaDemandado,
-            correo: limpio.correoDemandado,
-          });
-
-        if (errorDemandado)
-          throw new Error(
-            `Error actualizando demandado: ${errorDemandado.message}`,
-          );
-      }
+      // Auto-resolver llamado de atencion del estudiante si existe
+      await supabase
+        .from("llamados_atencion")
+        .update({ resuelto: true, fecha_resolucion: new Date().toISOString() })
+        .eq("id_caso", idCaso)
+        .eq("tipo", "estudiante")
+        .eq("resuelto", false);
 
       await insertAuditEvent(
         idCaso,

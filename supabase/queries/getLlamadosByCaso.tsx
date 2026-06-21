@@ -8,6 +8,9 @@ export type LlamadoAtencion = {
   motivo: string;
   fecha_creacion: string;
   leido: boolean;
+  resuelto?: boolean;
+  fecha_resolucion?: string | null;
+  resuelto_por?: string | null;
 };
 
 export async function getLlamadosByCaso(

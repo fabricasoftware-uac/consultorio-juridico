@@ -123,6 +123,15 @@ export default function Page({
         })
         .eq("id_caso", id_caso);
       if (error) throw error;
+
+      // Auto-resolver llamado del asesor al reenviar
+      await supabase
+        .from("llamados_atencion")
+        .update({ resuelto: true, fecha_resolucion: new Date().toISOString() })
+        .eq("id_caso", id_caso)
+        .eq("tipo", "asesor")
+        .eq("resuelto", false);
+
       await traerDatos();
       toast.success("Caso reenviado para aprobación del asesor");
     } catch (err) {

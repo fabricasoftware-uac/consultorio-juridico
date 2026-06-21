@@ -156,6 +156,15 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         `El asesor aprobó el caso con clasificación "${clasificacion}".`,
         { clasificacion },
       );
+
+      // Auto-resolver llamado de atencion del asesor si existe
+      await supabase
+        .from("llamados_atencion")
+        .update({ resuelto: true, fecha_resolucion: new Date().toISOString() })
+        .eq("id_caso", id_caso)
+        .eq("tipo", "asesor")
+        .eq("resuelto", false);
+
       await traerDatos();
       toast.success("Caso clasificado y aprobado exitosamente");
     } catch (err) {
