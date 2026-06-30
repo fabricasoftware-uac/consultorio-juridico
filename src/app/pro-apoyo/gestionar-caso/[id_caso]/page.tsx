@@ -52,7 +52,7 @@ import {
   Smile,
 } from "lucide-react";
 import { getStatusBadge } from "@/components/ui/status-badge";
-import { ReasignarEquipo } from "./components/ReasignarEquipo";
+import { AdminReasignarEquipo } from "@/components/casos-juridicos/reasignar-equipo-tabla";
 import { toast } from "sonner";
 import { CaseInfoTab } from "@/components/casos-juridicos/case-info-tab";
 import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
@@ -589,17 +589,17 @@ export default function Page({
                       </h3>
                     </div>
                     <div className="p-6 space-y-6">
-                      <ReasignarEquipo
+                      <AdminReasignarEquipo
                         idCaso={id_caso}
                         type="estudiante"
-                        casosData={displayCaseData?.estudiantes_casos || []}
+                        currentName={displayCaseData?.estudiantes_casos?.[displayCaseData.estudiantes_casos.length - 1]?.estudiante?.perfil?.nombre_completo}
                         onRefresh={traerDatos}
                       />
                       <div className="border-t border-slate-100 pt-6">
-                        <ReasignarEquipo
+                        <AdminReasignarEquipo
                           idCaso={id_caso}
                           type="asesor"
-                          casosData={displayCaseData?.asesores_casos || []}
+                          currentName={displayCaseData?.asesores_casos?.[displayCaseData.asesores_casos.length - 1]?.asesor?.perfil?.nombre_completo}
                           onRefresh={traerDatos}
                         />
                       </div>

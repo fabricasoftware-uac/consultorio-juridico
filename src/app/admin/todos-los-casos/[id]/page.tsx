@@ -23,7 +23,7 @@ import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
 import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
 import { CasoAuditoria } from "@/components/casos-juridicos/caso-auditoria";
 import { DocumentosCaso } from "@/components/casos-juridicos/documentos-caso";
-import { AdminReasignarEquipo } from "./components/AdminReasignarEquipo";
+import { AdminReasignarEquipo } from "@/components/casos-juridicos/reasignar-equipo-tabla";
 import { useRealtimeCaso } from "@/lib/hooks/useRealtimeCaso";
 import { useCaseEdit } from "@/lib/hooks/useCaseEdit";
 import { cleanData } from "@/lib/utils";
