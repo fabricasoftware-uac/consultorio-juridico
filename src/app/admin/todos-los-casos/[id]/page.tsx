@@ -23,6 +23,7 @@ import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
 import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
 import { CasoAuditoria } from "@/components/casos-juridicos/caso-auditoria";
 import { DocumentosCaso } from "@/components/casos-juridicos/documentos-caso";
+import { AdminReasignarEquipo } from "./components/AdminReasignarEquipo";
 import { useRealtimeCaso } from "@/lib/hooks/useRealtimeCaso";
 import { useCaseEdit } from "@/lib/hooks/useCaseEdit";
 import { cleanData } from "@/lib/utils";
@@ -158,6 +159,29 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       <div className="flex flex-wrap gap-2">
                         <CountdownTimer fechaVencimiento={caso.fecha_vencimiento_estudiante} label="Estudiante" estado={caso.estado} />
                         <CountdownTimer fechaVencimiento={caso.fecha_vencimiento_asesor} label="Asesor" estado={caso.estado} />
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                    <div className="bg-slate-50 border-b p-4 flex items-center gap-3">
+                      <Users className="w-5 h-5 text-blue-600" />
+                      <h3 className="font-bold text-slate-800">Equipo asignado</h3>
+                    </div>
+                    <div className="p-6 space-y-6">
+                      <AdminReasignarEquipo
+                        idCaso={id}
+                        type="estudiante"
+                        currentName={caso.estudiantes_casos?.[caso.estudiantes_casos.length - 1]?.estudiante?.perfil?.nombre_completo}
+                        onRefresh={refetch}
+                      />
+                      <div className="border-t border-slate-100 pt-6">
+                        <AdminReasignarEquipo
+                          idCaso={id}
+                          type="asesor"
+                          currentName={caso.asesores_casos?.[caso.asesores_casos.length - 1]?.asesor?.perfil?.nombre_completo}
+                          onRefresh={refetch}
+                        />
                       </div>
                     </div>
                   </Card>

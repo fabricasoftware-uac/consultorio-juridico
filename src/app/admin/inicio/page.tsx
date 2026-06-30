@@ -11,6 +11,7 @@ import {
   PlusCircle,
   Calendar,
   LayoutGrid,
+  FolderOpen,
 } from "lucide-react";
 import {
   Card,
