@@ -1,9 +1,16 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Upload, Download, Trash2, File, Image, FileSpreadsheet, FileArchive, Archive, Pencil } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { FileText, Upload, Download, Trash2, File, Image as ImageIcon, FileSpreadsheet, FileArchive, Archive, Pencil, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/supabase-client";
 
@@ -22,7 +29,7 @@ type Documento = {
 
 const ICON_MIME: Record<string, { icon: typeof File; color: string }> = {
   "application/pdf": { icon: FileText, color: "text-red-500" },
-  "image/": { icon: Image, color: "text-blue-500" },
+  "image/": { icon: ImageIcon, color: "text-blue-500" },
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": { icon: FileSpreadsheet, color: "text-green-500" },
   "application/vnd.ms-excel": { icon: FileSpreadsheet, color: "text-green-500" },
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": { icon: FileText, color: "text-blue-600" },
@@ -65,6 +72,7 @@ export function DocumentosCaso({ idCaso }: Props) {
   const [loading, setLoading] = useState(true);
   const [subiendo, setSubiendo] = useState(false);
   const [role, setRole] = useState("");
+  const [preview, setPreview] = useState<Documento | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -133,6 +141,7 @@ export function DocumentosCaso({ idCaso }: Props) {
   }
 
   return (
+    <>
     <div className="space-y-3">
       {documentos.length === 0 ? (
         <div className="p-6 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
@@ -150,6 +159,9 @@ export function DocumentosCaso({ idCaso }: Props) {
                 <p className="text-[10px] text-slate-400">{formatSize(doc.tamano)} {doc.estado === "archivado" && "· Archivado"}</p>
               </div>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setPreview(doc)} title="Vista previa">
+                  <Eye className="w-3.5 h-3.5" />
+                </Button>
                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDownload(doc)} title="Descargar">
                   <Download className="w-3.5 h-3.5" />
                 </Button>
@@ -184,5 +196,32 @@ export function DocumentosCaso({ idCaso }: Props) {
         </Button>
       </div>
     </div>
+
+    <Dialog open={!!preview} onOpenChange={() => setPreview(null)}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+        <DialogHeader>
+          <DialogTitle className="text-base truncate">{preview?.nombre_original}</DialogTitle>
+        </DialogHeader>
+        <div className="flex items-center justify-center min-h-[200px]">
+          {preview?.mime_type?.startsWith("image/") && preview?.signed_url && (
+            <Image
+              src={preview.signed_url}
+              alt={preview.nombre_original}
+              width={1200}
+              height={900}
+              unoptimized
+              className="max-w-full max-h-[70vh] object-contain rounded-lg"
+            />
+          )}
+          {preview?.mime_type === "application/pdf" && preview?.signed_url && (
+            <iframe src={preview.signed_url} className="w-full h-[70vh] rounded-lg" title="PDF" />
+          )}
+          {preview && !preview.mime_type?.startsWith("image/") && preview.mime_type !== "application/pdf" && (
+            <p className="text-slate-400 text-sm">Vista previa no disponible para este tipo de archivo.</p>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

@@ -52,18 +52,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Tipo de archivo no permitido" }, { status: 400 });
   }
 
-  // Validar tamano (10 MB)
-  if (file.size > 10 * 1024 * 1024) {
-    return NextResponse.json({ error: "Archivo demasiado grande (max 10 MB)" }, { status: 400 });
+  // Validar tamano (30 MB)
+  if (file.size > 30 * 1024 * 1024) {
+    return NextResponse.json({ error: "Archivo demasiado grande (max 30 MB)" }, { status: 400 });
   }
 
-  // Validar cantidad (max 50 por caso)
+  // Validar cantidad (max 30 por caso)
   const { count } = await supabaseAdmin
     .from("documentos_caso")
     .select("*", { count: "exact", head: true })
     .eq("id_caso", idCaso);
-  if ((count ?? 0) >= 50) {
-    return NextResponse.json({ error: "Limite de 50 documentos por caso alcanzado" }, { status: 400 });
+  if ((count ?? 0) >= 30) {
+    return NextResponse.json({ error: "Limite de 30 documentos por caso alcanzado" }, { status: 400 });
   }
 
   // Generar nombre unico
