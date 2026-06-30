@@ -4,13 +4,8 @@ import {
   Users,
   UserPlus,
   GraduationCap,
-  Briefcase,
-  Clock,
-  CheckCircle2,
   ArrowRight,
-  PlusCircle,
   Calendar,
-  LayoutGrid,
   FolderOpen,
 } from "lucide-react";
 import {
@@ -23,7 +18,6 @@ import {
 import { Navbar } from "../components/NavbarAdmin";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { DashboardMetrics } from "./components/DashboardMetrics";
 
 export default function AdminPanelPage() {
   const router = useRouter();
@@ -100,8 +94,6 @@ export default function AdminPanelPage() {
             </p>
           </div>
         </div>
-
-        <DashboardMetrics />
 
         {/* Main Action Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">

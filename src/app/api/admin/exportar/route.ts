@@ -84,8 +84,40 @@ export async function GET(request: NextRequest) {
 
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet(tipo);
-    ws.columns = columnas.map((c) => ({ header: c, key: c, width: 22 }));
-    filas.forEach((f) => ws.addRow(f));
+
+    // Columnas con anchos
+    ws.columns = columnas.map((c) => ({ header: c.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()), key: c, width: 22 }));
+
+    // Estilo del header
+    const headerRow = ws.getRow(1);
+    headerRow.font = { bold: true, color: { argb: "FFFFFFFF" }, size: 11 };
+    headerRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF1E40AF" } };
+    headerRow.alignment = { vertical: "middle", horizontal: "center" };
+    headerRow.height = 28;
+
+    // Filas con alternancia de colores
+    filas.forEach((f, i) => {
+      const row = ws.addRow(f);
+      if (i % 2 === 1) {
+        row.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF1F5F9" } };
+      }
+      row.font = { size: 10 };
+    });
+
+
+
+    // Bordes en todas las celdas
+    const lastRow = filas.length + 1;
+    for (let r = 1; r <= lastRow; r++) {
+      for (let c = 1; c <= columnas.length; c++) {
+        ws.getCell(r, c).border = {
+          top: { style: "thin", color: { argb: "FFE2E8F0" } },
+          bottom: { style: "thin", color: { argb: "FFE2E8F0" } },
+          left: { style: "thin", color: { argb: "FFE2E8F0" } },
+          right: { style: "thin", color: { argb: "FFE2E8F0" } },
+        };
+      }
+    }
 
     const buf = await wb.xlsx.writeBuffer();
     return new NextResponse(buf, {
