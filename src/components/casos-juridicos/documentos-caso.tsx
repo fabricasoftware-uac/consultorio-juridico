@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Upload, Download, Trash2, File, Image, FileSpreadsheet, FileArchive } from "lucide-react";
+import { FileText, Upload, Download, Trash2, File, Image, FileSpreadsheet, FileArchive, Archive, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/supabase-client";
 
@@ -15,6 +15,7 @@ type Documento = {
   nombre_original: string;
   mime_type: string;
   tamano: number;
+  estado?: string;
   created_at: string;
   signed_url?: string | null;
 };
@@ -63,7 +64,18 @@ export function DocumentosCaso({ idCaso }: Props) {
   const [documentos, setDocumentos] = useState<Documento[]>([]);
   const [loading, setLoading] = useState(true);
   const [subiendo, setSubiendo] = useState(false);
+  const [role, setRole] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.access_token) {
+        const payload = JSON.parse(atob(session.access_token.split(".")[1]));
+        setRole(payload.user_role ?? "");
+      }
+      cargar();
+    });
+  }, [idCaso]);
 
   const cargar = async () => {
     const data = await api(`/api/documentos?id_caso=${idCaso}`);
@@ -97,6 +109,19 @@ export function DocumentosCaso({ idCaso }: Props) {
     }
   };
 
+  const handleArchivar = async (doc: Documento) => {
+    const nuevoEstado = doc.estado === "archivado" ? "activo" : "archivado";
+    const data = await api(`/api/documentos/${doc.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ estado: nuevoEstado }),
+    });
+    if (data?.success) {
+      toast.success(nuevoEstado === "archivado" ? "Documento archivado" : "Documento restaurado");
+      cargar();
+    }
+  };
+
   const handleDownload = (doc: Documento) => {
     if (doc.signed_url) window.open(doc.signed_url, "_blank");
   };
@@ -118,19 +143,26 @@ export function DocumentosCaso({ idCaso }: Props) {
         documentos.map((doc) => {
           const { icon: Icon, color } = getIcon(doc.mime_type);
           return (
-            <div key={doc.id} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-100 shadow-sm group">
+            <div key={doc.id} className={`flex items-center gap-3 p-3 rounded-xl border shadow-sm group transition-opacity ${doc.estado === "archivado" ? "bg-slate-50 border-slate-100 opacity-60" : "bg-white border-slate-100"}`}>
               <Icon className={`w-5 h-5 ${color} shrink-0`} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-slate-700 truncate">{doc.nombre_original}</p>
-                <p className="text-[10px] text-slate-400">{formatSize(doc.tamano)}</p>
+                <p className="text-[10px] text-slate-400">{formatSize(doc.tamano)} {doc.estado === "archivado" && "· Archivado"}</p>
               </div>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDownload(doc)} title="Descargar">
                   <Download className="w-3.5 h-3.5" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-600" onClick={() => handleDelete(doc)} title="Eliminar">
-                  <Trash2 className="w-3.5 h-3.5" />
-                </Button>
+                {(role === "asesor" || role === "pro_apoyo" || role === "admin") && (
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleArchivar(doc)} title={doc.estado === "archivado" ? "Restaurar" : "Archivar"}>
+                    <Archive className="w-3.5 h-3.5" />
+                  </Button>
+                )}
+                {(role === "admin" || role === "pro_apoyo") && (
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-600" onClick={() => handleDelete(doc)} title="Eliminar">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+                )}
               </div>
             </div>
           );

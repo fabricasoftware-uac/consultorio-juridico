@@ -24,14 +24,23 @@ export async function GET(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const auth = _request.headers.get("authorization");
+  const auth = request.headers.get("authorization");
   if (!auth?.startsWith("Bearer ")) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const { data: { user } } = await supabaseAdmin.auth.getUser(auth.replace("Bearer ", ""));
+
+  // Solo admin/pro_apoyo pueden eliminar definitivamente
+  const token = auth.replace("Bearer ", "");
+  const { data: { user } } = await supabaseAdmin.auth.getUser(token);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const payload = JSON.parse(atob(token.split(".")[1]));
+  const role = payload.user_role ?? "";
+  if (role !== "admin" && role !== "pro_apoyo") {
+    return NextResponse.json({ error: "Solo el administrador puede eliminar documentos" }, { status: 403 });
+  }
 
   const { data: doc } = await supabaseAdmin
     .from("documentos_caso")
@@ -40,14 +49,6 @@ export async function DELETE(
     .single();
 
   if (!doc) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
-
-  // Solo admin, pro_apoyo o el que subio
-  const { data: roleData } = await supabaseAdmin.auth.getUser(auth.replace("Bearer ", ""));
-  const role = (roleData?.user?.app_metadata as any)?.user_role ?? "";
-
-  if (doc.id_usuario !== user.id && role !== "admin" && role !== "pro_apoyo") {
-    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
-  }
 
   const { error: storageError } = await supabaseAdmin
     .storage
@@ -59,6 +60,33 @@ export async function DELETE(
   }
 
   await supabaseAdmin.from("documentos_caso").delete().eq("id", id);
+
+  return NextResponse.json({ success: true });
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+  const auth = request.headers.get("authorization");
+  if (!auth?.startsWith("Bearer ")) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { data: { user } } = await supabaseAdmin.auth.getUser(auth.replace("Bearer ", ""));
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const body = await request.json();
+  const updates: Record<string, any> = {};
+  if (body.nombre_original) updates.nombre_original = body.nombre_original;
+  if (body.tipo) updates.tipo = body.tipo;
+  if (body.estado) updates.estado = body.estado;
+  updates.updated_at = new Date().toISOString();
+
+  const { error } = await supabaseAdmin
+    .from("documentos_caso")
+    .update(updates)
+    .eq("id", id);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   return NextResponse.json({ success: true });
 }
