@@ -4,6 +4,7 @@ export function Navbar() {
   const links = [
     { href: "/admin/inicio", label: "Inicio" },
     { href: "/admin/todos-los-casos", label: "Todos los Casos" },
+    { href: "/admin/analiticas", label: "Analíticas" },
     { href: "/admin/estudiantes", label: "Estudiantes" },
     { href: "/admin/asesores", label: "Asesores" },
     { href: "/admin/proapoyo", label: "Proapoyo" },
