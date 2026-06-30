@@ -45,6 +45,14 @@ export default function AdminPanelPage() {
 
   const actions = [
     {
+      title: "Gestionar Casos",
+      desc: "Ver, filtrar y modificar todos los casos del consultorio por período y estado",
+      href: "/admin/todos-los-casos",
+      icon: FolderOpen,
+      color: "amber",
+      btnText: "Ver todos los casos",
+    },
+    {
       title: "Gestion de Estudiantes",
       desc: "Añadir o modificar informacion de los estudiantes del consultorio",
       href: "/admin/estudiantes",
@@ -96,12 +104,13 @@ export default function AdminPanelPage() {
         <DashboardMetrics />
 
         {/* Main Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
           {actions.map((action, i) => {
             const colorStyles = {
               blue: "bg-blue-500 hover:bg-blue-600 shadow-blue-100",
               emerald: "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-100",
               purple: "bg-purple-500 hover:bg-purple-600 shadow-purple-100",
+              amber: "bg-amber-500 hover:bg-amber-600 shadow-amber-100",
             };
             const colorSet = action.color as keyof typeof colorStyles;
 

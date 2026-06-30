@@ -43,7 +43,7 @@ export function DashboardMetrics() {
         const activeCases =
           casesData?.filter(
             (c) =>
-              c.estado === "en_proceso" || c.estado === "pendiente_aprobacion",
+              c.estado === "en_proceso" || c.estado === "pendiente_aprobacion" || c.estado === "en_correccion",
           ).length || 0;
 
         setMetrics({ totalUsers, men, women, totalCases, activeCases });
