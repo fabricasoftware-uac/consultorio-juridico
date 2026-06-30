@@ -18,6 +18,11 @@ export async function insertCasoNuevo(
       fecha_vencimiento_estudiante: new Date(
         Date.now() + 3 * 24 * 60 * 60 * 1000,
       ).toISOString(),
+      periodo: (() => {
+        const ahora = new Date();
+        const year = ahora.getFullYear();
+        return ahora.getMonth() < 6 ? `${year}-1` : `${year}-2`;
+      })(),
     })
     .select();
 
