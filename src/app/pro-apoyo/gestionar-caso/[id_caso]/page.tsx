@@ -62,6 +62,7 @@ import { StudentInfo } from "@/components/casos-juridicos/student-info";
 import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
 import { ObservacionesChat } from "@/components/casos-juridicos/observaciones-chat";
 import { CasoAuditoria } from "@/components/casos-juridicos/caso-auditoria";
+import { DocumentosCaso } from "@/components/casos-juridicos/documentos-caso";
 
 export default function Page({
   params,
@@ -561,6 +562,20 @@ export default function Page({
                     </div>
                     <div className="p-6">
                       <CasoAuditoria idCaso={id_caso} />
+                    </div>
+                  </Card>
+
+                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                    <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center gap-3">
+                      <div className="p-2 bg-cyan-100 rounded-lg text-cyan-600">
+                        <FileText className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-bold text-slate-800 tracking-tight">
+                        Documentos
+                      </h3>
+                    </div>
+                    <div className="p-6">
+                      <DocumentosCaso idCaso={id_caso} />
                     </div>
                   </Card>
 

@@ -29,6 +29,7 @@ import { AdvisorInfo } from "@/components/casos-juridicos/advisor-info";
 import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
 import { ObservacionesChat } from "@/components/casos-juridicos/observaciones-chat";
 import { CasoAuditoria } from "@/components/casos-juridicos/caso-auditoria";
+import { DocumentosCaso } from "@/components/casos-juridicos/documentos-caso";
 import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
 import { useRealtimeCaso } from "@/lib/hooks/useRealtimeCaso";
 import { AlertTriangle, MessageSquare, Send } from "lucide-react";
@@ -406,6 +407,22 @@ export default function Page({
                     </div>
                     <div className="p-6">
                       <CasoAuditoria idCaso={id_caso} />
+                    </div>
+                  </Card>
+
+                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                    <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center gap-3">
+                      <div className="p-2 bg-cyan-100 rounded-lg text-cyan-600">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      <h3 className="font-bold text-slate-800 tracking-tight">
+                        Documentos
+                      </h3>
+                    </div>
+                    <div className="p-6">
+                      <DocumentosCaso idCaso={id_caso} />
                     </div>
                   </Card>
                 </div>

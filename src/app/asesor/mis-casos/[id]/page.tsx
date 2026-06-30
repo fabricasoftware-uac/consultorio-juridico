@@ -40,6 +40,7 @@ import { ObservacionesChat } from "@/components/casos-juridicos/observaciones-ch
 import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
 import { CasoAuditoria } from "@/components/casos-juridicos/caso-auditoria";
 import { useRealtimeCaso } from "@/lib/hooks/useRealtimeCaso";
+import { DocumentosCaso } from "@/components/casos-juridicos/documentos-caso";
 import { StudentInfo } from "@/components/casos-juridicos/student-info";
 import { SectionCard } from "@/components/casos-juridicos/shared-ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -654,6 +655,21 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     </div>
                     <div className="p-6">
                       <CasoAuditoria idCaso={id_caso} />
+                    </div>
+                  </Card>
+
+                  {/* Documentos */}
+                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                    <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center gap-3">
+                      <div className="p-2 bg-cyan-100 rounded-lg text-cyan-600">
+                        <FileText className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-bold text-slate-800 tracking-tight">
+                        Documentos
+                      </h3>
+                    </div>
+                    <div className="p-6">
+                      <DocumentosCaso idCaso={id_caso} />
                     </div>
                   </Card>
                 </div>
