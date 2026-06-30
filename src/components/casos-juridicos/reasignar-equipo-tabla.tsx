@@ -37,6 +37,8 @@ export function AdminReasignarEquipo({ idCaso, type, currentName, onRefresh }: P
   const [diaFilter, setDiaFilter] = useState("todos");
   const [jornadaFilter, setJornadaFilter] = useState("todos");
 
+  const [historial, setHistorial] = useState<{ nombre: string; desde: string; hasta: string | null }[]>([]);
+
   useEffect(() => {
     if (open) {
       if (type === "estudiante") {
@@ -44,6 +46,8 @@ export function AdminReasignarEquipo({ idCaso, type, currentName, onRefresh }: P
       } else {
         getAsesores(true).then((r) => setItems(r ?? []));
       }
+      // Cargar historial
+      cargarHistorial();
     } else {
       setSelectedId("");
       setSearch("");
@@ -51,6 +55,26 @@ export function AdminReasignarEquipo({ idCaso, type, currentName, onRefresh }: P
       setJornadaFilter("todos");
     }
   }, [open, type]);
+
+  const cargarHistorial = async () => {
+    const tabla = type === "estudiante" ? "estudiantes_casos" : "asesores_casos";
+    const colId = type === "estudiante" ? "id_estudiante" : "id_asesor";
+    const joinTabla = type === "estudiante" ? "estudiantes" : "asesores";
+    const joinFk = type === "estudiante" ? "estudiantes_casos_id_estudiante_fkey" : "asesores_casos_id_asesor_fkey";
+    const perfilFk = type === "estudiante" ? "estudiantes_id_perfil_fkey" : "asesores_id_perfil_fkey";
+    const { data } = await supabase
+      .from(tabla)
+      .select(`fecha_asignacion, fecha_fin_asignacion, ${type}:${joinTabla}!${joinFk}(perfil:perfiles!${perfilFk}(nombre_completo))`)
+      .eq("id_caso", idCaso)
+      .order("fecha_asignacion", { ascending: false });
+    if (data) {
+      setHistorial(data.map((h: any) => ({
+        nombre: h[type]?.perfil?.nombre_completo || "Desconocido",
+        desde: h.fecha_asignacion || "",
+        hasta: h.fecha_fin_asignacion || null,
+      })));
+    }
+  };
 
   const filtrados = items
     .filter((item) => {
@@ -181,6 +205,25 @@ export function AdminReasignarEquipo({ idCaso, type, currentName, onRefresh }: P
                 </tbody>
               </table>
             </div>
+
+            {historial.length > 0 && (
+              <div className="mt-3 border-t pt-3">
+                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 block">
+                  Historial de asignaciones
+                </Label>
+                <div className="max-h-32 overflow-y-auto space-y-1">
+                  {historial.map((h, i) => (
+                    <div key={i} className="flex justify-between text-xs text-slate-500 py-1 border-b border-slate-50 last:border-0">
+                      <span className="font-medium text-slate-700">{h.nombre}</span>
+                      <span>
+                        {h.desde ? new Date(h.desde).toLocaleDateString("es-CO") : "—"}
+                        {h.hasta ? ` → ${new Date(h.hasta).toLocaleDateString("es-CO")}` : " (actual)"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="flex justify-end gap-3 mt-4">
               <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>

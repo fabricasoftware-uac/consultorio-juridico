@@ -17,6 +17,7 @@ import type { AuditEvent } from "../../../supabase/queries/auditoriaCasos";
 
 const ACCION_ICON: Record<string, { icon: typeof FileText; color: string; bg: string }> = {
   creacion: { icon: FileText, color: "text-blue-600", bg: "bg-blue-100" },
+  asignacion: { icon: UserCheck, color: "text-cyan-600", bg: "bg-cyan-100" },
   entrevista: { icon: Send, color: "text-green-600", bg: "bg-green-100" },
   observacion: { icon: MessageSquare, color: "text-yellow-600", bg: "bg-yellow-100" },
   cambio_estado: { icon: AlertTriangle, color: "text-orange-600", bg: "bg-orange-100" },
