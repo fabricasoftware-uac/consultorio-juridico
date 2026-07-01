@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 import { Navbar } from "../components/NavbarAdmin";
 import { registerEstudiante } from "../actions/registerUser";
@@ -19,6 +20,7 @@ import {
   Power,
   PowerOff,
   Search,
+  Eye,
   ChartNoAxesColumnDecreasingIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -471,6 +473,11 @@ export default function EstudiantesPage() {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-1">
+                              <Link href={`/admin/estudiantes/${student.id_perfil}`}>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-slate-700 hover:bg-slate-100" title="Ver casos">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </Link>
                               <Button
                                 variant="ghost"
                                 size="icon"
