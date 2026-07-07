@@ -115,6 +115,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
             <TabsContent value="overview">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Columna principal */}
                 <div className="lg:col-span-2 space-y-6">
                   <CaseInfoTab
                     caseData={edit.isEditingCaseInfo ? edit.editedCaseData : caso}
@@ -152,8 +153,29 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       )}
                     </div>
                   </Card>
+
+                  {/* Historial + Documentos bajo Observaciones */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                      <div className="bg-slate-50 border-b p-4 flex items-center gap-3">
+                        <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3 className="font-bold text-slate-800">Historial del Caso</h3>
+                      </div>
+                      <div className="p-6 max-h-80 overflow-y-auto"><CasoAuditoria idCaso={id} /></div>
+                    </Card>
+                    <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                      <div className="bg-slate-50 border-b p-4 flex items-center gap-3">
+                        <Users className="w-5 h-5 text-cyan-600" />
+                        <h3 className="font-bold text-slate-800">Documentos</h3>
+                      </div>
+                      <div className="p-6"><DocumentosCaso idCaso={id} /></div>
+                    </Card>
+                  </div>
                 </div>
 
+                {/* Sidebar compacto */}
                 <div className="space-y-6">
                   <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
                     <div className="bg-slate-50 border-b p-4 flex items-center gap-3">
@@ -179,15 +201,13 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     </div>
                     <div className="p-6 space-y-6">
                       <AdminReasignarEquipo
-                        idCaso={id}
-                        type="estudiante"
+                        idCaso={id} type="estudiante"
                         currentName={caso.estudiantes_casos?.[caso.estudiantes_casos.length - 1]?.estudiante?.perfil?.nombre_completo}
                         onRefresh={refetch}
                       />
                       <div className="border-t border-slate-100 pt-6">
                         <AdminReasignarEquipo
-                          idCaso={id}
-                          type="asesor"
+                          idCaso={id} type="asesor"
                           currentName={caso.asesores_casos?.[caso.asesores_casos.length - 1]?.asesor?.perfil?.nombre_completo}
                           onRefresh={refetch}
                         />
@@ -201,24 +221,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       <h3 className="font-bold text-amber-800">Llamados de Atención</h3>
                     </div>
                     <div className="p-6"><LlamadosList idCaso={id} /></div>
-                  </Card>
-
-                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
-                    <div className="bg-slate-50 border-b p-4 flex items-center gap-3">
-                      <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <h3 className="font-bold text-slate-800">Historial del Caso</h3>
-                    </div>
-                    <div className="p-6"><CasoAuditoria idCaso={id} /></div>
-                  </Card>
-
-                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
-                    <div className="bg-slate-50 border-b p-4 flex items-center gap-3">
-                      <Users className="w-5 h-5 text-cyan-600" />
-                      <h3 className="font-bold text-slate-800">Documentos</h3>
-                    </div>
-                    <div className="p-6"><DocumentosCaso idCaso={id} /></div>
                   </Card>
                 </div>
               </div>

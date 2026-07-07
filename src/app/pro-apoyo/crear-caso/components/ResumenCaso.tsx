@@ -65,12 +65,27 @@ export function ResumenCaso({ caso, usuario, onNuevoCaso }: ResumenCasoProps) {
     setIsLoading(true);
     try {
       const limpio = cleanData(usuario);
-      const usuarioData = await insertUsuarioNuevo(limpio);
+      let id_usuario: string;
 
-      const id_usuario = usuarioData?.[0]?.id_usuario;
-      if (!id_usuario) {
-        throw new Error("No se obtuvo el id_usuario del usuario insertado");
+      // Verificar si ya existe un usuario con esa cedula
+      const { data: existente } = await supabase
+        .from("usuarios")
+        .select("id_usuario")
+        .eq("cedula", limpio.cedula)
+        .maybeSingle();
+
+      if (existente?.id_usuario) {
+        id_usuario = existente.id_usuario;
+        toast.info("El usuario ya existe. Se vinculó al caso existente.");
+      } else {
+        const usuarioData = await insertUsuarioNuevo(limpio);
+        const newId = usuarioData?.[0]?.id_usuario;
+        if (!newId) {
+          throw new Error("No se obtuvo el id_usuario del usuario insertado");
+        }
+        id_usuario = newId;
       }
+
       const casoData = await insertCasoNuevo(caso, id_usuario);
 
       const id_estudiante = caso.estudiantes_casos?.[0]?.estudiante?.id_perfil;

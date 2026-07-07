@@ -247,6 +247,18 @@ export function Step2InfoSolicitante({
       </CardContent>
 
       {/* Caracterización con enfoque diferencial */}
+      {caso?.usuarios?.enfoque_diverso != null ? (
+        <div className="px-6 pb-6">
+          <div className="p-4 bg-blue-50/30 rounded-xl border border-blue-100 text-sm text-slate-600">
+            <p className="font-semibold text-slate-700 mb-1">Caracterización registrada</p>
+            <p>Enfoque diverso: <strong>{caso.usuarios.enfoque_diverso === true ? "Sí" : "No"}</strong></p>
+            {caso.usuarios.caracterizacion_lgbtiq && (
+              <p>Se identifica como: <strong>{caso.usuarios.caracterizacion_lgbtiq.replace(/_/g, " ")}</strong></p>
+            )}
+            <p className="text-xs text-slate-400 mt-1">Registrado durante la recepción del caso.</p>
+          </div>
+        </div>
+      ) : (
       <div className="px-6 pb-6">
         <div className="p-5 bg-blue-50/30 rounded-2xl border border-blue-100 space-y-4">
           <div>
@@ -325,6 +337,7 @@ export function Step2InfoSolicitante({
           )}
         </div>
       </div>
+      )}
     </Card>
   );
 }
