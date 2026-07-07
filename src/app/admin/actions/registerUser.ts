@@ -17,8 +17,7 @@ export interface RegisterEstudianteInput {
   telefono: string;
   semestre: number;
   jornada: "diurna" | "nocturna" | "mixto";
-  turno: "9-11" | "2-4" | "4-6";
-  dia: string;
+  horarios: { turno: string; dia: string }[];
 }
 
 export async function registerEstudiante(
@@ -67,8 +66,6 @@ export async function registerEstudiante(
       id_perfil: userId,
       semestre: input.semestre,
       jornada: input.jornada,
-      turno: input.turno,
-      dia: input.dia,
     });
 
   if (estudianteError) {
@@ -78,6 +75,13 @@ export async function registerEstudiante(
       success: false,
       error: "Error al registrar los datos del estudiante.",
     };
+  }
+
+  // 4. Guardar horarios
+  if (input.horarios.length > 0) {
+    await supabaseAdmin.from("horarios").insert(
+      input.horarios.map((h) => ({ id_perfil: userId, turno: h.turno, dia: h.dia })),
+    );
   }
 
   return {
@@ -93,9 +97,8 @@ export interface RegisterAsesorInput {
   correo: string;
   cedula: string;
   telefono: string;
-  turno: "9-11" | "2-4" | "4-6";
   area: "no_asignada" | "laboral" | "civil_familia" | "penal" | "publica" | "otros";
-  dia: string;
+  horarios: { turno: string; dia: string }[];
 }
 
 export async function registerAsesor(
@@ -135,9 +138,7 @@ export async function registerAsesor(
 
   const { error: asesorError } = await supabaseAdmin.from("asesores").insert({
     id_perfil: userId,
-    turno: input.turno,
     area: input.area,
-    dia: input.dia,
   });
 
   if (asesorError) {
@@ -147,6 +148,13 @@ export async function registerAsesor(
       success: false,
       error: "Error al registrar los datos del asesor.",
     };
+  }
+
+  // Guardar horarios
+  if (input.horarios.length > 0) {
+    await supabaseAdmin.from("horarios").insert(
+      input.horarios.map((h) => ({ id_perfil: userId, turno: h.turno, dia: h.dia })),
+    );
   }
 
   return {

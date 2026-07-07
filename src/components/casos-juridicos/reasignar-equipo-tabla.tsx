@@ -38,6 +38,7 @@ export function AdminReasignarEquipo({ idCaso, type, currentName, onRefresh }: P
   const [jornadaFilter, setJornadaFilter] = useState("todos");
 
   const [historial, setHistorial] = useState<{ nombre: string; desde: string; hasta: string | null }[]>([]);
+  const [horariosMap, setHorariosMap] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     if (open) {
@@ -48,6 +49,7 @@ export function AdminReasignarEquipo({ idCaso, type, currentName, onRefresh }: P
       }
       // Cargar historial
       cargarHistorial();
+      cargarHorarios();
     } else {
       setSelectedId("");
       setSearch("");
@@ -74,6 +76,19 @@ export function AdminReasignarEquipo({ idCaso, type, currentName, onRefresh }: P
         hasta: h.fecha_fin_asignacion || null,
       })));
     }
+  };
+
+  const cargarHorarios = async () => {
+    // Obtener todos los horarios de los items disponibles
+    const ids = items.map((i) => i.id_perfil?.toString()).filter(Boolean);
+    if (ids.length === 0) return;
+    const { data } = await supabase.from("horarios").select("id_perfil, turno, dia").in("id_perfil", ids);
+    const map: Record<string, string[]> = {};
+    data?.forEach((h: any) => {
+      if (!map[h.id_perfil]) map[h.id_perfil] = [];
+      map[h.id_perfil].push(`${h.dia.substring(0,3)} ${h.turno}`);
+    });
+    setHorariosMap(map);
   };
 
   const filtrados = items
@@ -171,6 +186,7 @@ export function AdminReasignarEquipo({ idCaso, type, currentName, onRefresh }: P
                     )}
                     <th className="text-left p-3 text-[11px] font-bold text-slate-500 uppercase">Día</th>
                     <th className="text-center p-3 text-[11px] font-bold text-slate-500 uppercase">Carga</th>
+                    <th className="text-left p-3 text-[11px] font-bold text-slate-500 uppercase hidden lg:table-cell">Horarios</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -198,6 +214,14 @@ export function AdminReasignarEquipo({ idCaso, type, currentName, onRefresh }: P
                           <Badge variant={casos >= max ? "destructive" : "secondary"} className={`text-[10px] h-5 ${casos === 0 ? "bg-green-100 text-green-700" : casos < max ? "bg-blue-100 text-blue-700" : ""}`}>
                             {casos}/{max}
                           </Badge>
+                        </td>
+                        <td className="p-3 hidden lg:table-cell">
+                          <div className="flex flex-wrap gap-1">
+                            {(horariosMap[id!] || []).map((h, i) => (
+                              <Badge key={i} variant="outline" className="text-[10px] h-4 px-1">{h}</Badge>
+                            ))}
+                            {(!horariosMap[id!] || horariosMap[id!].length === 0) && <span className="text-[10px] text-slate-400">—</span>}
+                          </div>
                         </td>
                       </tr>
                     );

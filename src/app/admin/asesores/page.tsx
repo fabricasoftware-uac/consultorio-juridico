@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { toast } from "sonner";
+import { HorariosEditor } from "@/components/HorariosEditor";
 import { Navbar } from "../components/NavbarAdmin";
 import { registerAsesor } from "../actions/registerUser";
 import {
@@ -336,6 +337,42 @@ export default function AsesoresPage() {
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Turno</Label>
+                      <Select value={form.turno} onValueChange={set("turno")}>
+                        <SelectTrigger className="h-9"><SelectValue placeholder="Turno" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="9-11">9-11</SelectItem>
+                          <SelectItem value="2-4">2-4</SelectItem>
+                          <SelectItem value="4-6">4-6</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Dia</Label>
+                      <Select value={form.dia} onValueChange={set("dia")}>
+                        <SelectTrigger className="h-9"><SelectValue placeholder="Dia" /></SelectTrigger>
+                        <SelectContent>
+                          {["Lunes","Martes","Miercoles","Jueves","Viernes","Sabado"].map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Area</Label>
+                    <Select value={form.area} onValueChange={set("area")}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="Area" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="laboral">Laboral</SelectItem>
+                        <SelectItem value="civil_familia">Civil y Familia</SelectItem>
+                        <SelectItem value="penal">Penal</SelectItem>
+                        <SelectItem value="publica">Publico</SelectItem>
+                        <SelectItem value="otros">Otros</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   <Button
                     type="submit"
                     className="w-full bg-purple-600 hover:bg-purple-700 text-white mt-2"
@@ -530,6 +567,9 @@ export default function AsesoresPage() {
                 </div>
               </div>
             </div>
+
+            {editingAsesor && <HorariosEditor idPerfil={editingAsesor.id_perfil} />}
+
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsEditOpen(false)}>
                 Cancelar

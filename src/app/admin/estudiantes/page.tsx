@@ -3,6 +3,7 @@
 import { useState, useEffect, useTransition } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { HorariosEditor } from "@/components/HorariosEditor";
 import { Navbar } from "../components/NavbarAdmin";
 import { registerEstudiante } from "../actions/registerUser";
 import {
@@ -21,6 +22,8 @@ import {
   PowerOff,
   Search,
   Eye,
+  X,
+  Plus,
   ChartNoAxesColumnDecreasingIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -64,8 +67,7 @@ interface StudentForm {
   telefono: string;
   semestre: string;
   jornada: JornadaEnum | "";
-  turno: TurnoEnum | "";
-  dia: string;
+  horarios: { turno: string; dia: string }[];
 }
 
 const EMPTY_FORM: StudentForm = {
@@ -75,8 +77,7 @@ const EMPTY_FORM: StudentForm = {
   telefono: "",
   semestre: "",
   jornada: "",
-  turno: "",
-  dia: "",
+  horarios: [],
 };
 
 export default function EstudiantesPage() {
@@ -117,9 +118,7 @@ export default function EstudiantesPage() {
       !form.cedula ||
       !form.telefono ||
       !form.semestre ||
-      !form.jornada ||
-      !form.turno ||
-      !form.dia
+       !form.jornada
     ) {
       toast.error("Por favor complete todos los campos obligatorios.");
       return;
@@ -139,8 +138,7 @@ export default function EstudiantesPage() {
         telefono: form.telefono,
         semestre,
         jornada: form.jornada as JornadaEnum,
-        turno: form.turno as TurnoEnum,
-        dia: form.dia,
+        horarios: form.horarios,
       });
 
       if (result.success) {
@@ -335,45 +333,20 @@ export default function EstudiantesPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="student-turno" className="text-xs">
-                      Turno Horario
-                    </Label>
-                    <Select
-                      value={form.turno}
-                      onValueChange={set("turno")}
-                      disabled={isPending}
-                    >
-                      <SelectTrigger className="h-9 text-sm">
-                        <SelectValue placeholder="Seleccione turno" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="9-11">9–11 am</SelectItem>
-                        <SelectItem value="2-4">2–4 pm</SelectItem>
-                        <SelectItem value="4-6">4–6 pm</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label htmlFor="student-dia" className="text-xs">
-                      Día
-                    </Label>
-                    <Select
-                      value={form.dia}
-                      onValueChange={set("dia")}
-                      disabled={isPending}
-                    >
-                      <SelectTrigger className="h-9 text-sm">
-                        <SelectValue placeholder="Seleccione día" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Lunes">Lunes</SelectItem>
-                        <SelectItem value="Martes">Martes</SelectItem>
-                        <SelectItem value="Miércoles">Miércoles</SelectItem>
-                        <SelectItem value="Jueves">Jueves</SelectItem>
-                        <SelectItem value="Viernes">Viernes</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label className="text-xs font-bold">Horarios</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {form.horarios.map((h, i) => (
+                        <Badge key={i} variant="secondary" className="gap-1 pr-1">
+                          {h.dia?.substring(0,3)} {h.turno}
+                          <button onClick={() => {
+                            const next = [...form.horarios]; next.splice(i, 1);
+                            setForm({...form, horarios: next});
+                          }} className="hover:bg-slate-200 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                        </Badge>
+                      ))}
+                      {form.horarios.length === 0 && <span className="text-xs text-slate-400">Sin horarios</span>}
+                    </div>
+                    <HorarioAdder onAdd={(h) => setForm({...form, horarios: [...form.horarios, h]})} />
                   </div>
 
                   <Button
@@ -622,6 +595,9 @@ export default function EstudiantesPage() {
                 </div>
               </div>
             </div>
+
+            {editingStudent && <HorariosEditor idPerfil={editingStudent.id_perfil} />}
+
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsEditOpen(false)}>
                 Cancelar
@@ -644,3 +620,25 @@ export default function EstudiantesPage() {
     </div>
   );
 }
+
+function HorarioAdder({ onAdd }: { onAdd: (h: {turno:string,dia:string}) => void }) {
+  const [dia, setDia] = useState(""); const [turno, setTurno] = useState("");
+  const DIAS = ["Lunes","Martes","Miercoles","Jueves","Viernes","Sabado"];
+  return (
+    <div className="flex gap-2 items-center mt-2">
+      <Select value={dia} onValueChange={setDia}>
+        <SelectTrigger className="h-8 text-xs w-24"><SelectValue placeholder="Dia" /></SelectTrigger>
+        <SelectContent>{DIAS.map(d=><SelectItem key={d} value={d}>{d.substring(0,3)}</SelectItem>)}</SelectContent>
+      </Select>
+      <Select value={turno} onValueChange={setTurno}>
+        <SelectTrigger className="h-8 text-xs w-24"><SelectValue placeholder="Turno" /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="9-11">9-11</SelectItem><SelectItem value="2-4">2-4</SelectItem><SelectItem value="4-6">4-6</SelectItem>
+        </SelectContent>
+      </Select>
+      <Input placeholder="Otro..." value={turno} onChange={e=>setTurno(e.target.value)} className="h-8 text-xs w-20" />
+      <Button size="sm" variant="outline" className="h-8" onClick={()=>{if(dia&&turno){onAdd({dia,turno});setTurno("")}}} disabled={!dia||!turno}><Plus className="w-3.5 h-3.5" /></Button>
+    </div>
+  );
+}
+
