@@ -459,6 +459,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   </span>
                 </div>
               </div>
+              <div className="mt-3 lg:mt-0 lg:min-w-[260px]">
+                <BotonesCerrarArchivar idCaso={id_caso} estado={caso.estado} onRefresh={traerDatos} />
+              </div>
             </div>
           </div>
 
@@ -601,12 +604,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         />
                         )}
                       </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
-                    <div className="p-4">
-                      <BotonesCerrarArchivar idCaso={id_caso} estado={caso.estado} onRefresh={traerDatos} />
                     </div>
                   </Card>
 

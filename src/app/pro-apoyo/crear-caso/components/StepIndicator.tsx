@@ -36,7 +36,7 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
               {/* Círculo */}
               <div
                 className={`
-                  w-10 h-10 rounded-full flex items-center justify-center
+                  w-14 h-14 rounded-full flex items-center justify-center
                   transition-all duration-500 shadow-sm
                   ${isCompleted
                     ? "bg-emerald-500 scale-100 shadow-emerald-200"

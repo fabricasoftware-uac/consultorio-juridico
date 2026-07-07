@@ -95,6 +95,14 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               </div>
               <p className="text-lg text-slate-500">{caso.usuarios?.nombre_completo}</p>
               {caso.periodo && <p className="text-xs text-slate-400 mt-1">Período: {caso.periodo}</p>}
+              {caso.estudiantes_casos?.length ? (
+                <p className="text-xs text-blue-600 mt-1">
+                  Estudiante: {caso.estudiantes_casos[caso.estudiantes_casos.length - 1]?.estudiante?.perfil?.nombre_completo || "—"}
+                </p>
+              ) : null}
+            </div>
+            <div className="mt-3 lg:mt-0 lg:min-w-[260px]">
+              <BotonesCerrarArchivar idCaso={id} estado={caso.estado} onRefresh={refetch} />
             </div>
           </div>
 
@@ -161,12 +169,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         <CountdownTimer fechaVencimiento={caso.fecha_vencimiento_estudiante} label="Estudiante" estado={caso.estado} />
                         <CountdownTimer fechaVencimiento={caso.fecha_vencimiento_asesor} label="Asesor" estado={caso.estado} />
                       </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
-                    <div className="p-4">
-                      <BotonesCerrarArchivar idCaso={id} estado={caso.estado} onRefresh={refetch} />
                     </div>
                   </Card>
 

@@ -112,7 +112,10 @@ export default function SupportCasesPage() {
   const sortedCases = [...filteredCases].sort((a, b) => {
     const dateA = new Date(a.fecha_creacion).getTime();
     const dateB = new Date(b.fecha_creacion).getTime();
-    return dateSort === "recientes" ? dateB - dateA : dateA - dateB;
+    const diff = dateB - dateA;
+    return diff !== 0
+      ? (dateSort === "recientes" ? diff : -diff)
+      : ((b.id_caso ?? 0) - (a.id_caso ?? 0));
   });
 
   const uniqueStudents = [
