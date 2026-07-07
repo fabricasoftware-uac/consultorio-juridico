@@ -50,33 +50,45 @@ export async function GET(request: NextRequest) {
         break;
       }
       default: {
-        let q = supabaseAdmin.from("casos").select("id_caso, periodo, area, estado, clasificacion, tipo_proceso, fecha_creacion, fecha_cierre, resumen_hechos, observaciones, usuarios(nombre_completo, cedula, telefono, correo, sexo, edad, estrato, estado_civil, situacion_laboral, tipo_vivienda, enfoque_diverso, caracterizacion_lgbtiq)");
+        let q = supabaseAdmin.from("casos").select(`
+          id_caso, periodo, area, estado, clasificacion, tipo_proceso, fecha_creacion, fecha_cierre, resumen_hechos, observaciones,
+          usuarios(nombre_completo, cedula, telefono, correo, sexo, edad, estrato, estado_civil, situacion_laboral, tipo_vivienda, enfoque_diverso, caracterizacion_lgbtiq),
+          estudiantes_casos(fecha_asignacion, estudiante:estudiantes(perfil:perfiles(nombre_completo, cedula))),
+          asesores_casos(fecha_asignacion, asesor:asesores(perfil:perfiles(nombre_completo)))
+        `);
         if (periodo) q = q.eq("periodo", periodo);
         const { data } = await q;
-        filas = data?.map((c: any) => ({
-          id_caso: c.id_caso,
-          periodo: c.periodo,
-          area: c.area,
-          estado: c.estado,
-          clasificacion: c.clasificacion,
-          tipo_proceso: c.tipo_proceso,
-          fecha_creacion: c.fecha_creacion,
-          fecha_cierre: c.fecha_cierre,
-          cliente: c.usuarios?.nombre_completo,
-          cedula: c.usuarios?.cedula,
-          telefono: c.usuarios?.telefono,
-          correo: c.usuarios?.correo,
-          sexo: c.usuarios?.sexo,
-          edad: c.usuarios?.edad,
-          estrato: c.usuarios?.estrato,
-          estado_civil: c.usuarios?.estado_civil,
-          situacion_laboral: c.usuarios?.situacion_laboral,
-          tipo_vivienda: c.usuarios?.tipo_vivienda,
-          enfoque_diverso: c.usuarios?.enfoque_diverso,
-          caracterizacion_lgbtiq: c.usuarios?.caracterizacion_lgbtiq,
-          resumen_hechos: c.resumen_hechos,
-          observaciones: c.observaciones,
-        })) ?? [];
+        filas = data?.map((c: any) => {
+          const lastEst = c.estudiantes_casos?.[c.estudiantes_casos.length - 1];
+          const lastAsr = c.asesores_casos?.[c.asesores_casos.length - 1];
+          return {
+            id_caso: c.id_caso,
+            periodo: c.periodo,
+            area: c.area,
+            estado: c.estado,
+            clasificacion: c.clasificacion,
+            tipo_proceso: c.tipo_proceso,
+            fecha_creacion: c.fecha_creacion,
+            fecha_cierre: c.fecha_cierre,
+            cliente: c.usuarios?.nombre_completo,
+            cedula_cliente: c.usuarios?.cedula,
+            telefono: c.usuarios?.telefono,
+            correo: c.usuarios?.correo,
+            sexo: c.usuarios?.sexo,
+            edad: c.usuarios?.edad,
+            estrato: c.usuarios?.estrato,
+            estado_civil: c.usuarios?.estado_civil,
+            situacion_laboral: c.usuarios?.situacion_laboral,
+            tipo_vivienda: c.usuarios?.tipo_vivienda,
+            enfoque_diverso: c.usuarios?.enfoque_diverso,
+            caracterizacion_lgbtiq: c.usuarios?.caracterizacion_lgbtiq,
+            estudiante: lastEst?.estudiante?.perfil?.nombre_completo || "Sin asignar",
+            cedula_estudiante: lastEst?.estudiante?.perfil?.cedula || "",
+            asesor: lastAsr?.asesor?.perfil?.nombre_completo || "Sin asignar",
+            resumen_hechos: c.resumen_hechos,
+            observaciones: c.observaciones,
+          };
+        }) ?? [];
         columnas = Object.keys(filas[0] || {});
         break;
       }
