@@ -23,6 +23,7 @@ import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
 import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
 import { CasoAuditoria } from "@/components/casos-juridicos/caso-auditoria";
 import { DocumentosCaso } from "@/components/casos-juridicos/documentos-caso";
+import { ActividadesCaso } from "@/components/casos-juridicos/actividades-caso";
 import { AdminReasignarEquipo } from "@/components/casos-juridicos/reasignar-equipo-tabla";
 import { BotonesCerrarArchivar } from "@/components/casos-juridicos/botones-cerrar-archivar";
 import { useRealtimeCaso } from "@/lib/hooks/useRealtimeCaso";
@@ -30,7 +31,7 @@ import { useCaseEdit } from "@/lib/hooks/useCaseEdit";
 import { cleanData } from "@/lib/utils";
 import { toast } from "sonner";
 import {
-  Calendar, AlertTriangle, Users, ChevronLeft,
+  Calendar, AlertTriangle, Users, ChevronLeft, ClipboardList,
 } from "lucide-react";
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
@@ -221,6 +222,14 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       <h3 className="font-bold text-amber-800">Llamados de Atención</h3>
                     </div>
                     <div className="p-6"><LlamadosList idCaso={id} /></div>
+                  </Card>
+
+                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                    <div className="bg-slate-50 border-b p-4 flex items-center gap-3">
+                      <ClipboardList className="w-5 h-5 text-blue-600" />
+                      <h3 className="font-bold text-slate-800">Actividades</h3>
+                    </div>
+                    <div className="p-6"><ActividadesCaso idCaso={id} /></div>
                   </Card>
                 </div>
               </div>
