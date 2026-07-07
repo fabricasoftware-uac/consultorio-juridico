@@ -173,8 +173,7 @@ export default function EstudiantesPage() {
       telefono: student.perfil.telefono || "",
       semestre: student.semestre.toString(),
       jornada: student.jornada,
-      turno: student.turno,
-      dia: student.dia || "",
+      horarios: [],
     });
     setIsEditOpen(true);
   };
@@ -189,8 +188,6 @@ export default function EstudiantesPage() {
         telefono: editForm.telefono,
         semestre: parseInt(editForm.semestre),
         jornada: editForm.jornada,
-        turno: editForm.turno,
-        dia: editForm.dia,
       });
 
       if (result.success) {
@@ -428,10 +425,9 @@ export default function EstudiantesPage() {
                             <div className="text-sm">
                               Semestre {student.semestre}
                             </div>
-                            <div className="text-xs text-slate-400 capitalize">
-                              {student.jornada} • {student.turno} •
-                              {student.dia}
-                            </div>
+                             <div className="text-xs text-slate-400 capitalize">
+                               {student.jornada} · {student.semestre}° semestre
+                             </div>
                           </TableCell>
                           <TableCell>
                             <Badge
@@ -551,45 +547,6 @@ export default function EstudiantesPage() {
                       <SelectItem value="diurna">Diurna</SelectItem>
                       <SelectItem value="nocturna">Nocturna</SelectItem>
                       <SelectItem value="mixto">Mixto</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-turno" className="text-right">
-                  Turno
-                </Label>
-                <div className="col-span-3">
-                  <Select
-                    value={editForm.turno}
-                    onValueChange={setEdit("turno")}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccione turno" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="9-11">9–11 am</SelectItem>
-                      <SelectItem value="2-4">2–4 pm</SelectItem>
-                      <SelectItem value="4-6">4–6 pm</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-dia" className="text-right">
-                  Día
-                </Label>
-                <div className="col-span-3">
-                  <Select value={editForm.dia} onValueChange={setEdit("dia")}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccione día" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Lunes">Lunes</SelectItem>
-                      <SelectItem value="Martes">Martes</SelectItem>
-                      <SelectItem value="Miércoles">Miércoles</SelectItem>
-                      <SelectItem value="Jueves">Jueves</SelectItem>
-                      <SelectItem value="Viernes">Viernes</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

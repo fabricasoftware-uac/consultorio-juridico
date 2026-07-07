@@ -20,6 +20,8 @@ import {
   PowerOff,
   Search,
   Calendar,
+  X,
+  Plus,
 } from "lucide-react";
 
 import {
@@ -67,9 +69,8 @@ interface AsesorForm {
   correo: string;
   cedula: string;
   telefono: string;
-  turno: TurnoEnum | "";
   area: AreaEnum | "";
-  dia: string;
+  horarios: { turno: string; dia: string }[];
 }
 
 const EMPTY_FORM: AsesorForm = {
@@ -77,9 +78,8 @@ const EMPTY_FORM: AsesorForm = {
   correo: "",
   cedula: "",
   telefono: "",
-  turno: "",
   area: "",
-  dia: "",
+  horarios: [],
 };
 
 export default function AsesoresPage() {
@@ -125,9 +125,7 @@ export default function AsesoresPage() {
       !form.correo ||
       !form.cedula ||
       !form.telefono ||
-      !form.turno ||
-      !form.area ||
-      !form.dia
+      !form.area
     ) {
       toast.error("Por favor complete todos los campos obligatorios.");
       return;
@@ -139,9 +137,8 @@ export default function AsesoresPage() {
         correo: form.correo,
         cedula: form.cedula,
         telefono: form.telefono,
-        turno: form.turno as TurnoEnum,
         area: form.area as AreaEnum,
-        dia: form.dia,
+        horarios: form.horarios,
       });
 
       if (result.success) {
@@ -174,9 +171,8 @@ export default function AsesoresPage() {
       correo: asesor.perfil.correo || "",
       cedula: asesor.perfil.cedula || "",
       telefono: asesor.perfil.telefono || "",
-      turno: asesor.turno,
       area: asesor.area,
-      dia: asesor.dia || "",
+      horarios: [],
     });
     setIsEditOpen(true);
   };
@@ -232,9 +228,7 @@ export default function AsesoresPage() {
         nombre_completo: editForm.nombre,
         cedula: editForm.cedula,
         telefono: editForm.telefono,
-        turno: editForm.turno,
         area: editForm.area,
-        dia: editForm.dia,
       });
 
       if (result.success) {
@@ -337,27 +331,21 @@ export default function AsesoresPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <Label className="text-xs">Turno</Label>
-                      <Select value={form.turno} onValueChange={set("turno")}>
-                        <SelectTrigger className="h-9"><SelectValue placeholder="Turno" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="9-11">9-11</SelectItem>
-                          <SelectItem value="2-4">2-4</SelectItem>
-                          <SelectItem value="4-6">4-6</SelectItem>
-                        </SelectContent>
-                      </Select>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold">Horarios</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {form.horarios.map((h, i) => (
+                        <Badge key={i} variant="secondary" className="gap-1 pr-1">
+                          {h.dia?.substring(0,3)} {h.turno}
+                          <button onClick={() => {
+                            const next = [...form.horarios]; next.splice(i, 1);
+                            setForm({...form, horarios: next});
+                          }} className="hover:bg-slate-200 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                        </Badge>
+                      ))}
+                      {form.horarios.length === 0 && <span className="text-xs text-slate-400">Sin horarios</span>}
                     </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-xs">Dia</Label>
-                      <Select value={form.dia} onValueChange={set("dia")}>
-                        <SelectTrigger className="h-9"><SelectValue placeholder="Dia" /></SelectTrigger>
-                        <SelectContent>
-                          {["Lunes","Martes","Miercoles","Jueves","Viernes","Sabado"].map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <HorarioAdder onAdd={(h) => setForm({...form, horarios: [...form.horarios, h]})} />
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs">Area</Label>
@@ -625,3 +613,25 @@ export default function AsesoresPage() {
     </div>
   );
 }
+
+function HorarioAdder({ onAdd }: { onAdd: (h: {turno:string,dia:string}) => void }) {
+  const [dia, setDia] = useState(""); const [turno, setTurno] = useState("");
+  const DIAS = ["Lunes","Martes","Miercoles","Jueves","Viernes","Sabado"];
+  return (
+    <div className="flex gap-2 items-center mt-2">
+      <Select value={dia} onValueChange={setDia}>
+        <SelectTrigger className="h-8 text-xs w-24"><SelectValue placeholder="Dia" /></SelectTrigger>
+        <SelectContent>{DIAS.map(d=><SelectItem key={d} value={d}>{d.substring(0,3)}</SelectItem>)}</SelectContent>
+      </Select>
+      <Select value={turno} onValueChange={setTurno}>
+        <SelectTrigger className="h-8 text-xs w-24"><SelectValue placeholder="Turno" /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="9-11">9-11</SelectItem><SelectItem value="2-4">2-4</SelectItem><SelectItem value="4-6">4-6</SelectItem>
+        </SelectContent>
+      </Select>
+      <Input placeholder="Otro..." value={turno} onChange={e=>setTurno(e.target.value)} className="h-8 text-xs w-20" />
+      <Button size="sm" variant="outline" className="h-8" onClick={()=>{if(dia&&turno){onAdd({dia,turno});setTurno("")}}} disabled={!dia||!turno}><Plus className="w-3.5 h-3.5" /></Button>
+    </div>
+  );
+}
+
