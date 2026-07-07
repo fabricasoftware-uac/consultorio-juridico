@@ -4,6 +4,7 @@ import "./globals.css";
 import Footer from "@/components/global/Footer";
 import { Toaster } from "@/components/ui/sonner";
 
+import { BotonAccesibilidad } from "@/components/global/BotonAccesibilidad";
 import IdleTimerProvider from "@/components/global/IdleTimerProvider";
 
 const geistSans = Geist({
@@ -35,6 +36,7 @@ export default function RootLayout({
         {children}
         <Footer />
         <Toaster />
+        <BotonAccesibilidad />
       </body>
     </html>
   );
