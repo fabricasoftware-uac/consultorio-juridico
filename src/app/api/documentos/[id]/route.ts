@@ -75,11 +75,11 @@ export async function PATCH(
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
-  const updates: Record<string, any> = {};
+  const updates: Record<string, any> = { updated_at: new Date().toISOString() };
   if (body.nombre_original) updates.nombre_original = body.nombre_original;
   if (body.tipo) updates.tipo = body.tipo;
   if (body.estado) updates.estado = body.estado;
-  updates.updated_at = new Date().toISOString();
+  if (body.estado_doc) updates.estado_doc = body.estado_doc;
 
   const { error } = await supabaseAdmin
     .from("documentos_caso")

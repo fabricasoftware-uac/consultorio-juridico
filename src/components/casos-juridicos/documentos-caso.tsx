@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FileText, Upload, Download, Trash2, File, Image as ImageIcon, FileSpreadsheet, FileArchive, Archive, Pencil, Eye } from "lucide-react";
+import { FileText, Upload, Download, Trash2, File, Image as ImageIcon, FileSpreadsheet, FileArchive, Archive, Eye, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/supabase-client";
 
@@ -23,6 +24,7 @@ type Documento = {
   mime_type: string;
   tamano: number;
   estado?: string;
+  estado_doc?: string;
   created_at: string;
   signed_url?: string | null;
 };
@@ -130,6 +132,18 @@ export function DocumentosCaso({ idCaso }: Props) {
     }
   };
 
+  const handleAprobarDoc = async (doc: Documento, estado: "aprobado" | "rechazado") => {
+    const data = await api(`/api/documentos/${doc.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ estado_doc: estado }),
+    });
+    if (data?.success) {
+      toast.success(estado === "aprobado" ? "Documento aprobado" : "Documento rechazado");
+      cargar();
+    }
+  };
+
   const handleDownload = (doc: Documento) => {
     if (doc.signed_url) window.open(doc.signed_url, "_blank");
   };
@@ -155,7 +169,16 @@ export function DocumentosCaso({ idCaso }: Props) {
             <div key={doc.id} className={`flex items-center gap-3 p-3 rounded-xl border shadow-sm group transition-opacity ${doc.estado === "archivado" ? "bg-slate-50 border-slate-100 opacity-60" : "bg-white border-slate-100"}`}>
               <Icon className={`w-5 h-5 ${color} shrink-0`} />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-700 truncate">{doc.nombre_original}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium text-slate-700 truncate">{doc.nombre_original}</p>
+                  {doc.estado_doc === "aprobado" ? (
+                    <Badge variant="outline" className="text-[10px] text-green-700 bg-green-50 border-green-200 h-4 px-1">Aprobado</Badge>
+                  ) : doc.estado_doc === "rechazado" ? (
+                    <Badge variant="outline" className="text-[10px] text-red-700 bg-red-50 border-red-200 h-4 px-1">Rechazado</Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-[10px] text-amber-700 bg-amber-50 border-amber-200 h-4 px-1">Pendiente</Badge>
+                  )}
+                </div>
                 <p className="text-[10px] text-slate-400">{formatSize(doc.tamano)} {doc.estado === "archivado" && "· Archivado"}</p>
               </div>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -165,6 +188,16 @@ export function DocumentosCaso({ idCaso }: Props) {
                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDownload(doc)} title="Descargar">
                   <Download className="w-3.5 h-3.5" />
                 </Button>
+                {(role === "asesor" || role === "pro_apoyo" || role === "admin") && doc.estado_doc !== "aprobado" && (
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleAprobarDoc(doc, "aprobado")} title="Aprobar">
+                    <CheckCircle className="w-3.5 h-3.5 text-green-600" />
+                  </Button>
+                )}
+                {(role === "asesor" || role === "pro_apoyo" || role === "admin") && doc.estado_doc !== "rechazado" && (
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleAprobarDoc(doc, "rechazado")} title="Rechazar">
+                    <XCircle className="w-3.5 h-3.5 text-red-500" />
+                  </Button>
+                )}
                 {(role === "asesor" || role === "pro_apoyo" || role === "admin") && (
                   <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleArchivar(doc)} title={doc.estado === "archivado" ? "Restaurar" : "Archivar"}>
                     <Archive className="w-3.5 h-3.5" />
