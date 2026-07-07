@@ -63,6 +63,7 @@ import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
 import { ObservacionesChat } from "@/components/casos-juridicos/observaciones-chat";
 import { CasoAuditoria } from "@/components/casos-juridicos/caso-auditoria";
 import { DocumentosCaso } from "@/components/casos-juridicos/documentos-caso";
+import { BotonesCerrarArchivar } from "@/components/casos-juridicos/botones-cerrar-archivar";
 
 export default function Page({
   params,
@@ -532,6 +533,12 @@ export default function Page({
                           estado={caso?.estado}
                         />
                       </div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                    <div className="p-4">
+                      <BotonesCerrarArchivar idCaso={id_caso} estado={caso?.estado || ""} onRefresh={traerDatos} />
                     </div>
                   </Card>
 

@@ -15,8 +15,7 @@ export async function getAsesores(
       telefono,
       activo,
       cedula
-    ),
-    asesores_casos(count)
+    )
   `);
 
   if (soloActivos) {
@@ -30,9 +29,22 @@ export async function getAsesores(
     return [];
   }
 
+  // Conteo de casos ACTIVOS (fecha_fin_asignacion IS NULL)
+  const ids = data?.map((a) => a.id_perfil) ?? [];
+  const { data: counts } = await supabase
+    .from("asesores_casos")
+    .select("id_asesor")
+    .in("id_asesor", ids)
+    .is("fecha_fin_asignacion", null);
+
+  const countMap: Record<string, number> = {};
+  counts?.forEach((c) => {
+    countMap[c.id_asesor] = (countMap[c.id_asesor] || 0) + 1;
+  });
+
   const formattedData = data?.map((ase) => ({
     ...ase,
-    total_casos: ase.asesores_casos?.[0]?.count || 0,
+    total_casos: countMap[ase.id_perfil] || 0,
   }));
 
   return formattedData as unknown as Asesor[];

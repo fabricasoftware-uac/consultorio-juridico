@@ -24,6 +24,7 @@ import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
 import { CasoAuditoria } from "@/components/casos-juridicos/caso-auditoria";
 import { DocumentosCaso } from "@/components/casos-juridicos/documentos-caso";
 import { AdminReasignarEquipo } from "@/components/casos-juridicos/reasignar-equipo-tabla";
+import { BotonesCerrarArchivar } from "@/components/casos-juridicos/botones-cerrar-archivar";
 import { useRealtimeCaso } from "@/lib/hooks/useRealtimeCaso";
 import { useCaseEdit } from "@/lib/hooks/useCaseEdit";
 import { cleanData } from "@/lib/utils";
@@ -160,6 +161,12 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         <CountdownTimer fechaVencimiento={caso.fecha_vencimiento_estudiante} label="Estudiante" estado={caso.estado} />
                         <CountdownTimer fechaVencimiento={caso.fecha_vencimiento_asesor} label="Asesor" estado={caso.estado} />
                       </div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                    <div className="p-4">
+                      <BotonesCerrarArchivar idCaso={id} estado={caso.estado} onRefresh={refetch} />
                     </div>
                   </Card>
 

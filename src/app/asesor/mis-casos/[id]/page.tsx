@@ -41,6 +41,7 @@ import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
 import { CasoAuditoria } from "@/components/casos-juridicos/caso-auditoria";
 import { useRealtimeCaso } from "@/lib/hooks/useRealtimeCaso";
 import { DocumentosCaso } from "@/components/casos-juridicos/documentos-caso";
+import { BotonesCerrarArchivar } from "@/components/casos-juridicos/botones-cerrar-archivar";
 import { StudentInfo } from "@/components/casos-juridicos/student-info";
 import { SectionCard } from "@/components/casos-juridicos/shared-ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -600,6 +601,12 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         />
                         )}
                       </div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                    <div className="p-4">
+                      <BotonesCerrarArchivar idCaso={id_caso} estado={caso.estado} onRefresh={traerDatos} />
                     </div>
                   </Card>
 

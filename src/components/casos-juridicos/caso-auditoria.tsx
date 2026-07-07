@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import {
+  Archive,
   FileText,
   MessageSquare,
   CheckCircle2,
@@ -23,6 +24,8 @@ const ACCION_ICON: Record<string, { icon: typeof FileText; color: string; bg: st
   cambio_estado: { icon: AlertTriangle, color: "text-orange-600", bg: "bg-orange-100" },
   aprobacion: { icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-100" },
   correccion: { icon: UserCheck, color: "text-purple-600", bg: "bg-purple-100" },
+  cierre: { icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-100" },
+  archivado: { icon: Archive, color: "text-slate-600", bg: "bg-slate-100" },
 };
 
 interface CasoAuditoriaProps {

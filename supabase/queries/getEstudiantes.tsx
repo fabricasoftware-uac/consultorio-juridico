@@ -16,8 +16,7 @@ export async function getEstudiantes(
       telefono,
       cedula,
       activo
-    ),
-    estudiantes_casos(count)
+    )
   `);
 
   if (soloActivos) {
@@ -31,9 +30,22 @@ export async function getEstudiantes(
     return [];
   }
 
+  // Conteo de casos ACTIVOS (fecha_fin_asignacion IS NULL)
+  const ids = data?.map((e) => e.id_perfil) ?? [];
+  const { data: counts } = await supabase
+    .from("estudiantes_casos")
+    .select("id_estudiante")
+    .in("id_estudiante", ids)
+    .is("fecha_fin_asignacion", null);
+
+  const countMap: Record<string, number> = {};
+  counts?.forEach((c) => {
+    countMap[c.id_estudiante] = (countMap[c.id_estudiante] || 0) + 1;
+  });
+
   const formattedData = data?.map((est) => ({
     ...est,
-    total_casos: est.estudiantes_casos?.[0]?.count || 0,
+    total_casos: countMap[est.id_perfil] || 0,
   }));
 
   return formattedData as unknown as Estudiante[];

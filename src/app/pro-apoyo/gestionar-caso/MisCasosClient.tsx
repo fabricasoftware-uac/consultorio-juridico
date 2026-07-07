@@ -45,6 +45,7 @@ export default function SupportCasesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("todos");
   const [areaFilter, setAreaFilter] = useState("todos");
+  const [periodoFilter, setPeriodoFilter] = useState("todos");
   const [studentFilter, setStudentFilter] = useState("todos");
   const [dateSort, setDateSort] = useState("recientes");
   const [classFilter, setClassFilter] = useState("todos");
@@ -95,13 +96,16 @@ export default function SupportCasesPage() {
     // Nuevos filtros
     const matchesClass =
       classFilter === "todos" || caso.clasificacion === classFilter;
+    const matchesPeriodo =
+      periodoFilter === "todos" || caso.periodo === periodoFilter;
 
     return (
       matchesSearch &&
       matchesStatus &&
       matchesArea &&
       matchesStudent &&
-      matchesClass
+      matchesClass &&
+      matchesPeriodo
     );
   });
 
@@ -233,12 +237,28 @@ export default function SupportCasesPage() {
             setSearchTerm("");
             setStatusFilter("todos");
             setAreaFilter("todos");
+            setPeriodoFilter("todos");
             setStudentFilter("todos");
             setDateSort("recientes");
             setClassFilter("todos");
           }}
         >
-          
+          <div className="w-full lg:w-40 space-y-1.5">
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Período
+            </label>
+            <Select value={periodoFilter} onValueChange={setPeriodoFilter}>
+              <SelectTrigger className="bg-slate-50 border-transparent focus:bg-white transition-colors rounded-xl">
+                <SelectValue placeholder="Período" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos</SelectItem>
+                {[...new Set((casos ?? []).map((c) => c.periodo).filter(Boolean))].sort().reverse().map((p) => (
+                  <SelectItem key={p} value={p!}>{p}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CaseFilters>
 
         {/* Case List Grid */}
