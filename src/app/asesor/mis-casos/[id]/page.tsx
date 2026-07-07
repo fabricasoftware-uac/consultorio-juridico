@@ -570,7 +570,27 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         />
                       </div>
                     </div>
-                  </SectionCard>
+                    </SectionCard>
+
+                  {/* Historial + Documentos */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                      <div className="bg-slate-50 border-b p-4 flex items-center gap-3">
+                        <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3 className="font-bold text-slate-800">Historial del Caso</h3>
+                      </div>
+                      <div className="p-6 max-h-80 overflow-y-auto"><CasoAuditoria idCaso={id_caso} /></div>
+                    </Card>
+                    <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                      <div className="bg-slate-50 border-b p-4 flex items-center gap-3">
+                        <FileText className="w-5 h-5 text-cyan-600" />
+                        <h3 className="font-bold text-slate-800">Documentos</h3>
+                      </div>
+                      <div className="p-6"><DocumentosCaso idCaso={id_caso} /></div>
+                    </Card>
+                  </div>
                 </div>
 
                 {/* Sidebar */}
@@ -645,37 +665,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     </div>
                   </Card>
 
-                  {/* Historial del Caso */}
-                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
-                    <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center gap-3">
-                      <div className="p-2 bg-slate-100 rounded-lg text-slate-600">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <h3 className="font-bold text-slate-800 tracking-tight">
-                        Historial del Caso
-                      </h3>
-                    </div>
-                    <div className="p-6">
-                      <CasoAuditoria idCaso={id_caso} />
-                    </div>
-                  </Card>
-
-                  {/* Documentos */}
-                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
-                    <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center gap-3">
-                      <div className="p-2 bg-cyan-100 rounded-lg text-cyan-600">
-                        <FileText className="w-5 h-5" />
-                      </div>
-                      <h3 className="font-bold text-slate-800 tracking-tight">
-                        Documentos
-                      </h3>
-                    </div>
-                    <div className="p-6">
-                      <DocumentosCaso idCaso={id_caso} />
-                    </div>
-                  </Card>
                 </div>
               </div>
             </TabsContent>
