@@ -41,6 +41,7 @@ import {
   ChevronLeft,
   ChevronRight,
   CheckCircle,
+  Download,
 } from "lucide-react";
 import { ProgressIndicator } from "@radix-ui/react-progress";
 import { Caso, Demandado } from "app/types/database";
@@ -67,11 +68,11 @@ import {
 
 const STEPS = [
   { id: 1, title: "Información de la Entrevista", icon: CalendarDays },
-  { id: 2, title: "Información del Solicitante", icon: User },
+  { id: 2, title: "Identificación y Datos Personales", icon: User },
   { id: 3, title: "¿Quién solicita el servicio?", icon: Scale },
   { id: 4, title: "Información Laboral y Financiera", icon: Briefcase },
-  { id: 5, title: "Datos del Demandado", icon: MapPin },
-  { id: 6, title: "Información del Contrato Laboral", icon: FileText },
+  { id: 5, title: "Vivienda y Ubicación", icon: MapPin },
+  { id: 6, title: "Datos del Accionado", icon: FileText },
   { id: 7, title: "Detalles del Caso", icon: FileText },
   { id: 8, title: "Firmas y Autorización", icon: CheckCircle },
 ];
@@ -168,6 +169,33 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
     // Characterization
     enfoque_diverso: null as boolean | null,
     caracterizacion_lgbtiq: null as string | null,
+    correo_contacto: "",
+
+    // Document ID
+    tipo_documento: "CC",
+    fecha_expedicion_doc: "",
+    ciudad_expedicion: "",
+    fecha_nacimiento: "",
+    nacionalidad: "",
+
+    // Gender & Orientation
+    identidad_genero: null as string | null,
+    orientacion_sexual: null as string | null,
+
+    // Sociodemographic
+    escolaridad: "",
+    grupo_etnico: "",
+    barrio: "",
+    zona: "",
+    tenencia_vivienda: "",
+    comuna: "",
+    tiene_sisben: null as boolean | null,
+    personas_cargo: null as number | null,
+    rango_salarial: "",
+    servicios_publicos: "",
+    sabe_leer: null as boolean | null,
+    discapacidad: "",
+    condicion_actual: "",
 
     // Case Information
     resumen_hechos: "",
@@ -424,7 +452,19 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
               Paso {currentStep} de {STEPS.length}
             </p>
           </div>
-          <div className="text-right">
+          <div className="text-right flex items-center gap-3">
+            <Button variant="outline" size="sm" className="text-xs" onClick={async () => {
+              const ExcelJS = (await import("exceljs")).default;
+              const wb = new ExcelJS.Workbook(); const ws = wb.addWorksheet("Entrevista");
+              ws.columns = Object.keys(formData).map(k=>({header:k,key:k,width:25}));
+              ws.addRow(formData);
+              const buf = await wb.xlsx.writeBuffer();
+              const blob = new Blob([buf]); const url = URL.createObjectURL(blob);
+              const a = document.createElement("a"); a.href = url; a.download = `entrevista_${idCaso}.xlsx`; a.click(); URL.revokeObjectURL(url);
+              toast.success("Formulario exportado a Excel");
+            }}>
+              <Download className="w-3.5 h-3.5 mr-1" />Exportar
+            </Button>
             <span className="text-2xl font-black text-blue-600">
               {Math.round(progress)}%
             </span>

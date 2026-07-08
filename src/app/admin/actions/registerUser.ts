@@ -97,7 +97,7 @@ export interface RegisterAsesorInput {
   correo: string;
   cedula: string;
   telefono: string;
-  area: "no_asignada" | "laboral" | "civil_familia" | "penal" | "publica" | "otros";
+  area: "no_asignada" | "laboral" | "civil_familia" | "penal" | "publica" | "conciliacion" | "privado" | "otros";
   horarios: { turno: string; dia: string }[];
 }
 

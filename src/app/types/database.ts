@@ -13,11 +13,13 @@ export type AreaEnum =
   | "civil_familia"
   | "penal"
   | "publica"
+  | "conciliacion"
+  | "privado"
   | "otros";
 export type TurnoEnum = "9-11" | "2-4" | "4-6";
 export type ClasificacionEnum = "en_tramite" | "solo_asesoria";
 export type JornadaEnum = "diurna" | "nocturna" | "mixto";
-export type EstadoCivilEnum = "soltero" | "casado" | "union libre" | "otro";
+export type EstadoCivilEnum = "soltero" | "casado" | "union libre" | "viudo" | "divorciado" | "otro";
 export type TipoContratoEnum =
   | "escrito"
   | "verbal"
@@ -36,6 +38,7 @@ export type SexoEnum =
   | "FEMENINO"
   | "INTERSEXUAL"
   | "PREFIERO_NO_RESPONDER"
+  | "OTRO"
   | "";
 
 export type CaracterizacionLgbtiqEnum =
@@ -68,8 +71,28 @@ export type Usuario = {
   concepto_otros_ingresos?: string | null;
   tiene_contrato?: boolean;
   tiene_representado?: boolean;
+  tipo_documento?: string | null;
+  fecha_expedicion_doc?: string | null;
+  ciudad_expedicion?: string | null;
+  fecha_nacimiento?: string | null;
+  nacionalidad?: string | null;
   enfoque_diverso?: boolean | null;
   caracterizacion_lgbtiq?: CaracterizacionLgbtiqEnum | null;
+  identidad_genero?: string | null;
+  orientacion_sexual?: string | null;
+  escolaridad?: string | null;
+  grupo_etnico?: string | null;
+  barrio?: string | null;
+  zona?: string | null;
+  tenencia_vivienda?: string | null;
+  comuna?: string | null;
+  tiene_sisben?: boolean | null;
+  personas_cargo?: number | null;
+  rango_salarial?: string | null;
+  servicios_publicos?: string | null;
+  sabe_leer?: boolean | null;
+  discapacidad?: string | null;
+  condicion_actual?: string | null;
 };
 
 // --- PERFILES --------------------------------------------------
