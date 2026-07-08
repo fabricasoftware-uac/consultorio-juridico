@@ -145,7 +145,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         .from("casos")
         .update({
           clasificacion: clasificacion,
-          estado: "aprobado",
+          estado: "activo",
         })
         .eq("id_caso", id_caso);
 
@@ -629,7 +629,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   </Card>
 
                   {/* Estado del caso */}
-                  {caso.estado === "aprobado" && (
+                  {caso.estado === "activo" && (
                     <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
                       <div className="bg-green-50 border-b border-green-100 p-4 flex items-center gap-3 font-semibold text-green-800">
                         <Users className="w-5 h-5" />

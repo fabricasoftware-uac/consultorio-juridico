@@ -27,7 +27,7 @@ const STATUS_OPTIONS = [
   { value: "en_proceso", label: "En proceso" },
   { value: "pendiente_aprobacion", label: "Pendiente de aprobación" },
   { value: "en_correccion", label: "En corrección" },
-  { value: "aprobado", label: "Aprobado" },
+  { value: "activo", label: "Activo" },
   { value: "cerrado", label: "Cerrado" },
   { value: "archivado", label: "Archivado" },
 ] as const;

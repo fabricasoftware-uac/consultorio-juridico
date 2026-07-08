@@ -199,7 +199,7 @@ export default function SupportCasesPage() {
               <div>
                 <p className="text-sm font-medium text-slate-500">Aprobados</p>
                 <p className="text-2xl font-bold text-slate-900">
-                  {currentCases?.filter((c) => c.estado === "aprobado").length || 0}
+                  {currentCases?.filter((c) => c.estado === "activo").length || 0}
                 </p>
               </div>
             </div>

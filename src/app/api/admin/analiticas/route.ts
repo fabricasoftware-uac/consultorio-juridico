@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
         en_proceso: conteo(casosFiltrados, (c) => c.estado === "en_proceso"),
         pendiente_aprobacion: conteo(casosFiltrados, (c) => c.estado === "pendiente_aprobacion"),
         en_correccion: conteo(casosFiltrados, (c) => c.estado === "en_correccion"),
-        aprobado: conteo(casosFiltrados, (c) => c.estado === "aprobado"),
+        aprobado: conteo(casosFiltrados, (c) => c.estado === "activo"),
         cerrado: conteo(casosFiltrados, (c) => c.estado === "cerrado"),
         archivado: conteo(casosFiltrados, (c) => c.estado === "archivado"),
       },

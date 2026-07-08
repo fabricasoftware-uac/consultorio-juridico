@@ -1,7 +1,7 @@
 // --- ENUMS -----------------------------------------------------
 
 export type EstadoEnum =
-  | "aprobado"
+  | "activo"
   | "en_proceso"
   | "pendiente_aprobacion"
   | "en_correccion"

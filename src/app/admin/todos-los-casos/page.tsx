@@ -129,7 +129,7 @@ export default function TodosLosCasosPage() {
                 <SelectItem value="en_proceso">En proceso</SelectItem>
                 <SelectItem value="pendiente_aprobacion">Pendiente aprobación</SelectItem>
                 <SelectItem value="en_correccion">En corrección</SelectItem>
-                <SelectItem value="aprobado">Aprobado</SelectItem>
+                <SelectItem value="activo">Aprobado</SelectItem>
                 <SelectItem value="cerrado">Cerrado</SelectItem>
                 <SelectItem value="archivado">Archivado</SelectItem>
               </SelectContent>

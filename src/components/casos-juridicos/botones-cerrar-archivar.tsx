@@ -17,7 +17,7 @@ interface Props {
 export function BotonesCerrarArchivar({ idCaso, estado, clasificacion, onRefresh }: Props) {
   const [loading, setLoading] = useState(false);
 
-  if (estado === "cerrado" || estado === "archivado") return null;
+  if (estado !== "activo") return null;
 
   const handleAction = async (nuevoEstado: "cerrado" | "archivado") => {
     // Validar documentos antes de cerrar

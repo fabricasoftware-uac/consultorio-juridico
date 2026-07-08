@@ -113,7 +113,7 @@ export default function Asesor() {
     (c) => c.estado === "pendiente_aprobacion",
   ).length;
   const approvedCount = advisorActiveCasos?.filter(
-    (c) => c.estado === "aprobado",
+    (c) => c.estado === "activo",
   ).length;
   const totalCount = advisorActiveCasos?.length;
 

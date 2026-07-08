@@ -212,7 +212,7 @@ export default function MisCasosClient() {
                 <p className="text-sm font-medium text-slate-500">Aprobados</p>
                 <p className="text-2xl font-bold text-slate-900">
                   {
-                    studentActiveCasos.filter((c) => c.estado === "aprobado")
+                    studentActiveCasos.filter((c) => c.estado === "activo")
                       .length
                   }
                 </p>

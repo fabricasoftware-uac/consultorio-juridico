@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Clock, AlertTriangle, Hourglass } from "lucide-react";
 import { cn } from "@/components/ui/utils";
 
-const ESTADOS_TERMINALES = new Set(["aprobado", "cerrado", "archivado"]);
+const ESTADOS_TERMINALES = new Set(["activo", "cerrado", "archivado"]);
 
 interface CountdownTimerProps {
   fechaVencimiento: string | null | undefined;
