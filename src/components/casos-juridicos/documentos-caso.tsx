@@ -11,9 +11,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FileText, Upload, Download, Trash2, File, Image as ImageIcon, FileSpreadsheet, FileArchive, Archive, Eye, CheckCircle, XCircle } from "lucide-react";
+import { FileText, Upload, Download, Trash2, File, Image as ImageIcon, FileSpreadsheet, FileArchive, Archive, Eye, CheckCircle, XCircle, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/supabase-client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type Documento = {
   id: number;
@@ -93,7 +100,14 @@ export function DocumentosCaso({ idCaso }: Props) {
     setLoading(false);
   };
 
-  useEffect(() => { cargar(); }, [idCaso]);
+  useEffect(() => {
+    cargar();
+    const channel = supabase
+      .channel(`docs-${idCaso}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "documentos_caso", filter: `id_caso=eq.${idCaso}` }, () => cargar())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [idCaso]);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -181,33 +195,30 @@ export function DocumentosCaso({ idCaso }: Props) {
                 </div>
                 <p className="text-[10px] text-slate-400">{formatSize(doc.tamano)} {doc.estado === "archivado" && "· Archivado"}</p>
               </div>
-              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setPreview(doc)} title="Vista previa">
-                  <Eye className="w-3.5 h-3.5" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDownload(doc)} title="Descargar">
-                  <Download className="w-3.5 h-3.5" />
-                </Button>
-                {(role === "asesor" || role === "pro_apoyo" || role === "admin") && doc.estado_doc !== "aprobado" && (
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleAprobarDoc(doc, "aprobado")} title="Aprobar">
-                    <CheckCircle className="w-3.5 h-3.5 text-green-600" />
-                  </Button>
-                )}
-                {(role === "asesor" || role === "pro_apoyo" || role === "admin") && doc.estado_doc !== "rechazado" && (
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleAprobarDoc(doc, "rechazado")} title="Rechazar">
-                    <XCircle className="w-3.5 h-3.5 text-red-500" />
-                  </Button>
-                )}
-                {(role === "asesor" || role === "pro_apoyo" || role === "admin") && (
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleArchivar(doc)} title={doc.estado === "archivado" ? "Restaurar" : "Archivar"}>
-                    <Archive className="w-3.5 h-3.5" />
-                  </Button>
-                )}
-                {(role === "admin" || role === "pro_apoyo") && (
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-600" onClick={() => handleDelete(doc)} title="Eliminar">
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
-                )}
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-7 w-7">
+                      <MoreVertical className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={() => setPreview(doc)}><Eye className="w-4 h-4 mr-2" />Vista previa</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleDownload(doc)}><Download className="w-4 h-4 mr-2" />Descargar</DropdownMenuItem>
+                    {(role === "asesor" || role === "pro_apoyo" || role === "admin") && doc.estado_doc !== "aprobado" && (
+                      <DropdownMenuItem onClick={() => handleAprobarDoc(doc, "aprobado")}><CheckCircle className="w-4 h-4 mr-2 text-green-600" />Aprobar</DropdownMenuItem>
+                    )}
+                    {(role === "asesor" || role === "pro_apoyo" || role === "admin") && doc.estado_doc !== "rechazado" && (
+                      <DropdownMenuItem onClick={() => handleAprobarDoc(doc, "rechazado")}><XCircle className="w-4 h-4 mr-2 text-red-500" />Rechazar</DropdownMenuItem>
+                    )}
+                    {(role === "asesor" || role === "pro_apoyo" || role === "admin") && (
+                      <><DropdownMenuSeparator /><DropdownMenuItem onClick={() => handleArchivar(doc)}><Archive className="w-4 h-4 mr-2" />{doc.estado === "archivado" ? "Restaurar" : "Archivar"}</DropdownMenuItem></>
+                    )}
+                    {(role === "admin" || role === "pro_apoyo") && (
+                      <DropdownMenuItem onClick={() => handleDelete(doc)} className="text-red-600"><Trash2 className="w-4 h-4 mr-2" />Eliminar</DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           );

@@ -33,7 +33,14 @@ export function ActividadesCaso({ idCaso }: Props) {
     setLoading(false);
   };
 
-  useEffect(() => { cargar(); }, [idCaso]);
+  useEffect(() => {
+    cargar();
+    const channel = supabase
+      .channel(`act-${idCaso}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "actividades_caso", filter: `id_caso=eq.${idCaso}` }, () => cargar())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [idCaso]);
 
   const enviar = async () => {
     if (!titulo.trim()) return;

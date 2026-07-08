@@ -59,6 +59,7 @@ import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
 import { ClientInfo } from "@/components/casos-juridicos/client-info";
 import { DefendantInfo } from "@/components/casos-juridicos/defendant-info";
 import { StudentInfo } from "@/components/casos-juridicos/student-info";
+import { ActividadesCaso } from "@/components/casos-juridicos/actividades-caso";
 import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
 import { ObservacionesChat } from "@/components/casos-juridicos/observaciones-chat";
 import { CasoAuditoria } from "@/components/casos-juridicos/caso-auditoria";
@@ -572,6 +573,15 @@ export default function Page({
                       <LlamadosList idCaso={id_caso} />
                     </div>
                   </Card>
+                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                    <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center gap-3">
+                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                      <h3 className="font-bold text-slate-800 tracking-tight">Actividades</h3>
+                    </div>
+                    <div className="p-6"><ActividadesCaso idCaso={id_caso} /></div>
+                  </Card>
+
+
 
                   <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
                     <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center gap-3">
