@@ -103,7 +103,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               ) : null}
             </div>
             <div className="mt-3 lg:mt-0 lg:min-w-[260px]">
-              <BotonesCerrarArchivar idCaso={id} estado={caso.estado} onRefresh={refetch} />
+              <BotonesCerrarArchivar idCaso={id} estado={caso.estado} clasificacion={caso.clasificacion} onRefresh={refetch} />
             </div>
           </div>
 

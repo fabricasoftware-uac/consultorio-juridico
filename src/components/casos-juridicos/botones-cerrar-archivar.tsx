@@ -10,15 +10,30 @@ import { Archive, CheckCircle } from "lucide-react";
 interface Props {
   idCaso: string;
   estado: string;
+  clasificacion?: string | null;
   onRefresh: () => void;
 }
 
-export function BotonesCerrarArchivar({ idCaso, estado, onRefresh }: Props) {
+export function BotonesCerrarArchivar({ idCaso, estado, clasificacion, onRefresh }: Props) {
   const [loading, setLoading] = useState(false);
 
   if (estado === "cerrado" || estado === "archivado") return null;
 
   const handleAction = async (nuevoEstado: "cerrado" | "archivado") => {
+    // Validar documentos antes de cerrar
+    if (nuevoEstado === "cerrado" && clasificacion !== "solo_asesoria") {
+      const { data: docs } = await supabase
+        .from("documentos_caso")
+        .select("estado_doc")
+        .eq("id_caso", idCaso);
+
+      const pendientes = docs?.filter((d) => d.estado_doc !== "aprobado").length ?? 0;
+      if (pendientes > 0) {
+        toast.error(`Hay ${pendientes} documento(s) pendiente(s) de aprobación. No se puede cerrar el caso hasta que todos estén aprobados.`);
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       const { error } = await supabase

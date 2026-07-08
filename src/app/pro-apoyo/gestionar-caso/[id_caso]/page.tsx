@@ -406,7 +406,7 @@ export default function Page({
                 </div>
               </div>
               <div className="mt-3 lg:mt-0 lg:min-w-[260px]">
-                <BotonesCerrarArchivar idCaso={id_caso} estado={caso?.estado || ""} onRefresh={traerDatos} />
+                <BotonesCerrarArchivar idCaso={id_caso} estado={caso?.estado || ""} clasificacion={caso?.clasificacion} onRefresh={traerDatos} />
               </div>
             </div>
           </div>
