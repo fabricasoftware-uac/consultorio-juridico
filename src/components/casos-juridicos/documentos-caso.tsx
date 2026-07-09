@@ -195,7 +195,7 @@ export function DocumentosCaso({ idCaso }: Props) {
                 </div>
                 <p className="text-[10px] text-slate-400">{formatSize(doc.tamano)} {doc.estado === "archivado" && "· Archivado"}</p>
               </div>
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+              <div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-7 w-7">
