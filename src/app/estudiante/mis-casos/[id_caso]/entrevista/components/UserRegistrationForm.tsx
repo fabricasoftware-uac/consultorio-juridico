@@ -125,7 +125,7 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
 
   useEffect(() => {
     if (caso?.usuarios.correo && !formData.correo_contacto) {
-      setFormData((prev) => ({ ...prev, correo_contacto: caso.usuarios.correo }));
+      setFormData((prev) => ({ ...prev, correo_contacto: caso.usuarios.correo ?? "" }));
     }
   }, [caso?.usuarios.correo]);
 
