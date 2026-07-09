@@ -102,7 +102,7 @@ export function Step2InfoSolicitante({ formData, handleInputChange, caso }: Step
         </div>
         <div className="space-y-1.5">
           <Label className={LABEL}>Correo electrónico</Label>
-          <Input className={INP_DISABLED} value={caso?.usuarios.correo || ""} disabled />
+          <Input className={INP} type="email" value={formData.correo_contacto || ""} onChange={(e) => handleInputChange("correo_contacto", e.target.value)} placeholder="correo@ejemplo.com" />
         </div>
         <div className="space-y-1.5">
           <Label className={LABEL}>Contacto familiar</Label>

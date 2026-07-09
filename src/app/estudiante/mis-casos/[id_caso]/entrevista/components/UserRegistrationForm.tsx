@@ -123,6 +123,12 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
     traerDatos();
   }, []);
 
+  useEffect(() => {
+    if (caso?.usuarios.correo && !formData.correo_contacto) {
+      setFormData((prev) => ({ ...prev, correo_contacto: caso.usuarios.correo }));
+    }
+  }, [caso?.usuarios.correo]);
+
   const clearForm = () => {
     setFormData(initialFormData);
   };
@@ -318,6 +324,13 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
 
       if (errorCaso)
         throw new Error(`Error actualizando caso: ${errorCaso.message}`);
+
+      if (limpio.correo_contacto && caso?.usuarios.id_usuario) {
+        await supabase
+          .from("usuarios")
+          .update({ correo: limpio.correo_contacto })
+          .eq("id_usuario", caso.usuarios.id_usuario);
+      }
 
       // Auto-resolver llamado de atencion del estudiante si existe
       await supabase
