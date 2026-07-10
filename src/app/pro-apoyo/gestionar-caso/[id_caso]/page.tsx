@@ -455,18 +455,9 @@ export default function Page({
 
                     <div className="p-6">
                       {!isEditingCaseInfo ? (
-                        <div className="p-5 bg-white rounded-xl border border-slate-100 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)] relative overflow-hidden">
-                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500 opacity-60" />
-                          {displayCaseData?.resumen_hechos ? (
-                            <p className="text-slate-700 leading-relaxed pl-3 whitespace-pre-wrap">
-                              {displayCaseData?.resumen_hechos}
-                            </p>
-                          ) : (
-                            <p className="text-sm text-center text-slate-500 italic py-4">
-                              No hay resumen de los hechos registrado
-                            </p>
-                          )}
-                        </div>
+                        <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">
+                          {displayCaseData?.resumen_hechos || "No hay resumen registrado"}
+                        </p>
                       ) : (
                         <Textarea
                           value={editedCaseData?.resumen_hechos || ""}

@@ -1,26 +1,18 @@
 "use client";
 export const dynamic = "force-dynamic";
-import { use, useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
+import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Navbar } from "../../components/NavBarEstudiante";
 import Link from "next/link";
-import React from "react";
+import { Navbar } from "../../components/NavBarEstudiante";
 import { Caso, Demandado } from "app/types/database";
 import { getCasoById } from "../../../../../supabase/queries/getCasoById";
 import { getDemandadoByCasoId } from "../../../../../supabase/queries/getDemandadoByCasoId";
+import { formatDate } from "@/lib/format-date";
+import { supabase } from "@/lib/supabase/supabase-client";
 import { getStatusBadge } from "@/components/ui/status-badge";
 import { CaseInfoTab } from "@/components/casos-juridicos/case-info-tab";
 import { ClientInfo } from "@/components/casos-juridicos/client-info";
@@ -33,84 +25,32 @@ import { CasoAuditoria } from "@/components/casos-juridicos/caso-auditoria";
 import { DocumentosCaso } from "@/components/casos-juridicos/documentos-caso";
 import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
 import { useRealtimeCaso } from "@/lib/hooks/useRealtimeCaso";
-import { AlertTriangle, MessageSquare, Send } from "lucide-react";
-import { supabase } from "@/lib/supabase/supabase-client";
-import { formatDate } from "@/lib/format-date";
 import { toast } from "sonner";
+import {
+  Calendar, AlertTriangle, Users, ChevronLeft, ClipboardList,
+  FileText, Send,
+} from "lucide-react";
 
-export default function Page({
-  params,
-}: {
-  params: Promise<{ id_caso: string }>;
-}) {
+export default function Page({ params }: { params: Promise<{ id_caso: string }> }) {
   const { id_caso } = React.use(params);
   const [activeTab, setActiveTab] = useState("overview");
-  const [newNote, setNewNote] = useState("");
   const [caso, setCaso] = useState<Caso>();
-  const [enviando, setEnviando] = useState(false);
   const [demandado, setDemandado] = useState<Demandado | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [guardando, setGuardando] = useState(false);
-  const [editando, setEditando] = useState(false);
-  const [observaciones, setObservaciones] = useState("");
-  const [observacionesEstudiante, setObservacionesEstudiante] = useState("");
   const [loading, setLoading] = useState(true);
+  const [enviando, setEnviando] = useState(false);
 
   async function traerDatos() {
     try {
-      setError(null);
-
-      const [casoFetch, demandadoFetch] = await Promise.all([
-        getCasoById(id_caso),
-        getDemandadoByCasoId(id_caso),
-      ]);
-
-      if (!casoFetch) {
-        setError("Caso no encontrado");
-        return;
-      }
-
-      setCaso(casoFetch);
-      setDemandado(demandadoFetch);
-    } catch (err) {
-      console.error(err);
-      setError("Error al obtener los datos del caso");
-    } finally {
-      setLoading(false);
-    }
+      const [c, d] = await Promise.all([getCasoById(id_caso), getDemandadoByCasoId(id_caso)]);
+      setCaso(c);
+      setDemandado(d);
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
   }
 
-  const refetch = useCallback(() => {
-    traerDatos();
-  }, [id_caso]);
-
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
-
+  const refetch = useCallback(() => { traerDatos(); }, [id_caso]);
+  useEffect(() => { refetch(); }, [refetch]);
   useRealtimeCaso(id_caso, refetch);
-
-  useEffect(() => {
-    if (caso) {
-      setObservaciones(caso.observaciones || "");
-      setObservacionesEstudiante(caso.observaciones_estudiante || "");
-    }
-  }, [caso]);
-
-  const handleGuardar = async () => {
-    try {
-      setGuardando(true);
-      await supabase
-        .from("casos")
-        .update({ observaciones_estudiante: observacionesEstudiante })
-        .eq("id_caso", id_caso);
-      setEditando(false);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setGuardando(false);
-    }
-  };
 
   const handleReenviar = async () => {
     try {
@@ -119,21 +59,16 @@ export default function Page({
         .from("casos")
         .update({
           estado: "pendiente_aprobacion",
-          fecha_vencimiento_asesor: new Date(
-            Date.now() + 2 * 24 * 60 * 60 * 1000,
-          ).toISOString(),
+          fecha_vencimiento_asesor: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
         })
         .eq("id_caso", id_caso);
       if (error) throw error;
-
-      // Auto-resolver llamado del asesor al reenviar
       await supabase
         .from("llamados_atencion")
         .update({ resuelto: true, fecha_resolucion: new Date().toISOString() })
         .eq("id_caso", id_caso)
         .eq("tipo", "asesor")
         .eq("resuelto", false);
-
       await traerDatos();
       toast.success("Caso reenviado para aprobación del asesor");
     } catch (err) {
@@ -148,11 +83,19 @@ export default function Page({
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <div className="flex-1 flex flex-col items-center justify-center p-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-slate-500 font-medium">
-            Cargando detalles del caso...
-          </p>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!caso) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-slate-500">Caso no encontrado</p>
         </div>
       </div>
     );
@@ -163,78 +106,34 @@ export default function Page({
       <Navbar />
       <main>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header */}
-          <div className="mb-6">
-            <Link
-              href={"/estudiante/mis-casos"}
-              className="flex items-center text-blue-600 hover:text-blue-700 mb-4 transition-colors duration-200 hover:underline"
-            >
-              <svg
-                className="w-5 h-5 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
-              </svg>
-              Volver a mis casos
-            </Link>
-            {error ? (
-              <div
-                className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg"
-                role="alert"
-              >
-                {error}
+          <Link href="/estudiante/mis-casos" className="flex items-center text-blue-600 hover:underline mb-4">
+            <ChevronLeft className="w-5 h-5 mr-2" />
+            Volver a mis casos
+          </Link>
+
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between bg-white p-8 rounded-2xl shadow-sm border mb-6">
+            <div>
+              <div className="flex flex-wrap items-center gap-3 mb-2">
+                <h1 className="text-3xl font-extrabold text-slate-900">Caso #{caso.id_caso}</h1>
+                {getStatusBadge(caso.estado)}
+                {caso.estado === "en_correccion" && (
+                  <Button onClick={handleReenviar} disabled={enviando} size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                    <Send className="w-4 h-4 mr-1" />
+                    {enviando ? "Enviando..." : "Reenviar para aprobación"}
+                  </Button>
+                )}
               </div>
-            ) : null}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div className="space-y-1">
-                <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
-                    Caso #{id_caso.slice(0, 8)}
-                  </h1>
-                  {caso && getStatusBadge(caso.estado)}
-                  {caso?.estado === "en_correccion" && (
-                    <Button
-                      onClick={handleReenviar}
-                      disabled={enviando}
-                      size="sm"
-                      className="bg-blue-600 hover:bg-blue-700 text-white"
-                    >
-                      <Send className="w-4 h-4 mr-1" />
-                      {enviando ? "Enviando..." : "Reenviar para aprobación"}
-                    </Button>
-                  )}
-                </div>
-                <p className="text-lg text-gray-600 flex items-center gap-2">
-                  <span className="text-gray-400 font-medium">Usuario:</span>
-                  <span className="font-semibold">
-                    {caso?.usuarios?.nombre_completo || "N/A"}
-                  </span>
+              <p className="text-lg text-slate-500">{caso.usuarios?.nombre_completo}</p>
+              {caso.periodo && <p className="text-xs text-slate-400 mt-1">Período: {caso.periodo}</p>}
+              {caso.asesores_casos?.length ? (
+                <p className="text-xs text-emerald-600 mt-1">
+                  Asesor: {caso.asesores_casos[caso.asesores_casos.length - 1]?.asesor?.perfil?.nombre_completo || "—"}
                 </p>
-              </div>
-              <div className="flex flex-col md:items-end gap-1">
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                  ID del Proceso
-                </span>
-                <code className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-500 font-mono">
-                  {id_caso}
-                </code>
-              </div>
+              ) : null}
             </div>
           </div>
 
-          {/* Tabs Navigation */}
-          <Tabs
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="w-full"
-          >
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full overflow-x-auto flex-nowrap">
               <TabsTrigger value="overview">Resumen</TabsTrigger>
               <TabsTrigger value="client">Usuario</TabsTrigger>
@@ -242,10 +141,8 @@ export default function Page({
               <TabsTrigger value="advisor">Asesor</TabsTrigger>
             </TabsList>
 
-            {/* Overview Tab */}
-            <TabsContent value="overview" className="space-y-6">
+            <TabsContent value="overview">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Case Info */}
                 <div className="lg:col-span-2 space-y-6">
                   <CaseInfoTab
                     caseData={caso}
@@ -259,190 +156,95 @@ export default function Page({
                     canEdit={false}
                   />
 
-                  <Card className="p-6">
-                    <div className="flex items-center">
-                      <div className="p-2 bg-green-100 rounded-lg mr-3">
-                        <svg
-                          className="w-5 h-5 text-green-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-                          />
-                        </svg>
-                      </div>
-                      <h3 className="text-gray-900">Resumen de los hechos</h3>
-                    </div>
-                    <p className="text-gray-600 leading-relaxed">
-                      {caso?.resumen_hechos || "No hay resumen de los hechos."}
-                    </p>
-                  </Card>
-
-                  <Card className="p-6">
-                    <div className="flex items-center">
-                      <div className="p-2 bg-yellow-100 rounded-lg mr-3">
-                        <svg
-                          className="w-5 h-5 text-yellow-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                          />
-                        </svg>
-                      </div>
-                      <h3 className="text-gray-900 font-semibold">
-                        Observaciones (Asesor)
-                      </h3>
-                    </div>
-                    <div className="space-y-3 mt-4">
-                      <p className="text-gray-700 bg-gray-50 p-4 rounded-md min-h-20 whitespace-pre-wrap border border-gray-100 leading-relaxed">
-                        {observaciones ||
-                          "No hay observaciones registradas por el asesor."}
-                      </p>
-                    </div>
-                  </Card>
-
-                  <Card className="p-6">
-                    <div className="flex items-center mb-4">
-                      <div className="p-2 bg-blue-100 rounded-lg mr-3">
-                        <MessageSquare className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <h3 className="text-gray-900 font-semibold">
-                        Mis Observaciones
-                      </h3>
-                    </div>
-                    <ObservacionesChat
-                      idCaso={id_caso}
-                      observaciones={caso?.observaciones}
-                      observacionesEstudiante={caso?.observaciones_estudiante}
-                    />
-                  </Card>
-                </div>
-
-                {/* Sidebar */}
-                <div className="space-y-6">
-                  <Card className="p-6">
-                    <div className="flex items-center mb-4">
-                      <div className="p-2 bg-purple-100 rounded-lg mr-3">
-                        <svg
-                          className="w-5 h-5 text-purple-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
-                      </div>
-                      <h3 className="text-gray-900">Fechas importantes</h3>
-                    </div>
-                    <div className="space-y-3">
-                      {caso?.fecha_creacion && (
-                        <div>
-                          <Label className="text-gray-600">
-                            Fecha de creación
-                          </Label>
-                          <p className="text-gray-900">
-                            {formatDate(caso.fecha_creacion)}
-                          </p>
-                        </div>
-                      )}
-                      {caso?.fecha_cierre && (
-                        <div>
-                          <Label className="text-gray-600">
-                            Fecha de cierre
-                          </Label>
-                          <p className="text-gray-900">
-                            {formatDate(caso.fecha_cierre)}
-                          </p>
-                        </div>
-                      )}
-                      <div className="flex flex-wrap gap-2 pt-2">
-                        <CountdownTimer
-                          fechaVencimiento={caso?.fecha_vencimiento_estudiante}
-                          label="Entrega"
-                          estado={caso?.estado}
-                        />
-                      </div>
-                    </div>
-                  </Card>
-
                   <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
-                    <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center gap-3">
-                      <div className="p-2 bg-amber-100 rounded-lg text-amber-600">
-                        <AlertTriangle className="w-5 h-5" />
-                      </div>
-                      <h3 className="font-bold text-slate-800 tracking-tight">
-                        Llamados de Atención
-                      </h3>
-                    </div>
-                    <div className="p-6">
-                      <LlamadosList idCaso={id_caso} />
-                    </div>
-                  </Card>
-                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
-                    <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center gap-3">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                      <h3 className="font-bold text-slate-800 tracking-tight">Actividades</h3>
-                    </div>
-                    <div className="p-6"><ActividadesCaso idCaso={id_caso} /></div>
-                  </Card>
-
-
-
-                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
-                    <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center gap-3">
-                      <div className="p-2 bg-slate-100 rounded-lg text-slate-600">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <h3 className="font-bold text-slate-800 tracking-tight">
-                        Historial del Caso
-                      </h3>
-                    </div>
-                    <div className="p-6">
-                      <CasoAuditoria idCaso={id_caso} />
-                    </div>
-                  </Card>
-
-                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
-                    <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center gap-3">
-                      <div className="p-2 bg-cyan-100 rounded-lg text-cyan-600">
+                    <div className="bg-slate-50 border-b p-4 flex items-center gap-3">
+                      <div className="p-2 bg-green-100 rounded-lg text-green-600">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                       </div>
-                      <h3 className="font-bold text-slate-800 tracking-tight">
-                        Documentos
-                      </h3>
+                      <h3 className="font-bold text-slate-800">Resumen de los hechos</h3>
                     </div>
                     <div className="p-6">
-                      <DocumentosCaso idCaso={id_caso} />
+                      <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">
+                        {caso.resumen_hechos || "No hay resumen registrado"}
+                      </p>
                     </div>
+                  </Card>
+
+                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                    <div className="bg-slate-50 border-b p-4 flex items-center gap-3">
+                      <Users className="w-5 h-5 text-blue-600" />
+                      <h3 className="font-bold text-slate-800">Observaciones</h3>
+                    </div>
+                    <div className="p-6">
+                      <ObservacionesChat
+                        idCaso={id_caso}
+                        observaciones={caso.observaciones}
+                        observacionesEstudiante={caso.observaciones_estudiante}
+                      />
+                    </div>
+                  </Card>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                      <div className="bg-slate-50 border-b p-4 flex items-center gap-3">
+                        <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3 className="font-bold text-slate-800">Historial del Caso</h3>
+                      </div>
+                      <div className="p-6 max-h-80 overflow-y-auto"><CasoAuditoria idCaso={id_caso} /></div>
+                    </Card>
+                    <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                      <div className="bg-slate-50 border-b p-4 flex items-center gap-3">
+                        <FileText className="w-5 h-5 text-cyan-600" />
+                        <h3 className="font-bold text-slate-800">Documentos</h3>
+                      </div>
+                      <div className="p-6"><DocumentosCaso idCaso={id_caso} /></div>
+                    </Card>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                    <div className="bg-slate-50 border-b p-4 flex items-center gap-3">
+                      <Calendar className="w-5 h-5 text-purple-600" />
+                      <h3 className="font-bold text-slate-800">Fechas importantes</h3>
+                    </div>
+                    <div className="p-6 space-y-3">
+                      <div>
+                        <Label className="text-xs font-bold text-slate-500 uppercase">Fecha de creación</Label>
+                        <p className="text-slate-900 font-medium">{formatDate(caso.fecha_creacion)}</p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <CountdownTimer fechaVencimiento={caso.fecha_vencimiento_estudiante} label="Entrega" estado={caso.estado} />
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                    <div className="bg-amber-50 border-b p-4 flex items-center gap-3">
+                      <AlertTriangle className="w-5 h-5 text-amber-600" />
+                      <h3 className="font-bold text-amber-800">Llamados de Atención</h3>
+                    </div>
+                    <div className="p-6"><LlamadosList idCaso={id_caso} /></div>
+                  </Card>
+
+                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                    <div className="bg-slate-50 border-b p-4 flex items-center gap-3">
+                      <ClipboardList className="w-5 h-5 text-blue-600" />
+                      <h3 className="font-bold text-slate-800">Actividades</h3>
+                    </div>
+                    <div className="p-6"><ActividadesCaso idCaso={id_caso} /></div>
                   </Card>
                 </div>
               </div>
             </TabsContent>
 
-            {/* Client Tab */}
-            <TabsContent value="client" className="space-y-6">
+            <TabsContent value="client">
               <ClientInfo
-                usuarios={caso?.usuarios}
+                usuarios={caso.usuarios}
                 isEditing={false}
                 editedData={null}
                 onEdit={() => {}}
@@ -453,8 +255,7 @@ export default function Page({
               />
             </TabsContent>
 
-            {/* Defendant Tab */}
-            <TabsContent value="defendant" className="space-y-6">
+            <TabsContent value="defendant">
               <DefendantInfo
                 defendantData={demandado}
                 isEditing={false}
@@ -467,10 +268,9 @@ export default function Page({
               />
             </TabsContent>
 
-            {/* Advisor Tab */}
-            <TabsContent value="advisor" className="space-y-6">
+            <TabsContent value="advisor">
               <AdvisorInfo
-                advisors={caso?.asesores_casos?.map((ac) => ac.asesor) || []}
+                advisors={caso.asesores_casos?.map((ac) => ac.asesor) || []}
               />
             </TabsContent>
           </Tabs>

@@ -628,6 +628,27 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     </div>
                   </Card>
 
+                  <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
+                    <div className="bg-slate-50 border-b p-4 flex items-center gap-3">
+                      <Users className="w-5 h-5 text-blue-600" />
+                      <h3 className="font-bold text-slate-800">Equipo asignado</h3>
+                    </div>
+                    <div className="p-6 space-y-6">
+                      <div>
+                        <span className="text-xs font-bold text-slate-500 uppercase">Estudiante</span>
+                        <p className="text-sm font-semibold text-slate-800 mt-1">
+                          {ultimoEstudiante?.perfil?.nombre_completo || "Sin asignar"}
+                        </p>
+                      </div>
+                      <div className="border-t border-slate-100 pt-4">
+                        <span className="text-xs font-bold text-slate-500 uppercase">Asesor</span>
+                        <p className="text-sm font-semibold text-slate-800 mt-1">
+                          {ultimoAsesor?.perfil?.nombre_completo || "Sin asignar"}
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+
                   {/* Estado del caso */}
                   {caso.estado === "activo" && (
                     <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
