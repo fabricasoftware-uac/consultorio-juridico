@@ -86,7 +86,7 @@ const ALLOWED_TYPES = [
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "application/zip",
 ];
-const SUPABASE_MAX = 50 * 1024 * 1024; // 50MB límite Supabase free tier
+const SUPABASE_MAX = 25 * 1024 * 1024; // 25MB
 
 async function uploadDirecto(idCaso: string, file: File) {
   if (!ALLOWED_TYPES.includes(file.type)) {
