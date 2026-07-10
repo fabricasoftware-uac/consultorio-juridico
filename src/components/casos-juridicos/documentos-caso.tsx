@@ -76,6 +76,71 @@ async function api(path: string, options?: RequestInit) {
   return res.json();
 }
 
+const ALLOWED_TYPES = [
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/zip",
+];
+const SUPABASE_MAX = 50 * 1024 * 1024; // 50MB límite Supabase free tier
+
+async function uploadDirecto(idCaso: string, file: File) {
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    toast.error("Tipo de archivo no permitido");
+    return null;
+  }
+  if (file.size > SUPABASE_MAX) {
+    toast.error(`Archivo demasiado grande (máx. 50 MB). Tamaño actual: ${(file.size / 1024 / 1024).toFixed(1)} MB`);
+    return null;
+  }
+
+  const { count } = await supabase
+    .from("documentos_caso")
+    .select("*", { count: "exact", head: true })
+    .eq("id_caso", idCaso);
+  if ((count ?? 0) >= 30) {
+    toast.error("Límite de 30 documentos por caso alcanzado");
+    return null;
+  }
+
+  const ext = file.name.split(".").pop() || "bin";
+  const storagePath = `${idCaso}/${crypto.randomUUID()}.${ext}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("documentos-casos")
+    .upload(storagePath, file, { contentType: file.type, upsert: false });
+
+  if (uploadError) {
+    toast.error(uploadError.message);
+    return null;
+  }
+
+  const { data: inserted, error: insertError } = await supabase
+    .from("documentos_caso")
+    .insert({
+      id_caso: parseInt(idCaso),
+      id_usuario: (await supabase.auth.getUser()).data.user?.id,
+      storage_path: storagePath,
+      nombre_original: file.name,
+      tipo: "documento",
+      mime_type: file.type,
+      tamano: file.size,
+    })
+    .select()
+    .single();
+
+  if (insertError) {
+    toast.error(insertError.message);
+    return null;
+  }
+
+  return inserted;
+}
+
 export function DocumentosCaso({ idCaso }: Props) {
   const [documentos, setDocumentos] = useState<Documento[]>([]);
   const [loading, setLoading] = useState(true);
@@ -113,11 +178,8 @@ export function DocumentosCaso({ idCaso }: Props) {
     const file = e.target.files?.[0];
     if (!file) return;
     setSubiendo(true);
-    const form = new FormData();
-    form.append("file", file);
-    form.append("id_caso", idCaso);
-    const data = await api("/api/documentos", { method: "POST", body: form });
-    if (data?.documento) {
+    const doc = await uploadDirecto(idCaso, file);
+    if (doc) {
       toast.success(`"${file.name}" subido`);
       cargar();
     }

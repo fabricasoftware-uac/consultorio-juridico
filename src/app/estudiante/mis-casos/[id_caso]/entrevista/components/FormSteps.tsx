@@ -381,7 +381,7 @@ export function Step6InfoContrato({ formData, handleInputChange }: StepProps) {
       <CardContent className="space-y-4">
         <div>
           <Label className={LABEL}>¿Tiene Contrato Laboral?</Label>
-          <RadioGroup value={formData.tiene_contrato ? "si" : "no"} onValueChange={(v) => handleInputChange("tiene_contrato", v === "si")} className="flex space-x-6 mt-2">
+          <RadioGroup value={formData.tiene_contrato ? "si" : "no"} onValueChange={(v) => handleInputChange("tiene_contrato", v === "si")} className="flex space-x-4 sm:space-x-6 mt-2">
             <div className="flex items-center space-x-2"><RadioGroupItem value="si" id="tieneContratoSi" /><Label htmlFor="tieneContratoSi" className={LABEL}>Sí</Label></div>
             <div className="flex items-center space-x-2"><RadioGroupItem value="no" id="tieneContratoNo" /><Label htmlFor="tieneContratoNo" className={LABEL}>No</Label></div>
           </RadioGroup>

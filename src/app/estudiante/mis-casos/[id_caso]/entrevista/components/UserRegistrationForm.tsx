@@ -439,7 +439,7 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
 
   if (error && !caso) {
     return (
-      <Card className="p-8 text-center border-red-200 bg-red-50">
+      <Card className="p-4 sm:p-8 text-center border-red-200 bg-red-50">
         <p className="text-red-600 font-medium">{error}</p>
         <Button
           onClick={() => router.back()}
@@ -455,17 +455,17 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       {/* Progress Bar Container */}
-      <div className="backdrop-blur-md bg-white/70 border border-white/20 p-6 rounded-2xl shadow-xl transition-all duration-300">
-        <div className="flex items-center justify-between mb-4">
+      <div className="backdrop-blur-md bg-white/70 border border-white/20 p-4 sm:p-6 rounded-2xl shadow-xl transition-all duration-300">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
           <div className="space-y-1">
-            <h3 className="text-xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <h3 className="text-lg sm:text-xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               Inscripción de Caso
             </h3>
-            <p className="text-sm text-slate-500 font-medium">
+            <p className="text-xs sm:text-sm text-slate-500 font-medium">
               Paso {currentStep} de {STEPS.length}
             </p>
           </div>
-          <div className="text-right flex items-center gap-3">
+          <div className="text-left sm:text-right flex items-center gap-3">
             <Button variant="outline" size="sm" className="text-xs" onClick={async () => {
               const ExcelJS = (await import("exceljs")).default;
               const wb = new ExcelJS.Workbook(); const ws = wb.addWorksheet("Entrevista");

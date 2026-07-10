@@ -500,44 +500,44 @@ export default function AsesoresPage() {
               <DialogTitle>Editar Asesor</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-nombre" className="text-right">
+              <div className="flex flex-col sm:grid sm:grid-cols-4 items-start sm:items-center gap-1.5 sm:gap-4">
+                <Label htmlFor="edit-nombre" className="text-left sm:text-right">
                   Nombre
                 </Label>
                 <Input
                   id="edit-nombre"
                   value={editForm.nombre}
                   onChange={(e) => setEdit("nombre")(e.target.value)}
-                  className="col-span-3"
+                  className="sm:col-span-3"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-cedula" className="text-right">
+              <div className="flex flex-col sm:grid sm:grid-cols-4 items-start sm:items-center gap-1.5 sm:gap-4">
+                <Label htmlFor="edit-cedula" className="text-left sm:text-right">
                   Cédula
                 </Label>
                 <Input
                   id="edit-cedula"
                   value={editForm.cedula}
                   onChange={(e) => setEdit("cedula")(e.target.value)}
-                  className="col-span-3"
+                  className="sm:col-span-3"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-telefono" className="text-right">
+              <div className="flex flex-col sm:grid sm:grid-cols-4 items-start sm:items-center gap-1.5 sm:gap-4">
+                <Label htmlFor="edit-telefono" className="text-left sm:text-right">
                   Teléfono
                 </Label>
                 <Input
                   id="edit-telefono"
                   value={editForm.telefono}
                   onChange={(e) => setEdit("telefono")(e.target.value)}
-                  className="col-span-3"
+                  className="sm:col-span-3"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-area" className="text-right">
+              <div className="flex flex-col sm:grid sm:grid-cols-4 items-start sm:items-center gap-1.5 sm:gap-4">
+                <Label htmlFor="edit-area" className="text-left sm:text-right">
                   Área
                 </Label>
-                <div className="col-span-3">
+                <div className="sm:col-span-3 w-full">
                   <Select value={editForm.area} onValueChange={setEdit("area")}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccione área" />
@@ -579,7 +579,7 @@ export default function AsesoresPage() {
 
         {/* Edit Schedule Dialog */}
         <Dialog open={isScheduleOpen} onOpenChange={setIsScheduleOpen}>
-          <DialogContent className="sm:max-w-[700px] h-[80vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 Editar Horario: {scheduleAsesor?.perfil.nombre_completo}

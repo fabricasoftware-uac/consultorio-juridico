@@ -24,8 +24,8 @@ export default function App({ params }: { params: Promise<{ id_caso: string }> }
               </svg>
               Volver al inicio
             </Link>
-            <div className="text-center mb-10 bg-white p-8 rounded-2xl shadow-md">
-              <h1 className="mb-4 text-3xl text-blue-900">
+            <div className="text-center mb-10 bg-white p-4 sm:p-6 md:p-8 rounded-2xl shadow-md">
+              <h1 className="mb-4 text-2xl sm:text-3xl text-blue-900">
                 Formulario de Entrevista
               </h1>
               <p className="text-blue-800 text-lg max-w-2xl mx-auto">

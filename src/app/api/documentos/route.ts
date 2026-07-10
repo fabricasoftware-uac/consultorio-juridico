@@ -52,9 +52,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Tipo de archivo no permitido" }, { status: 400 });
   }
 
-  // Validar tamano (30 MB)
-  if (file.size > 30 * 1024 * 1024) {
-    return NextResponse.json({ error: "Archivo demasiado grande (max 30 MB)" }, { status: 400 });
+  // Validar tamano (4.5 MB — límite de Vercel serverless)
+  if (file.size > 4.5 * 1024 * 1024) {
+    return NextResponse.json({ error: "Archivo demasiado grande (máx. 4.5 MB)" }, { status: 400 });
   }
 
   // Validar cantidad (max 30 por caso)
