@@ -6,9 +6,9 @@ export const getStatusBadge = (status: string) => {
       color: "bg-yellow-50 text-yellow-700 border-yellow-200",
       text: "Pendiente de aprobación",
     },
-    aprobado: {
+    activo: {
       color: "bg-green-50 text-green-700 border-green-200",
-      text: "Aprobado",
+      text: "Activo",
     },
     en_proceso: {
       color: "bg-blue-50 text-blue-700 border-blue-200",
