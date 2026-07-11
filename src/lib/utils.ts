@@ -21,3 +21,14 @@ export function formatArea(area: string | null | undefined): string {
   if (!area) return "";
   return AREA_LABELS[area] ?? area.replace(/_/g, " ");
 }
+
+export function sumarDiasHabiles(fecha: Date, dias: number): Date {
+  const result = new Date(fecha);
+  let added = 0;
+  while (added < dias) {
+    result.setDate(result.getDate() + 1);
+    const dow = result.getDay();
+    if (dow !== 0 && dow !== 6) added++;
+  }
+  return result;
+}

@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase/supabase-client";
 import type { Caso } from "../../src/app/types/database";
 import { insertAuditEvent } from "./auditoriaCasos";
+import { sumarDiasHabiles } from "@/lib/utils";
 
 export async function insertCasoNuevo(
   caso: Caso,
@@ -15,9 +16,7 @@ export async function insertCasoNuevo(
       estado: caso.estado,
       observaciones: caso.observaciones,
       tipo_proceso: caso.tipo_proceso || "No creado",
-      fecha_vencimiento_estudiante: new Date(
-        Date.now() + 3 * 24 * 60 * 60 * 1000,
-      ).toISOString(),
+      fecha_vencimiento_estudiante: sumarDiasHabiles(new Date(), 3).toISOString(),
       periodo: (() => {
         const ahora = new Date();
         const year = ahora.getFullYear();

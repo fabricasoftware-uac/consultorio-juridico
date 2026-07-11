@@ -54,7 +54,7 @@ import { Tienne } from "next/font/google";
 import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useRouter } from "next/navigation";
-import { cleanData } from "@/lib/utils";
+import { cleanData, sumarDiasHabiles } from "@/lib/utils";
 import {
   Step1InfoEntrevista,
   Step2InfoSolicitante,
@@ -316,9 +316,7 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
           resumen_hechos: limpio.resumen_hechos,
           observaciones_estudiante: limpio.observaciones_estudiante,
           estado: "pendiente_aprobacion",
-          fecha_vencimiento_asesor: new Date(
-            Date.now() + 2 * 24 * 60 * 60 * 1000,
-          ).toISOString(),
+          fecha_vencimiento_asesor: sumarDiasHabiles(new Date(), 2).toISOString(),
         })
         .eq("id_caso", idCaso);
 

@@ -30,6 +30,7 @@ import {
   Calendar, AlertTriangle, Users, ChevronLeft, ClipboardList,
   FileText, Send,
 } from "lucide-react";
+import { sumarDiasHabiles } from "@/lib/utils";
 
 export default function Page({ params }: { params: Promise<{ id_caso: string }> }) {
   const { id_caso } = React.use(params);
@@ -59,7 +60,7 @@ export default function Page({ params }: { params: Promise<{ id_caso: string }> 
         .from("casos")
         .update({
           estado: "pendiente_aprobacion",
-          fecha_vencimiento_asesor: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+          fecha_vencimiento_asesor: sumarDiasHabiles(new Date(), 2).toISOString(),
         })
         .eq("id_caso", id_caso);
       if (error) throw error;

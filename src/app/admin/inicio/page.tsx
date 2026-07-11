@@ -7,6 +7,9 @@ import {
   ArrowRight,
   Calendar,
   FolderOpen,
+  AlertTriangle,
+  ExternalLink,
+  CheckCircle2,
 } from "lucide-react";
 import {
   Card,
@@ -18,10 +21,25 @@ import {
 import { Navbar } from "../components/NavbarAdmin";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase/supabase-client";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+
+type LlamadoPendiente = {
+  id: number;
+  id_caso: number;
+  tipo: string;
+  motivo: string;
+  fecha_creacion: string;
+  usuario: string;
+  caso_estado: string;
+};
 
 export default function AdminPanelPage() {
   const router = useRouter();
   const [currentTime, setCurrentTime] = useState<string>("");
+  const [llamadosPendientes, setLlamadosPendientes] = useState<LlamadoPendiente[]>([]);
 
   useEffect(() => {
     const updateTime = () => {
@@ -35,7 +53,32 @@ export default function AdminPanelPage() {
       );
     };
     updateTime();
+
+    fetchLlamados();
   }, []);
+
+  async function fetchLlamados() {
+    const { data } = await supabase
+      .from("llamados_atencion")
+      .select("id, id_caso, tipo, motivo, fecha_creacion, casos!inner(estado, usuarios!inner(nombre_completo))")
+      .eq("resuelto", false)
+      .order("fecha_creacion", { ascending: false })
+      .limit(10);
+
+    if (data) {
+      setLlamadosPendientes(
+        data.map((l: any) => ({
+          id: l.id,
+          id_caso: l.id_caso,
+          tipo: l.tipo,
+          motivo: l.motivo,
+          fecha_creacion: l.fecha_creacion,
+          usuario: l.casos?.usuarios?.nombre_completo ?? "—",
+          caso_estado: l.casos?.estado ?? "—",
+        })),
+      );
+    }
+  }
 
   const actions = [
     {
@@ -144,6 +187,55 @@ export default function AdminPanelPage() {
             );
           })}
         </div>
+
+        {/* Llamados de Atención Pendientes */}
+        {llamadosPendientes.length > 0 && (
+          <div className="mt-10">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-amber-100 rounded-lg">
+                <AlertTriangle className="w-5 h-5 text-amber-600" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-900">
+                Llamados de Atencion Pendientes
+              </h2>
+              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 ml-2">
+                {llamadosPendientes.length}
+              </Badge>
+            </div>
+            <Card className="border-slate-200 shadow-sm overflow-hidden">
+              <div className="divide-y divide-slate-100">
+                {llamadosPendientes.map((ll) => (
+                  <div key={ll.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className={`p-1.5 rounded-lg shrink-0 mt-0.5 ${ll.tipo === "estudiante" ? "bg-blue-100 text-blue-600" : "bg-purple-100 text-purple-600"}`}>
+                        {ll.tipo === "estudiante" ? <GraduationCap className="w-4 h-4" /> : <Users className="w-4 h-4" />}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Link href={`/admin/todos-los-casos/${ll.id_caso}`} className="font-semibold text-slate-800 hover:text-blue-600 truncate">
+                            Caso #{ll.id_caso} — {ll.usuario}
+                          </Link>
+                          <Badge variant="outline" className={`text-[10px] h-4 px-1 ${ll.tipo === "estudiante" ? "text-blue-600 bg-blue-50 border-blue-100" : "text-purple-600 bg-purple-50 border-purple-100"}`}>
+                            {ll.tipo === "estudiante" ? "Estudiante" : "Asesor"}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-slate-500 mt-0.5 line-clamp-1">{ll.motivo}</p>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          {new Date(ll.fecha_creacion).toLocaleDateString("es-CO", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                      </div>
+                    </div>
+                    <Link href={`/admin/todos-los-casos/${ll.id_caso}`} className="shrink-0">
+                      <Button variant="ghost" size="sm" className="text-slate-500 hover:text-blue-600">
+                        <ExternalLink className="w-4 h-4 mr-1" /> Ver caso
+                      </Button>
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+        )}
       </main>
     </div>
   );
