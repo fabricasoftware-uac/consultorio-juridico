@@ -87,8 +87,7 @@ export function RegistroUsuario({
     return (
       formData.nombre_completo.trim() !== "" &&
       formData.sexo !== "" &&
-      formData.cedula.trim() !== "" &&
-      formData.telefono.trim() !== ""
+      formData.cedula.trim() !== ""
     );
   };
 
@@ -196,7 +195,7 @@ export function RegistroUsuario({
                     htmlFor="telefono"
                     className="text-slate-700 font-semibold flex items-center gap-2"
                   >
-                    <Phone className="w-4 h-4 text-slate-400" /> Teléfono *
+                    <Phone className="w-4 h-4 text-slate-400" /> Teléfono (Opcional)
                   </Label>
                   <Input
                     id="telefono"
@@ -205,7 +204,6 @@ export function RegistroUsuario({
                     value={formData.telefono || ""}
                     onChange={(e) => handleChange("telefono", e.target.value)}
                     className="bg-white border-slate-200 focus-visible:ring-blue-500/30 h-11"
-                    required
                   />
                 </div>
 
