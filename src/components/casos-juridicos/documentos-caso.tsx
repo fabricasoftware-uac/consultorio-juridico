@@ -94,7 +94,7 @@ async function uploadDirecto(idCaso: string, file: File) {
     return null;
   }
   if (file.size > SUPABASE_MAX) {
-    toast.error(`Archivo demasiado grande (máx. 50 MB). Tamaño actual: ${(file.size / 1024 / 1024).toFixed(1)} MB`);
+    toast.error(`Archivo demasiado grande (máx. ${SUPABASE_MAX / 1024 / 1024} MB). Tamaño actual: ${(file.size / 1024 / 1024).toFixed(1)} MB`);
     return null;
   }
 
