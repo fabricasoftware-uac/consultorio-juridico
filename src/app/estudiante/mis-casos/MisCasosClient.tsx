@@ -328,11 +328,13 @@ export default function MisCasosClient() {
               </div>
 
               <div className="mt-2 mb-3">
+                {caso.estado === "en_proceso" && (
                 <CountdownTimer
                   fechaVencimiento={caso.fecha_vencimiento_estudiante}
                   label="Entrega"
                   estado={caso.estado}
                 />
+                )}
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 mt-auto pt-4 border-t border-slate-50">

@@ -219,7 +219,9 @@ export default function Page({ params }: { params: Promise<{ id_caso: string }> 
                         <p className="text-slate-900 font-medium">{formatDate(caso.fecha_creacion)}</p>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        <CountdownTimer fechaVencimiento={caso.fecha_vencimiento_estudiante} label="Entrega" estado={caso.estado} />
+                        {caso.estado === "en_proceso" && (
+                          <CountdownTimer fechaVencimiento={caso.fecha_vencimiento_estudiante} label="Entrega" estado={caso.estado} />
+                        )}
                       </div>
                     </div>
                   </Card>
