@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { updateObservaciones } from "../../../../../supabase/queries/updateObservaciones";
 import { insertAuditEvent } from "../../../../../supabase/queries/auditoriaCasos";
 import { toast } from "sonner";
-import { cleanData } from "@/lib/utils";
+import { cleanData, sumarDiasHabiles } from "@/lib/utils";
 import { supabase } from "@/lib/supabase/supabase-client";
 import {
   AlertTriangle,
@@ -146,6 +146,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         .update({
           clasificacion: clasificacion,
           estado: "activo",
+          fecha_vencimiento_asesor: null,
         })
         .eq("id_caso", id_caso);
 
@@ -183,9 +184,21 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       setIsSolicitandoAjustes(true);
       const { error } = await supabase
         .from("casos")
-        .update({ estado: "en_correccion" })
+        .update({
+          estado: "en_correccion",
+          fecha_vencimiento_estudiante: sumarDiasHabiles(new Date(), 3).toISOString(),
+          fecha_vencimiento_asesor: null,
+        })
         .eq("id_caso", id_caso);
       if (error) throw error;
+
+      await supabase
+        .from("llamados_atencion")
+        .update({ resuelto: true, fecha_resolucion: new Date().toISOString() })
+        .eq("id_caso", id_caso)
+        .eq("tipo", "asesor")
+        .eq("resuelto", false);
+
       await insertAuditEvent(
         id_caso,
         "correccion",

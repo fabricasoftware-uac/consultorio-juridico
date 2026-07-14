@@ -317,6 +317,8 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
           observaciones_estudiante: limpio.observaciones_estudiante,
           estado: "pendiente_aprobacion",
           fecha_vencimiento_asesor: sumarDiasHabiles(new Date(), 2).toISOString(),
+          fecha_entrega_entrevista: new Date().toISOString(),
+          fecha_vencimiento_estudiante: null,
         })
         .eq("id_caso", idCaso);
 

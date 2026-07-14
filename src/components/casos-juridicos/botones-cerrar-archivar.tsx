@@ -38,7 +38,7 @@ export function BotonesCerrarArchivar({ idCaso, estado, clasificacion, onRefresh
     try {
       const { error } = await supabase
         .from("casos")
-        .update({ estado: nuevoEstado, fecha_cierre: new Date().toISOString() })
+        .update({ estado: nuevoEstado, fecha_cierre: new Date().toISOString(), fecha_vencimiento_estudiante: null, fecha_vencimiento_asesor: null })
         .eq("id_caso", idCaso);
       if (error) throw error;
 

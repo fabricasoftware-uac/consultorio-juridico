@@ -61,6 +61,7 @@ export default function Page({ params }: { params: Promise<{ id_caso: string }> 
         .update({
           estado: "pendiente_aprobacion",
           fecha_vencimiento_asesor: sumarDiasHabiles(new Date(), 2).toISOString(),
+          fecha_vencimiento_estudiante: null,
         })
         .eq("id_caso", id_caso);
       if (error) throw error;
@@ -68,7 +69,6 @@ export default function Page({ params }: { params: Promise<{ id_caso: string }> 
         .from("llamados_atencion")
         .update({ resuelto: true, fecha_resolucion: new Date().toISOString() })
         .eq("id_caso", id_caso)
-        .eq("tipo", "asesor")
         .eq("resuelto", false);
       await traerDatos();
       toast.success("Caso reenviado para aprobación del asesor");
