@@ -166,6 +166,7 @@ export function DocumentosCaso({ idCaso }: Props) {
   };
 
   useEffect(() => {
+    cargar();
     const channel = supabase
       .channel(`docs-${idCaso}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "documentos_caso", filter: `id_caso=eq.${idCaso}` }, () => cargar())
