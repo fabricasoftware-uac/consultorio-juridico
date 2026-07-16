@@ -47,6 +47,7 @@ import { ProgressIndicator } from "@radix-ui/react-progress";
 import { Caso, Demandado } from "app/types/database";
 import { getCasoById } from "../../../../../../../supabase/queries/getCasoById";
 import { getDemandadoByCasoId } from "../../../../../../../supabase/queries/getDemandadoByCasoId";
+import { getContratoByUsuarioId } from "../../../../../../../supabase/queries/getContratoByUsuarioId";
 import { insertAuditEvent } from "../../../../../../../supabase/queries/auditoriaCasos";
 import { supabase } from "@/lib/supabase/supabase-client";
 import { Switch } from "@/components/ui/switch";
@@ -83,6 +84,7 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
   const [error, setError] = useState<string>();
   const [caso, setCaso] = useState<Caso>();
   const [demandado, setDemandado] = useState<Demandado | null>();
+  const [contrato, setContrato] = useState<import("app/types/database").ContratoLaboral | null>(null);
   const [open, setOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -111,6 +113,12 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
 
       setCaso(casoFetch);
       setDemandado(demandadoFetch);
+
+      // Cargar contrato si existe
+      if (casoFetch.usuarios?.id_usuario) {
+        const contratoFetch = await getContratoByUsuarioId(casoFetch.usuarios.id_usuario);
+        setContrato(contratoFetch);
+      }
     } catch (err) {
       console.error(err);
       setError("Error al obtener los datos del caso");
@@ -124,10 +132,76 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
   }, []);
 
   useEffect(() => {
-    if (caso?.usuarios.correo && !formData.correo_contacto) {
-      setFormData((prev) => ({ ...prev, correo_contacto: caso.usuarios.correo ?? "" }));
-    }
-  }, [caso?.usuarios.correo]);
+    if (!caso?.usuarios) return;
+    const u = caso.usuarios;
+    setFormData((prev) => ({
+      ...prev,
+      correo_contacto: prev.correo_contacto || u.correo || "",
+      edad: prev.edad || String(u.edad ?? ""),
+      contacto_familiar: prev.contacto_familiar || u.contacto_familiar || "",
+      estado_civil: prev.estado_civil || u.estado_civil || "",
+      estrato: prev.estrato || String(u.estrato ?? ""),
+      direccion: prev.direccion || u.direccion || "",
+      tipo_vivienda: prev.tipo_vivienda || u.tipo_vivienda || "",
+      tiene_representado: prev.tiene_representado || String(u.tiene_representado ?? ""),
+      situacion_laboral: prev.situacion_laboral || u.situacion_laboral || "",
+      otros_ingresos: prev.otros_ingresos || u.otros_ingresos || false,
+      valor_otros_ingresos: prev.valor_otros_ingresos || String(u.valor_otros_ingresos ?? ""),
+      concepto_otros_ingresos: prev.concepto_otros_ingresos || u.concepto_otros_ingresos || "",
+      tiene_contrato: prev.tiene_contrato || u.tiene_contrato || false,
+      tipo_documento: prev.tipo_documento || u.tipo_documento || "CC",
+      fecha_expedicion_doc: prev.fecha_expedicion_doc || u.fecha_expedicion_doc || "",
+      ciudad_expedicion: prev.ciudad_expedicion || u.ciudad_expedicion || "",
+      fecha_nacimiento: prev.fecha_nacimiento || u.fecha_nacimiento || "",
+      nacionalidad: prev.nacionalidad || u.nacionalidad || "",
+      identidad_genero: prev.identidad_genero || u.identidad_genero || null,
+      orientacion_sexual: prev.orientacion_sexual || u.orientacion_sexual || null,
+      escolaridad: prev.escolaridad || u.escolaridad || "",
+      grupo_etnico: prev.grupo_etnico || u.grupo_etnico || "",
+      barrio: prev.barrio || u.barrio || "",
+      zona: prev.zona || u.zona || "",
+      tenencia_vivienda: prev.tenencia_vivienda || u.tenencia_vivienda || "",
+      comuna: prev.comuna || u.comuna || "",
+      tiene_sisben: prev.tiene_sisben ?? u.tiene_sisben ?? null,
+      personas_cargo: prev.personas_cargo ?? u.personas_cargo ?? null,
+      rango_salarial: prev.rango_salarial || u.rango_salarial || "",
+      servicios_publicos: prev.servicios_publicos || u.servicios_publicos || "",
+      sabe_leer: prev.sabe_leer ?? u.sabe_leer ?? null,
+      discapacidad: prev.discapacidad || u.discapacidad || "",
+      condicion_actual: prev.condicion_actual || u.condicion_actual || "",
+      enfoque_diverso: prev.enfoque_diverso ?? u.enfoque_diverso ?? null,
+      caracterizacion_lgbtiq: prev.caracterizacion_lgbtiq || u.caracterizacion_lgbtiq || null,
+    }));
+  }, [caso?.usuarios]);
+
+  useEffect(() => {
+    if (!demandado) return;
+    setFormData((prev) => ({
+      ...prev,
+      sinDemandado: false,
+      nombreDemandado: prev.nombreDemandado || demandado.nombre_completo || "",
+      documentoDemandado: prev.documentoDemandado || demandado.documento || "",
+      celularDemandado: prev.celularDemandado || demandado.celular || "",
+      lugarResidenciaDemandado: prev.lugarResidenciaDemandado || demandado.lugar_residencia || "",
+      correoDemandado: prev.correoDemandado || demandado.correo || "",
+    }));
+  }, [demandado]);
+
+  useEffect(() => {
+    if (!contrato) return;
+    setFormData((prev) => ({
+      ...prev,
+      tipoContrato: prev.tipoContrato || contrato.tipo_contrato || "",
+      nombreRepresentanteLegal: prev.nombreRepresentanteLegal || contrato.representante_legal || "",
+      direccionEmpresa: prev.direccionEmpresa || contrato.direccion_empresa || "",
+      correoEmpleador: prev.correoEmpleador || contrato.correo_patrono || "",
+      fechaInicio: prev.fechaInicio || contrato.fecha_inicio || "",
+      fechaTerminacion: prev.fechaTerminacion || contrato.fecha_fin || "",
+      continuaContrato: prev.continuaContrato || contrato.continua || false,
+      salarioInicial: prev.salarioInicial || String(contrato.salario_inicial ?? ""),
+      salarioActual: prev.salarioActual || String(contrato.salario_actual ?? ""),
+    }));
+  }, [contrato]);
 
   const clearForm = () => {
     setFormData(initialFormData);
@@ -308,7 +382,7 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
     if (!validateStep(8)) return;
 
     try {
-      //Actualizar caso
+      // 1. Actualizar caso
       const { error: errorCaso } = await supabase
         .from("casos")
         .update({
@@ -325,14 +399,129 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
       if (errorCaso)
         throw new Error(`Error actualizando caso: ${errorCaso.message}`);
 
-      if (limpio.correo_contacto && caso?.usuarios.id_usuario) {
-        await supabase
+      const userId = caso?.usuarios.id_usuario;
+
+      const parseNum = (v: any) => (v === null || v === "" || v === undefined ? null : Number(v));
+      const parseBool = (v: any) => {
+        if (v === null || v === undefined || v === "") return null;
+        if (typeof v === "boolean") return v;
+        return String(v).toLowerCase() === "true";
+      };
+
+      // 2. Actualizar usuarios con TODO el formulario sociodemográfico
+      if (userId) {
+
+        const usuariosPayload = {
+          correo: limpio.correo_contacto || null,
+          edad: parseNum(limpio.edad),
+          contacto_familiar: limpio.contacto_familiar,
+          estado_civil: limpio.estado_civil,
+          estrato: parseNum(limpio.estrato),
+          direccion: limpio.direccion,
+          tipo_vivienda: limpio.tipo_vivienda,
+          tiene_representado: parseBool(limpio.tiene_representado),
+          situacion_laboral: limpio.situacion_laboral,
+          otros_ingresos: limpio.otros_ingresos,
+          valor_otros_ingresos: parseNum(limpio.valor_otros_ingresos),
+          concepto_otros_ingresos: limpio.concepto_otros_ingresos,
+          tiene_contrato: limpio.tiene_contrato,
+          tipo_documento: limpio.tipo_documento,
+          fecha_expedicion_doc: limpio.fecha_expedicion_doc || null,
+          ciudad_expedicion: limpio.ciudad_expedicion,
+          fecha_nacimiento: limpio.fecha_nacimiento || null,
+          nacionalidad: limpio.nacionalidad,
+          identidad_genero: limpio.identidad_genero,
+          orientacion_sexual: limpio.orientacion_sexual,
+          escolaridad: limpio.escolaridad,
+          grupo_etnico: limpio.grupo_etnico,
+          barrio: limpio.barrio,
+          zona: limpio.zona,
+          tenencia_vivienda: limpio.tenencia_vivienda,
+          comuna: limpio.comuna,
+          tiene_sisben: parseBool(limpio.tiene_sisben),
+          personas_cargo: parseNum(limpio.personas_cargo),
+          rango_salarial: limpio.rango_salarial,
+          servicios_publicos: limpio.servicios_publicos,
+          sabe_leer: parseBool(limpio.sabe_leer),
+          discapacidad: limpio.discapacidad,
+          condicion_actual: limpio.condicion_actual,
+          enfoque_diverso: parseBool(limpio.enfoque_diverso),
+          caracterizacion_lgbtiq: limpio.caracterizacion_lgbtiq,
+        };
+
+        const { error: errorUsuario } = await supabase
           .from("usuarios")
-          .update({ correo: limpio.correo_contacto })
-          .eq("id_usuario", caso.usuarios.id_usuario);
+          .update(usuariosPayload)
+          .eq("id_usuario", userId);
+
+        if (errorUsuario) throw new Error(`Error guardando datos del solicitante: ${errorUsuario.message}`);
       }
 
-      // Auto-resolver llamado de atencion del estudiante si existe
+      // 3. Insertar / actualizar demandado
+      const tieneDemandado = !limpio.sinDemandado && limpio.nombreDemandado;
+      if (tieneDemandado) {
+        const { data: existente } = await supabase
+          .from("demandados")
+          .select("id_demandado")
+          .eq("id_caso", idCaso)
+          .maybeSingle();
+
+        const demandadoPayload = {
+          id_caso: parseInt(idCaso),
+          nombre_completo: limpio.nombreDemandado,
+          documento: limpio.documentoDemandado || null,
+          celular: limpio.celularDemandado || null,
+          lugar_residencia: limpio.lugarResidenciaDemandado || null,
+          correo: limpio.correoDemandado || null,
+        };
+
+        if (existente?.id_demandado) {
+          const { error: e2 } = await supabase
+            .from("demandados")
+            .update(demandadoPayload)
+            .eq("id_demandado", existente.id_demandado);
+          if (e2) throw new Error(`Error actualizando demandado: ${e2.message}`);
+        } else {
+          const { error: e2 } = await supabase.from("demandados").insert(demandadoPayload);
+          if (e2) throw new Error(`Error insertando demandado: ${e2.message}`);
+        }
+      }
+
+      // 4. Insertar / actualizar contrato laboral
+      const tieneContratoDatos = limpio.tiene_contrato && limpio.tipoContrato;
+      if (tieneContratoDatos && userId) {
+        const { data: existente } = await supabase
+          .from("contratos_laborales")
+          .select("id_contrato")
+          .eq("id_usuario", userId)
+          .maybeSingle();
+
+        const contratoPayload = {
+          id_usuario: userId,
+          tipo_contrato: limpio.tipoContrato,
+          representante_legal: limpio.nombreRepresentanteLegal || null,
+          direccion_empresa: limpio.direccionEmpresa || null,
+          correo_patrono: limpio.correoEmpleador || null,
+          fecha_inicio: limpio.fechaInicio || null,
+          fecha_fin: limpio.fechaTerminacion || null,
+          continua: limpio.continuaContrato ?? false,
+          salario_inicial: parseNum(limpio.salarioInicial),
+          salario_actual: parseNum(limpio.salarioActual),
+        };
+
+        if (existente?.id_contrato) {
+          const { error: e2 } = await supabase
+            .from("contratos_laborales")
+            .update(contratoPayload)
+            .eq("id_contrato", existente.id_contrato);
+          if (e2) throw new Error(`Error actualizando contrato: ${e2.message}`);
+        } else {
+          const { error: e2 } = await supabase.from("contratos_laborales").insert(contratoPayload);
+          if (e2) throw new Error(`Error insertando contrato: ${e2.message}`);
+        }
+      }
+
+      // 5. Auto-resolver llamado de atencion del estudiante si existe
       await supabase
         .from("llamados_atencion")
         .update({ resuelto: true, fecha_resolucion: new Date().toISOString() })

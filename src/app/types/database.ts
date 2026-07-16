@@ -181,3 +181,17 @@ export type Demandado = {
   lugar_residencia: string | null;
   correo: string | null;
 };
+
+export type ContratoLaboral = {
+  id_contrato: number;
+  id_usuario: string;
+  tipo_contrato: string | null;
+  representante_legal: string | null;
+  direccion_empresa: string | null;
+  correo_patrono: string | null;
+  fecha_inicio: string | null;
+  fecha_fin: string | null;
+  continua: boolean | null;
+  salario_inicial: number | null;
+  salario_actual: number | null;
+};
