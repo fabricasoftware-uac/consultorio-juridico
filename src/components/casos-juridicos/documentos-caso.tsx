@@ -14,6 +14,7 @@ import {
 import { FileText, Upload, Download, Trash2, File, Image as ImageIcon, FileSpreadsheet, FileArchive, Archive, Eye, CheckCircle, XCircle, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/supabase-client";
+import { jwtDecode } from "jwt-decode";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -163,7 +164,7 @@ export function DocumentosCaso({ idCaso }: Props) {
         console.log("[DocumentosCaso] session:", !!session, "role:", session?.access_token ? "token presente" : "sin token");
 
         if (session?.access_token) {
-          const payload = JSON.parse(atob(session.access_token.split(".")[1]));
+          const payload = jwtDecode<{ user_role?: string }>(session.access_token);
           setRole(payload.user_role ?? "");
           console.log("[DocumentosCaso] user_role:", payload.user_role);
         }
