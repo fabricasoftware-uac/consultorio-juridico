@@ -43,6 +43,7 @@ import { CasoAuditoria } from "@/components/casos-juridicos/caso-auditoria";
 import { useRealtimeCaso } from "@/lib/hooks/useRealtimeCaso";
 import { DocumentosCaso } from "@/components/casos-juridicos/documentos-caso";
 import { BotonesCerrarArchivar } from "@/components/casos-juridicos/botones-cerrar-archivar";
+import { BotonesEntrevista } from "@/components/casos-juridicos/botones-entrevista";
 import { StudentInfo } from "@/components/casos-juridicos/student-info";
 import { SectionCard } from "@/components/casos-juridicos/shared-ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -473,7 +474,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   </span>
                 </div>
               </div>
-              <div className="mt-3 lg:mt-0 lg:min-w-[260px]">
+              <div className="mt-3 lg:mt-0 lg:min-w-[260px] flex flex-col gap-2">
+                <BotonesEntrevista idCaso={id_caso} caso={caso} demandado={demandado || null} />
                 <BotonesCerrarArchivar idCaso={id_caso} estado={caso.estado} clasificacion={caso.clasificacion} onRefresh={traerDatos} />
               </div>
             </div>

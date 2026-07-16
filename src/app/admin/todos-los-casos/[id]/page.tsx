@@ -26,6 +26,7 @@ import { DocumentosCaso } from "@/components/casos-juridicos/documentos-caso";
 import { ActividadesCaso } from "@/components/casos-juridicos/actividades-caso";
 import { AdminReasignarEquipo } from "@/components/casos-juridicos/reasignar-equipo-tabla";
 import { BotonesCerrarArchivar } from "@/components/casos-juridicos/botones-cerrar-archivar";
+import { BotonesEntrevista } from "@/components/casos-juridicos/botones-entrevista";
 import { useRealtimeCaso } from "@/lib/hooks/useRealtimeCaso";
 import { useCaseEdit } from "@/lib/hooks/useCaseEdit";
 import { cleanData } from "@/lib/utils";
@@ -102,7 +103,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                 </p>
               ) : null}
             </div>
-            <div className="mt-3 lg:mt-0 lg:min-w-[260px]">
+            <div className="mt-3 lg:mt-0 lg:min-w-[260px] flex flex-col gap-2">
+              <BotonesEntrevista idCaso={id} caso={caso} demandado={demandado} />
               <BotonesCerrarArchivar idCaso={id} estado={caso.estado} clasificacion={caso.clasificacion} onRefresh={refetch} />
             </div>
           </div>

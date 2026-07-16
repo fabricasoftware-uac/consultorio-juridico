@@ -24,6 +24,7 @@ import { ObservacionesChat } from "@/components/casos-juridicos/observaciones-ch
 import { CasoAuditoria } from "@/components/casos-juridicos/caso-auditoria";
 import { DocumentosCaso } from "@/components/casos-juridicos/documentos-caso";
 import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
+import { BotonesEntrevista } from "@/components/casos-juridicos/botones-entrevista";
 import { useRealtimeCaso } from "@/lib/hooks/useRealtimeCaso";
 import { toast } from "sonner";
 import {
@@ -117,6 +118,9 @@ export default function Page({ params }: { params: Promise<{ id_caso: string }> 
               <div className="flex flex-wrap items-center gap-3 mb-2">
                 <h1 className="text-3xl font-extrabold text-slate-900">Caso #{caso.id_caso}</h1>
                 {getStatusBadge(caso.estado)}
+                {caso.estado !== "en_proceso" && caso.estado !== "en_correccion" && (
+                  <BotonesEntrevista idCaso={id_caso} caso={caso} demandado={demandado} />
+                )}
                 {caso.estado === "en_correccion" && (
                   <Button onClick={handleReenviar} disabled={enviando} size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
                     <Send className="w-4 h-4 mr-1" />
