@@ -464,7 +464,7 @@ export function AsignacionCaso({
                         setAsesorId("");
                         setAsesorSeleccionado(null);
                       }}
-                      className="text-xs text-red-500 hover:text-red-700 font-semibold flex items-center gap-1 bg-red-50 px-2 py-0.5 rounded-md transition-colors"
+                      className="text-xs text-red-500 hover:text-red-700 font-semibold flex items-center gap-1 bg-red-50 px-2 py-0.5 rounded-md transition-colors cursor-pointer"
                       type="button"
                     >
                       <X className="w-3 h-3" /> Quitar selección

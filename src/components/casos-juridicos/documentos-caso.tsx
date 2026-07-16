@@ -232,8 +232,23 @@ export function DocumentosCaso({ idCaso }: Props) {
     }
   };
 
-  const handleDownload = (doc: Documento) => {
-    if (doc.signed_url) window.open(doc.signed_url, "_blank");
+  const handleDownload = async (doc: Documento) => {
+    if (!doc.signed_url) return;
+    try {
+      const res = await fetch(doc.signed_url);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = doc.nombre_original;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Error descargando archivo:", err);
+      toast.error("Error al descargar el archivo");
+    }
   };
 
   if (loading) {
@@ -255,7 +270,11 @@ export function DocumentosCaso({ idCaso }: Props) {
           documentos.map((doc) => {
             const { icon: Icon, color } = getIcon(doc.mime_type);
             return (
-              <div key={doc.id} className={`flex items-center gap-3 p-3 rounded-xl border shadow-sm group transition-opacity ${doc.estado === "archivado" ? "bg-slate-50 border-slate-100 opacity-60" : "bg-white border-slate-100"}`}>
+              <div
+                key={doc.id}
+                onClick={() => handleDownload(doc)}
+                className={`flex items-center gap-3 p-3 rounded-xl border shadow-sm group transition-opacity cursor-pointer hover:bg-slate-50 ${doc.estado === "archivado" ? "bg-slate-50 border-slate-100 opacity-60" : "bg-white border-slate-100"}`}
+              >
                 <Icon className={`w-5 h-5 ${color} shrink-0`} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -273,7 +292,7 @@ export function DocumentosCaso({ idCaso }: Props) {
                 <div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-7 w-7">
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => e.stopPropagation()}>
                         <MoreVertical className="w-4 h-4" />
                       </Button>
                     </DropdownMenuTrigger>

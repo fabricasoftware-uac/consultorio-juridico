@@ -67,7 +67,7 @@ export function BotonAccesibilidad() {
       {/* Botón flotante */}
       <button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-6 z-50 bg-blue-600 text-white rounded-full p-3 shadow-lg hover:bg-blue-700 transition-all duration-200"
+        className="fixed bottom-6 right-6 z-50 bg-blue-600 text-white rounded-full p-3 shadow-lg hover:bg-blue-700 transition-all duration-200 cursor-pointer"
         aria-label="Accesibilidad"
       >
         {open ? <X className="w-5 h-5" /> : <Accessibility className="w-5 h-5" />}

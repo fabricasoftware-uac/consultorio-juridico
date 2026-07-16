@@ -105,7 +105,7 @@ export function ScheduleEditor({ horario, onChangeDia }: ScheduleEditorProps) {
                   key={t}
                   onClick={() => onChangeDia(dia, "turno", t)}
                   disabled={!info.activo}
-                  className={`px-4 py-2 rounded-lg font-bold text-sm transition-all border-2 ${
+                  className={`cursor-pointer px-4 py-2 rounded-lg font-bold text-sm transition-all border-2 ${
                     info.turno === t
                       ? "bg-blue-700 border-blue-800 text-white shadow-md scale-105"
                       : "bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-700"

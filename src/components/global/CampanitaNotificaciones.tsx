@@ -46,7 +46,7 @@ function NotificacionItem({ n, onLeer }: { n: Notificacion; onLeer: (id: number)
       {!n.leida && (
         <button
           onClick={() => onLeer(n.id)}
-          className="shrink-0 p-1 rounded hover:bg-blue-100 text-blue-500"
+          className="shrink-0 p-1 rounded hover:bg-blue-100 text-blue-500 cursor-pointer"
           title="Marcar como leída"
         >
           <CheckCheck className="w-3.5 h-3.5" />
@@ -78,7 +78,7 @@ export function CampanitaNotificaciones({ role }: { role?: string }) {
     <div ref={ref} className="relative">
       <button
         onClick={handleToggle}
-        className="relative p-2 rounded-lg hover:bg-slate-100 transition-colors"
+        className="relative p-2 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
         aria-label="Notificaciones"
       >
         <Bell className="w-5 h-5 text-slate-600" />
@@ -96,7 +96,7 @@ export function CampanitaNotificaciones({ role }: { role?: string }) {
             <div className="flex items-center gap-1">
               <button
                 onClick={toggleMute}
-                className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-600"
+                className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
                 title={muted ? "Activar sonido" : "Silenciar"}
               >
                 {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}

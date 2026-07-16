@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Navbar } from "../components/NavBarAsesor";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Caso } from "app/types/database";
 import { getCasos } from "../../../../supabase/queries/getCasos";
 import {
@@ -43,6 +44,7 @@ export default function Asesor() {
   const [loading, setLoading] = useState(false);
   const [casos, setCasos] = useState<Caso[] | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const router = useRouter();
 
   const refetch = useCallback(async () => {
     try {
@@ -304,10 +306,14 @@ export default function Asesor() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
             {currentCases?.map((caso) => (
-              <Card
+              <div
                 key={caso.id_caso}
-                className="p-6 border-none shadow-sm shadow-slate-200/50 hover:shadow-md hover:shadow-blue-900/5 transition-all duration-300 bg-white rounded-2xl group flex flex-col"
+                onClick={() => router.push(`/asesor/mis-casos/${caso.id_caso}`)}
+                className="cursor-pointer"
               >
+                <Card
+                  className="p-6 border-none shadow-sm shadow-slate-200/50 hover:shadow-md hover:shadow-blue-900/5 hover:border-blue-300 transition-all duration-300 bg-white rounded-2xl group flex flex-col h-full"
+                >
                 <div className="flex justify-between items-start mb-5 border-b border-slate-100 pb-4">
                   <div className="space-y-1">
                     <div className="text-xs font-semibold text-slate-400">
@@ -387,15 +393,16 @@ export default function Asesor() {
                 )}
                 </div>
 
-                <div className="mt-auto pt-4 border-t border-slate-50 flex flex-col gap-3">
-                  <Link
-                    href={`/asesor/mis-casos/${caso.id_caso}`}
-                    className="flex w-full items-center justify-center bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 font-medium px-4 py-2.5 rounded-xl transition-colors duration-200 text-sm shadow-xs"
+                <div className="mt-auto pt-4 border-t border-slate-50 flex flex-col gap-3" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); router.push(`/asesor/mis-casos/${caso.id_caso}`); }}
+                    className="flex w-full items-center justify-center bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 font-medium px-4 py-2.5 rounded-xl transition-colors duration-200 text-sm shadow-xs cursor-pointer"
                   >
                     Ver detalles
-                  </Link>
+                  </button>
                 </div>
               </Card>
+              </div>
             ))}
           </div>
         )}

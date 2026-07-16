@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Navbar } from "../components/NavBarProApoyo";
 import { Caso } from "app/types/database";
 import { getCasos } from "../../../../supabase/queries/getCasos";
@@ -53,6 +54,7 @@ export default function SupportCasesPage() {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 9;
+  const router = useRouter();
 
   const refetch = useCallback(async () => {
     try {
@@ -272,10 +274,14 @@ export default function SupportCasesPage() {
         {/* Case List Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
           {currentCases?.map((caso) => (
-            <Card
+            <div
               key={caso.id_caso}
-              className="p-6 border-none shadow-sm shadow-slate-200/50 hover:shadow-md hover:shadow-blue-900/5 transition-all duration-300 bg-white rounded-2xl group flex flex-col"
+              onClick={() => router.push(`/pro-apoyo/gestionar-caso/${caso.id_caso}`)}
+              className="cursor-pointer"
             >
+              <Card
+                className="p-6 border-none shadow-sm shadow-slate-200/50 hover:shadow-md hover:shadow-blue-900/5 hover:border-blue-300 transition-all duration-300 bg-white rounded-2xl group flex flex-col h-full"
+              >
               <div className="flex justify-between items-start mb-5 border-b border-slate-100 pb-4">
                 <div className="space-y-1">
                   <div className="text-xs font-semibold text-slate-400">
@@ -366,15 +372,16 @@ export default function SupportCasesPage() {
                   />
                 </div>
 
-                <div className="mt-auto pt-4 border-t border-slate-50">
-                <Link
-                  className="flex w-full items-center justify-center bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 font-medium px-4 py-2.5 rounded-xl transition-colors duration-200 text-sm shadow-xs"
-                  href={`/pro-apoyo/gestionar-caso/${caso.id_caso}`}
+                <div className="mt-auto pt-4 border-t border-slate-50" onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={(e) => { e.stopPropagation(); router.push(`/pro-apoyo/gestionar-caso/${caso.id_caso}`); }}
+                  className="flex w-full items-center justify-center bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 font-medium px-4 py-2.5 rounded-xl transition-colors duration-200 text-sm shadow-xs cursor-pointer"
                 >
                   Modificar & Supervisar
-                </Link>
+                </button>
               </div>
             </Card>
+            </div>
           ))}
         </div>
 

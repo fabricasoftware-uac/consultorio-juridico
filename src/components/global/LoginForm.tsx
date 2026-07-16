@@ -144,7 +144,7 @@ export function LoginForm() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors focus:outline-hidden"
+                className="absolute right-3.5 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors focus:outline-hidden cursor-pointer"
               >
                 {showPassword ? (
                   <EyeOffIcon className="h-5 w-5" />
@@ -158,7 +158,7 @@ export function LoginForm() {
           <div className="flex flex-col space-y-3 pt-2">
             <button
               type="button"
-              className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline transition-all text-left w-max"
+              className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline transition-all text-left w-max cursor-pointer"
               onClick={handleRedirectToPasswordReset}
             >
               ¿Olvidaste tu contraseña?

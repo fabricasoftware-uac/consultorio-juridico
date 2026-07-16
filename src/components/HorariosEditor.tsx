@@ -59,7 +59,7 @@ export function HorariosEditor({ idPerfil }: Props) {
           {horarios.map((h, i) => (
             <Badge key={i} variant="secondary" className="gap-1 pr-1">
               {h.dia.substring(0, 3)} {h.turno}
-              <button onClick={() => quitar(i)} className="hover:bg-slate-200 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+              <button onClick={() => quitar(i)} className="hover:bg-slate-200 rounded-full p-0.5 cursor-pointer"><X className="w-3 h-3" /></button>
             </Badge>
           ))}
         </div>

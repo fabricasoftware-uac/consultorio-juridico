@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Navbar } from "../components/NavBarEstudiante";
 import { Caso } from "app/types/database";
 import { getCasos } from "../../../../supabase/queries/getCasos";
@@ -51,6 +52,7 @@ export default function MisCasosClient() {
   const [loading, setLoading] = useState(false);
   const [casos, setCasos] = useState<Caso[] | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const router = useRouter();
 
   const refetch = useCallback(async () => {
     try {
@@ -269,9 +271,13 @@ export default function MisCasosClient() {
         {/* Case List Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {currentCases.map((caso) => (
+          <div
+            key={caso.id_caso}
+            onClick={() => router.push(`/estudiante/mis-casos/${caso.id_caso}`)}
+            className="cursor-pointer"
+          >
             <Card
-              key={caso.id_caso}
-              className="p-6 border-none shadow-sm shadow-slate-200/50 hover:shadow-md hover:shadow-blue-900/5 transition-all duration-300 bg-white rounded-2xl group flex flex-col"
+              className="p-6 border-none shadow-sm shadow-slate-200/50 hover:shadow-md hover:shadow-blue-900/5 hover:border-blue-300 transition-all duration-300 bg-white rounded-2xl group flex flex-col h-full"
             >
               <div className="flex justify-between items-start mb-6 border-b border-slate-100 pb-4">
                 <div>
@@ -342,26 +348,27 @@ export default function MisCasosClient() {
                 )}
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 mt-auto pt-4 border-t border-slate-50">
-                <Link
-                  href={`/estudiante/mis-casos/${caso.id_caso}`}
-                  className="flex-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium px-4 py-2.5 rounded-xl transition-colors duration-200 text-center text-sm shadow-xs"
+              <div className="flex flex-col sm:flex-row gap-3 mt-auto pt-4 border-t border-slate-50" onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={(e) => { e.stopPropagation(); router.push(`/estudiante/mis-casos/${caso.id_caso}`); }}
+                  className="flex-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium px-4 py-2.5 rounded-xl transition-colors duration-200 text-center text-sm shadow-xs cursor-pointer"
                 >
                   Ver detalles
-                </Link>
+                </button>
                 {(caso.estado === "en_proceso" ||
                   caso.estado === "en_correccion") && (
-                  <Link
-                    href={`/estudiante/mis-casos/${caso.id_caso}/entrevista`}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2.5 rounded-xl transition-colors duration-200 text-center text-sm shadow-md shadow-green-600/20"
+                  <button
+                    onClick={(e) => { e.stopPropagation(); router.push(`/estudiante/mis-casos/${caso.id_caso}/entrevista`); }}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2.5 rounded-xl transition-colors duration-200 text-center text-sm shadow-md shadow-green-600/20 cursor-pointer"
                   >
                     {caso.estado === "en_correccion"
                       ? "Continuar entrevista"
                       : "Ir a entrevista"}
-                  </Link>
+                  </button>
                 )}
               </div>
             </Card>
+          </div>
           ))}
         </div>
 

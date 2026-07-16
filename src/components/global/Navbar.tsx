@@ -75,7 +75,7 @@ export function Navbar({ roleName, basePath, links, role }: NavbarProps) {
         <div className="md:hidden flex items-center gap-2">
           <CampanitaNotificaciones role={role} />
           <button
-            className="p-2 rounded-md text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors focus:outline-hidden"
+            className="p-2 rounded-md text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors focus:outline-hidden cursor-pointer"
             onClick={() => setOpen(!open)}
             aria-label="Toggle menu"
           >
