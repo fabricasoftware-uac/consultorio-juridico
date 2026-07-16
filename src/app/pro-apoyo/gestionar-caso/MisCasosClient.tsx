@@ -47,12 +47,12 @@ export default function SupportCasesPage() {
   const [areaFilter, setAreaFilter] = useState("todos");
   const [periodoFilter, setPeriodoFilter] = useState("todos");
   const [studentFilter, setStudentFilter] = useState("todos");
-  const [dateSort, setDateSort] = useState("recientes");
+  const [dateSort, setDateSort] = useState("ultima_mod");
   const [classFilter, setClassFilter] = useState("todos");
   const [casos, setCasos] = useState<Caso[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 9;
 
   const refetch = useCallback(async () => {
     try {
@@ -110,6 +110,11 @@ export default function SupportCasesPage() {
   });
 
   const sortedCases = [...filteredCases].sort((a, b) => {
+    if (dateSort === "ultima_mod") {
+      const modA = a.ultima_modificacion ? new Date(a.ultima_modificacion).getTime() : 0;
+      const modB = b.ultima_modificacion ? new Date(b.ultima_modificacion).getTime() : 0;
+      return modB - modA;
+    }
     const dateA = new Date(a.fecha_creacion).getTime();
     const dateB = new Date(b.fecha_creacion).getTime();
     const diff = dateB - dateA;
@@ -242,7 +247,7 @@ export default function SupportCasesPage() {
             setAreaFilter("todos");
             setPeriodoFilter("todos");
             setStudentFilter("todos");
-            setDateSort("recientes");
+            setDateSort("ultima_mod");
             setClassFilter("todos");
           }}
         >
@@ -391,7 +396,7 @@ export default function SupportCasesPage() {
                 setStatusFilter("todos");
                 setAreaFilter("todos");
                 setStudentFilter("todos");
-                setDateSort("recientes");
+                setDateSort("ultima_mod");
                 setClassFilter("todos");
               }}
               className="bg-white"

@@ -161,12 +161,10 @@ export function DocumentosCaso({ idCaso }: Props) {
     const init = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        console.log("[DocumentosCaso] session:", !!session, "role:", session?.access_token ? "token presente" : "sin token");
 
         if (session?.access_token) {
           const payload = jwtDecode<{ user_role?: string }>(session.access_token);
           setRole(payload.user_role ?? "");
-          console.log("[DocumentosCaso] user_role:", payload.user_role);
         }
 
         channelRef.current = supabase
@@ -174,9 +172,7 @@ export function DocumentosCaso({ idCaso }: Props) {
           .on("postgres_changes", { event: "*", schema: "public", table: "documentos_caso", filter: `id_caso=eq.${idCaso}` }, () => cargar())
           .subscribe();
 
-        console.log("[DocumentosCaso] cargando docs para id_caso:", idCaso);
         await cargar();
-        console.log("[DocumentosCaso] carga completada, docs:", documentos.length);
       } catch (err) {
         console.error("[DocumentosCaso] error en init:", err);
         setLoading(false);

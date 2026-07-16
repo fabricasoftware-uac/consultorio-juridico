@@ -24,13 +24,17 @@ interface Props {
 
 export function BotonesEntrevista({ idCaso, caso, demandado }: Props) {
   const [contrato, setContrato] = useState<ContratoLaboral | null>(null);
+  const [loadingContrato, setLoadingContrato] = useState(false);
   const [open, setOpen] = useState(false);
 
   // Fetch contrato cuando el componente se monta
   useEffect(() => {
     const userId = caso?.usuarios?.id_usuario;
     if (userId) {
-      getContratoByUsuarioId(userId).then((data) => setContrato(data));
+      setLoadingContrato(true);
+      getContratoByUsuarioId(userId)
+        .then((data) => setContrato(data))
+        .finally(() => setLoadingContrato(false));
     }
   }, [caso?.usuarios?.id_usuario]);
 
@@ -59,6 +63,7 @@ export function BotonesEntrevista({ idCaso, caso, demandado }: Props) {
           variant="outline"
           size="sm"
           onClick={handleExportar}
+          disabled={loadingContrato}
           className="text-xs"
         >
           <Download className="w-3.5 h-3.5 mr-1.5" />

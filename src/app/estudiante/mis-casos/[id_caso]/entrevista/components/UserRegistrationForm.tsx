@@ -1,15 +1,6 @@
 "use client";
-export const dynamic = "force-dynamic";
 import { useEffect, useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+
 import {
   Card,
   CardContent,
@@ -51,7 +42,6 @@ import { getContratoByUsuarioId } from "../../../../../../../supabase/queries/ge
 import { insertAuditEvent } from "../../../../../../../supabase/queries/auditoriaCasos";
 import { supabase } from "@/lib/supabase/supabase-client";
 import { Switch } from "@/components/ui/switch";
-import { Tienne } from "next/font/google";
 import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useRouter } from "next/navigation";
@@ -85,8 +75,6 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
   const [caso, setCaso] = useState<Caso>();
   const [demandado, setDemandado] = useState<Demandado | null>();
   const [contrato, setContrato] = useState<import("app/types/database").ContratoLaboral | null>(null);
-  const [open, setOpen] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const router = useRouter();
 
@@ -401,8 +389,9 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
 
       const userId = caso?.usuarios.id_usuario;
 
-      const parseNum = (v: any) => (v === null || v === "" || v === undefined ? null : Number(v));
-      const parseBool = (v: any) => {
+      const parseNum = (v: string | number | boolean | null | undefined) =>
+        v === null || v === "" || v === undefined ? null : Number(v);
+      const parseBool = (v: string | number | boolean | null | undefined) => {
         if (v === null || v === undefined || v === "") return null;
         if (typeof v === "boolean") return v;
         return String(v).toLowerCase() === "true";
@@ -542,7 +531,7 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
       clearForm();
     } catch (err) {
       console.error("❌ Error durante la actualización:", err);
-      alert(`Ocurrió un error: ${(err as Error).message}`);
+      toast.error("Ocurrió un error al guardar la entrevista. Intente de nuevo.");
     }
   };
 
@@ -700,24 +689,6 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
           </div>
         )}
       </div>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-center">
-              {successMessage.includes("✅")
-                ? "Actualización Exitosa"
-                : "Error"}
-            </DialogTitle>
-            <DialogDescription className="text-center">
-              {successMessage}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex justify-center">
-            <Button onClick={() => setOpen(false)}>Cerrar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       {/* Step Content */}
       <form onSubmit={handleSubmit}>
         {renderStepContent()}

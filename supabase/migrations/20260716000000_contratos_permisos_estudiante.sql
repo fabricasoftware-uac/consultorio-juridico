@@ -7,4 +7,5 @@ VALUES
   ('asesor', 'contratos_laborales.read'),
   ('asesor', 'contratos_laborales.update'),
   ('pro_apoyo', 'contratos_laborales.read'),
-  ('pro_apoyo', 'contratos_laborales.update');
+  ('pro_apoyo', 'contratos_laborales.update')
+ON CONFLICT (role, permission) DO NOTHING;

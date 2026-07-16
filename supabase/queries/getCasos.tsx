@@ -14,6 +14,8 @@ export async function getCasos(): Promise<Caso[]> {
     fecha_cierre,
     fecha_vencimiento_estudiante,
     fecha_vencimiento_asesor,
+    fecha_entrega_entrevista,
+    ultima_modificacion,
     periodo,
     usuarios (
       id_usuario,

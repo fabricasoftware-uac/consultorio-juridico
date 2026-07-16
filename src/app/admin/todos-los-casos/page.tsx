@@ -43,6 +43,7 @@ export default function TodosLosCasosPage() {
   const [statusFilter, setStatusFilter] = useState("todos");
   const [areaFilter, setAreaFilter] = useState("todos");
   const [periodoFilter, setPeriodoFilter] = useState("todos");
+  const [dateSort, setDateSort] = useState("ultima_mod");
   const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 20;
 
@@ -66,14 +67,26 @@ export default function TodosLosCasosPage() {
     return matchSearch && matchStatus && matchArea && matchPeriodo;
   });
 
-  const totalPages = Math.ceil(filtrados.length / ITEMS_PER_PAGE);
-  const paginados = filtrados.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+  const sorted = [...filtrados].sort((a, b) => {
+    if (dateSort === "ultima_mod") {
+      const modA = a.ultima_modificacion ? new Date(a.ultima_modificacion).getTime() : 0;
+      const modB = b.ultima_modificacion ? new Date(b.ultima_modificacion).getTime() : 0;
+      return modB - modA;
+    }
+    const dateA = new Date(a.fecha_creacion).getTime();
+    const dateB = new Date(b.fecha_creacion).getTime();
+    return dateSort === "recientes" ? dateB - dateA : dateA - dateB;
+  });
+
+  const totalPages = Math.ceil(sorted.length / ITEMS_PER_PAGE);
+  const paginados = sorted.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   const limpiar = () => {
     setSearchTerm("");
     setStatusFilter("todos");
     setAreaFilter("todos");
     setPeriodoFilter("todos");
+    setDateSort("ultima_mod");
     setPage(1);
   };
 
@@ -146,6 +159,17 @@ export default function TodosLosCasosPage() {
                 <SelectItem value="penal">Penal</SelectItem>
                 <SelectItem value="publica">Público</SelectItem>
                 <SelectItem value="otros">Otros</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={dateSort} onValueChange={(v) => { setDateSort(v); setPage(1); }}>
+              <SelectTrigger className="w-48 bg-slate-50 border-transparent rounded-xl">
+                <SelectValue placeholder="Ordenar por" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ultima_mod">Última modificación</SelectItem>
+                <SelectItem value="recientes">Más recientes (creación)</SelectItem>
+                <SelectItem value="antiguos">Más antiguos (creación)</SelectItem>
               </SelectContent>
             </Select>
 

@@ -39,8 +39,9 @@ const CLASS_OPTIONS = [
 ] as const;
 
 const SORT_OPTIONS = [
-  { value: "recientes", label: "Más recientes" },
-  { value: "antiguos", label: "Más antiguos" },
+  { value: "ultima_mod", label: "Última modificación" },
+  { value: "recientes", label: "Más recientes (creación)" },
+  { value: "antiguos", label: "Más antiguos (creación)" },
 ] as const;
 
 export interface CaseFiltersProps {
@@ -141,7 +142,7 @@ export function CaseFilters({
 
         <div className="w-full lg:w-48 space-y-1.5">
           <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-            Ordenar por fecha
+            Ordenar por
           </label>
           <Select
             value={dateSort}

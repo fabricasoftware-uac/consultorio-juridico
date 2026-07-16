@@ -46,7 +46,7 @@ export default function MisCasosClient() {
   const [statusFilter, setStatusFilter] = useState("todos");
   const [areaFilter, setAreaFilter] = useState("todos");
   const [periodoFilter, setPeriodoFilter] = useState("todos");
-  const [dateSort, setDateSort] = useState("recientes");
+  const [dateSort, setDateSort] = useState("ultima_mod");
   const [classFilter, setClassFilter] = useState("todos");
   const [loading, setLoading] = useState(false);
   const [casos, setCasos] = useState<Caso[] | null>(null);
@@ -111,6 +111,11 @@ export default function MisCasosClient() {
   });
 
   const sortedCases = [...filteredCases].sort((a, b) => {
+    if (dateSort === "ultima_mod") {
+      const modA = a.ultima_modificacion ? new Date(a.ultima_modificacion).getTime() : 0;
+      const modB = b.ultima_modificacion ? new Date(b.ultima_modificacion).getTime() : 0;
+      return modB - modA;
+    }
     const dateA = new Date(a.fecha_creacion).getTime();
     const dateB = new Date(b.fecha_creacion).getTime();
     const diff = dateB - dateA;
@@ -120,7 +125,7 @@ export default function MisCasosClient() {
   });
 
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 9;
   // Paginación
   const totalPages = Math.ceil(sortedCases.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -239,7 +244,7 @@ export default function MisCasosClient() {
             setStatusFilter("todos");
             setAreaFilter("todos");
             setPeriodoFilter("todos");
-            setDateSort("recientes");
+            setDateSort("ultima_mod");
             setClassFilter("todos");
           }}
         >
@@ -377,7 +382,7 @@ export default function MisCasosClient() {
                 setSearchTerm("");
                 setStatusFilter("todos");
                 setAreaFilter("todos");
-                setDateSort("recientes");
+                setDateSort("ultima_mod");
                 setClassFilter("todos");
               }}
               className="bg-white"
