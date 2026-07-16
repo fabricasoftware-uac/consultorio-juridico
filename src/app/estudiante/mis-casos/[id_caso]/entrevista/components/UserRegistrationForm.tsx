@@ -39,13 +39,13 @@ import { Caso, Demandado } from "app/types/database";
 import { getCasoById } from "../../../../../../../supabase/queries/getCasoById";
 import { getDemandadoByCasoId } from "../../../../../../../supabase/queries/getDemandadoByCasoId";
 import { getContratoByUsuarioId } from "../../../../../../../supabase/queries/getContratoByUsuarioId";
-import { insertAuditEvent } from "../../../../../../../supabase/queries/auditoriaCasos";
+import { guardarEntrevista } from "../../../../../../../supabase/queries/guardarEntrevista";
 import { supabase } from "@/lib/supabase/supabase-client";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useRouter } from "next/navigation";
-import { cleanData, sumarDiasHabiles } from "@/lib/utils";
+import { cleanData } from "@/lib/utils";
 import {
   Step1InfoEntrevista,
   Step2InfoSolicitante,
@@ -366,174 +366,117 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const limpio = cleanData(formData);
     if (!validateStep(8)) return;
 
     try {
-      // 1. Actualizar caso
-      const { error: errorCaso } = await supabase
-        .from("casos")
-        .update({
-          area: limpio.area,
-          resumen_hechos: limpio.resumen_hechos,
-          observaciones_estudiante: limpio.observaciones_estudiante,
-          estado: "pendiente_aprobacion",
-          fecha_vencimiento_asesor: sumarDiasHabiles(new Date(), 2).toISOString(),
-          fecha_entrega_entrevista: new Date().toISOString(),
-          fecha_vencimiento_estudiante: null,
-        })
-        .eq("id_caso", idCaso);
-
-      if (errorCaso)
-        throw new Error(`Error actualizando caso: ${errorCaso.message}`);
-
+      setLoading(true);
+      const limpio = cleanData(formData);
       const userId = caso?.usuarios.id_usuario;
 
-      const parseNum = (v: string | number | boolean | null | undefined) =>
-        v === null || v === "" || v === undefined ? null : Number(v);
-      const parseBool = (v: string | number | boolean | null | undefined) => {
-        if (v === null || v === undefined || v === "") return null;
-        if (typeof v === "boolean") return v;
-        return String(v).toLowerCase() === "true";
+      if (!userId) {
+        throw new Error("No se encontró el usuario del caso");
+      }
+
+      // 1. Caso payload
+      const casoPayload = {
+        area: limpio.area,
+        resumen_hechos: limpio.resumen_hechos,
+        observaciones_estudiante: limpio.observaciones_estudiante,
       };
 
-      // 2. Actualizar usuarios con TODO el formulario sociodemográfico
-      if (userId) {
+      // 2. Usuario payload
+      const usuarioPayload = {
+        correo: limpio.correo_contacto,
+        edad: limpio.edad,
+        contacto_familiar: limpio.contacto_familiar,
+        estado_civil: limpio.estado_civil,
+        estrato: limpio.estrato,
+        direccion: limpio.direccion,
+        tipo_vivienda: limpio.tipo_vivienda,
+        tiene_representado: limpio.tiene_representado,
+        situacion_laboral: limpio.situacion_laboral,
+        otros_ingresos: limpio.otros_ingresos,
+        valor_otros_ingresos: limpio.valor_otros_ingresos,
+        concepto_otros_ingresos: limpio.concepto_otros_ingresos,
+        tiene_contrato: limpio.tiene_contrato,
+        tipo_documento: limpio.tipo_documento,
+        fecha_expedicion_doc: limpio.fecha_expedicion_doc,
+        ciudad_expedicion: limpio.ciudad_expedicion,
+        fecha_nacimiento: limpio.fecha_nacimiento,
+        nacionalidad: limpio.nacionalidad,
+        identidad_genero: limpio.identidad_genero,
+        orientacion_sexual: limpio.orientacion_sexual,
+        escolaridad: limpio.escolaridad,
+        grupo_etnico: limpio.grupo_etnico,
+        barrio: limpio.barrio,
+        zona: limpio.zona,
+        tenencia_vivienda: limpio.tenencia_vivienda,
+        comuna: limpio.comuna,
+        tiene_sisben: limpio.tiene_sisben,
+        personas_cargo: limpio.personas_cargo,
+        rango_salarial: limpio.rango_salarial,
+        servicios_publicos: limpio.servicios_publicos,
+        sabe_leer: limpio.sabe_leer,
+        discapacidad: limpio.discapacidad,
+        condicion_actual: limpio.condicion_actual,
+        enfoque_diverso: limpio.enfoque_diverso,
+        caracterizacion_lgbtiq: limpio.caracterizacion_lgbtiq,
+      };
 
-        const usuariosPayload = {
-          correo: limpio.correo_contacto || null,
-          edad: parseNum(limpio.edad),
-          contacto_familiar: limpio.contacto_familiar,
-          estado_civil: limpio.estado_civil,
-          estrato: parseNum(limpio.estrato),
-          direccion: limpio.direccion,
-          tipo_vivienda: limpio.tipo_vivienda,
-          tiene_representado: parseBool(limpio.tiene_representado),
-          situacion_laboral: limpio.situacion_laboral,
-          otros_ingresos: limpio.otros_ingresos,
-          valor_otros_ingresos: parseNum(limpio.valor_otros_ingresos),
-          concepto_otros_ingresos: limpio.concepto_otros_ingresos,
-          tiene_contrato: limpio.tiene_contrato,
-          tipo_documento: limpio.tipo_documento,
-          fecha_expedicion_doc: limpio.fecha_expedicion_doc || null,
-          ciudad_expedicion: limpio.ciudad_expedicion,
-          fecha_nacimiento: limpio.fecha_nacimiento || null,
-          nacionalidad: limpio.nacionalidad,
-          identidad_genero: limpio.identidad_genero,
-          orientacion_sexual: limpio.orientacion_sexual,
-          escolaridad: limpio.escolaridad,
-          grupo_etnico: limpio.grupo_etnico,
-          barrio: limpio.barrio,
-          zona: limpio.zona,
-          tenencia_vivienda: limpio.tenencia_vivienda,
-          comuna: limpio.comuna,
-          tiene_sisben: parseBool(limpio.tiene_sisben),
-          personas_cargo: parseNum(limpio.personas_cargo),
-          rango_salarial: limpio.rango_salarial,
-          servicios_publicos: limpio.servicios_publicos,
-          sabe_leer: parseBool(limpio.sabe_leer),
-          discapacidad: limpio.discapacidad,
-          condicion_actual: limpio.condicion_actual,
-          enfoque_diverso: parseBool(limpio.enfoque_diverso),
-          caracterizacion_lgbtiq: limpio.caracterizacion_lgbtiq,
-        };
-
-        const { error: errorUsuario } = await supabase
-          .from("usuarios")
-          .update(usuariosPayload)
-          .eq("id_usuario", userId);
-
-        if (errorUsuario) throw new Error(`Error guardando datos del solicitante: ${errorUsuario.message}`);
-      }
-
-      // 3. Insertar / actualizar demandado
+      // 3. Demandado payload (opcional)
       const tieneDemandado = !limpio.sinDemandado && limpio.nombreDemandado;
-      if (tieneDemandado) {
-        const { data: existente } = await supabase
-          .from("demandados")
-          .select("id_demandado")
-          .eq("id_caso", idCaso)
-          .maybeSingle();
+      const demandadoPayload = tieneDemandado
+        ? {
+            nombre_completo: limpio.nombreDemandado,
+            documento: limpio.documentoDemandado,
+            celular: limpio.celularDemandado,
+            lugar_residencia: limpio.lugarResidenciaDemandado,
+            correo: limpio.correoDemandado,
+          }
+        : null;
 
-        const demandadoPayload = {
-          id_caso: parseInt(idCaso),
-          nombre_completo: limpio.nombreDemandado,
-          documento: limpio.documentoDemandado || null,
-          celular: limpio.celularDemandado || null,
-          lugar_residencia: limpio.lugarResidenciaDemandado || null,
-          correo: limpio.correoDemandado || null,
-        };
-
-        if (existente?.id_demandado) {
-          const { error: e2 } = await supabase
-            .from("demandados")
-            .update(demandadoPayload)
-            .eq("id_demandado", existente.id_demandado);
-          if (e2) throw new Error(`Error actualizando demandado: ${e2.message}`);
-        } else {
-          const { error: e2 } = await supabase.from("demandados").insert(demandadoPayload);
-          if (e2) throw new Error(`Error insertando demandado: ${e2.message}`);
-        }
-      }
-
-      // 4. Insertar / actualizar contrato laboral
+      // 4. Contrato payload (opcional)
       const tieneContratoDatos = limpio.tiene_contrato && limpio.tipoContrato;
-      if (tieneContratoDatos && userId) {
-        const { data: existente } = await supabase
-          .from("contratos_laborales")
-          .select("id_contrato")
-          .eq("id_usuario", userId)
-          .maybeSingle();
+      const contratoPayload = tieneContratoDatos
+        ? {
+            tipo_contrato: limpio.tipoContrato,
+            representante_legal: limpio.nombreRepresentanteLegal,
+            direccion_empresa: limpio.direccionEmpresa,
+            correo_patrono: limpio.correoEmpleador,
+            fecha_inicio: limpio.fechaInicio,
+            fecha_fin: limpio.fechaTerminacion,
+            continua: limpio.continuaContrato,
+            salario_inicial: limpio.salarioInicial,
+            salario_actual: limpio.salarioActual,
+          }
+        : null;
 
-        const contratoPayload = {
-          id_usuario: userId,
-          tipo_contrato: limpio.tipoContrato,
-          representante_legal: limpio.nombreRepresentanteLegal || null,
-          direccion_empresa: limpio.direccionEmpresa || null,
-          correo_patrono: limpio.correoEmpleador || null,
-          fecha_inicio: limpio.fechaInicio || null,
-          fecha_fin: limpio.fechaTerminacion || null,
-          continua: limpio.continuaContrato ?? false,
-          salario_inicial: parseNum(limpio.salarioInicial),
-          salario_actual: parseNum(limpio.salarioActual),
-        };
+      // 5. Llamada atomica RPC: todo o nada
+      await guardarEntrevista({
+        idCaso: Number(idCaso),
+        usuarioId: userId,
+        caso: casoPayload,
+        usuario: usuarioPayload,
+        demandado: demandadoPayload,
+        contrato: contratoPayload,
+      });
 
-        if (existente?.id_contrato) {
-          const { error: e2 } = await supabase
-            .from("contratos_laborales")
-            .update(contratoPayload)
-            .eq("id_contrato", existente.id_contrato);
-          if (e2) throw new Error(`Error actualizando contrato: ${e2.message}`);
-        } else {
-          const { error: e2 } = await supabase.from("contratos_laborales").insert(contratoPayload);
-          if (e2) throw new Error(`Error insertando contrato: ${e2.message}`);
-        }
-      }
-
-      // 5. Auto-resolver llamado de atencion del estudiante si existe
-      await supabase
-        .from("llamados_atencion")
-        .update({ resuelto: true, fecha_resolucion: new Date().toISOString() })
-        .eq("id_caso", idCaso)
-        .eq("tipo", "estudiante")
-        .eq("resuelto", false);
-
-      await insertAuditEvent(
-        idCaso,
-        "entrevista",
-        "El estudiante completó la entrevista y envió el caso para aprobación del asesor.",
-      );
       if (typeof window !== "undefined") {
         localStorage.removeItem(`entrevista_draft_${idCaso}`);
       }
       toast.success("Entrevista completada exitosamente");
       router.push(`/estudiante/mis-casos`);
       clearForm();
-    } catch (err) {
+    } catch (err: any) {
       console.error("❌ Error durante la actualización:", err);
-      toast.error("Ocurrió un error al guardar la entrevista. Intente de nuevo.");
+      toast.error(err.message || "Ocurrió un error al guardar la entrevista. Intente de nuevo.");
+    } finally {
+      setLoading(false);
     }
   };
+
+
+
 
   const progress = (currentStep / STEPS.length) * 100;
   const currentStepData = STEPS.find((step) => step.id === currentStep);
