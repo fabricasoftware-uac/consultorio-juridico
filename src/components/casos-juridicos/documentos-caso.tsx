@@ -77,6 +77,12 @@ async function api(path: string, options?: RequestInit) {
   return res.json();
 }
 
+/** Fetch a fresh signed URL for a single document. Returns null on failure. */
+async function getFreshSignedUrl(docId: number): Promise<string | null> {
+  const data = await api(`/api/documentos/${docId}`);
+  return data?.signed_url ?? null;
+}
+
 const ALLOWED_TYPES = [
   "application/pdf",
   "image/jpeg",
@@ -148,6 +154,7 @@ export function DocumentosCaso({ idCaso }: Props) {
   const [subiendo, setSubiendo] = useState(false);
   const [role, setRole] = useState("");
   const [preview, setPreview] = useState<Documento | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel>>(undefined);
 
@@ -185,6 +192,19 @@ export function DocumentosCaso({ idCaso }: Props) {
       channelRef.current && supabase.removeChannel(channelRef.current);
     };
   }, [idCaso]);
+
+  // Fetch a fresh signed URL whenever the preview dialog opens
+  useEffect(() => {
+    if (!preview) {
+      setPreviewUrl(null);
+      return;
+    }
+    let cancelled = false;
+    getFreshSignedUrl(preview.id).then((url) => {
+      if (!cancelled) setPreviewUrl(url);
+    });
+    return () => { cancelled = true; };
+  }, [preview]);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -233,9 +253,14 @@ export function DocumentosCaso({ idCaso }: Props) {
   };
 
   const handleDownload = async (doc: Documento) => {
-    if (!doc.signed_url) return;
     try {
-      const res = await fetch(doc.signed_url);
+      const signedUrl = await getFreshSignedUrl(doc.id);
+      if (!signedUrl) {
+        toast.error("No se pudo obtener la URL del documento");
+        return;
+      }
+      const res = await fetch(signedUrl);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -342,9 +367,14 @@ export function DocumentosCaso({ idCaso }: Props) {
           <DialogTitle className="text-base truncate">{preview?.nombre_original}</DialogTitle>
         </DialogHeader>
         <div className="flex items-center justify-center min-h-[200px]">
-          {preview?.mime_type?.startsWith("image/") && preview?.signed_url && (
+          {preview && !previewUrl && (
+            <div className="flex items-center justify-center">
+              <p className="text-slate-400 text-sm">Cargando vista previa...</p>
+            </div>
+          )}
+          {preview?.mime_type?.startsWith("image/") && previewUrl && (
             <Image
-              src={preview.signed_url}
+              src={previewUrl}
               alt={preview.nombre_original}
               width={1200}
               height={900}
@@ -352,10 +382,10 @@ export function DocumentosCaso({ idCaso }: Props) {
               className="max-w-full max-h-[70vh] object-contain rounded-lg"
             />
           )}
-          {preview?.mime_type === "application/pdf" && preview?.signed_url && (
-            <iframe src={preview.signed_url} className="w-full h-[70vh] rounded-lg" title="PDF" />
+          {preview?.mime_type === "application/pdf" && previewUrl && (
+            <iframe src={previewUrl} className="w-full h-[70vh] rounded-lg" title="PDF" />
           )}
-          {preview && !preview.mime_type?.startsWith("image/") && preview.mime_type !== "application/pdf" && (
+          {preview && previewUrl && !preview.mime_type?.startsWith("image/") && preview.mime_type !== "application/pdf" && (
             <p className="text-slate-400 text-sm">Vista previa no disponible para este tipo de archivo.</p>
           )}
         </div>

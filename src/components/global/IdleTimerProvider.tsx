@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/supabase-client";
 import {
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 
 const MAX_IDLE_TIME = 15 * 60 * 1000; // 15 minutos (milisegundos)
 const WARNING_TIME = 14 * 60 * 1000; // 14 minutos (milisegundos)
+const SESSION_STORAGE_KEY = "idleExpiresAt";
 
 export default function IdleTimerProvider() {
   const router = useRouter();
@@ -41,7 +42,7 @@ export default function IdleTimerProvider() {
       if (event === "SIGNED_OUT") {
         setIsExpired(false);
         setShowWarning(false);
-        // Limpiar caché, local storage, o estados globales (cumpliendo con la restricción solicitada)
+        // Limpiar caché, local storage, o estados globales
         localStorage.clear();
         sessionStorage.clear();
         // Redirigir al inicio de sesión
@@ -58,6 +59,12 @@ export default function IdleTimerProvider() {
     };
   }, [router]);
 
+  const handleLogout = useCallback(async () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    await supabase.auth.signOut();
+  }, []);
+
   useEffect(() => {
     if (!isAuthenticated) {
       if (intervalRef.current) clearInterval(intervalRef.current);
@@ -65,8 +72,30 @@ export default function IdleTimerProvider() {
       return;
     }
 
+    // Check if session already expired (survives page reload)
+    const storedExpiry = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    if (storedExpiry && parseInt(storedExpiry, 10) < Date.now()) {
+      // Session expired while the page was closed/reloaded — sign out immediately
+      handleLogout();
+      return;
+    }
+
+    // Restore lastActivityTime from storage if available
+    if (storedExpiry) {
+      const storedExpiryMs = parseInt(storedExpiry, 10);
+      lastActivityTime.current = storedExpiryMs - MAX_IDLE_TIME;
+      const timeIdle = Date.now() - lastActivityTime.current;
+      if (timeIdle >= MAX_IDLE_TIME) {
+        setIsExpired(true);
+        setShowWarning(true);
+      } else if (timeIdle >= WARNING_TIME) {
+        setShowWarning(true);
+        setTimeLeft(Math.floor((MAX_IDLE_TIME - timeIdle) / 1000));
+      }
+    }
+
     const resetTimer = () => {
-      if (showWarning) return; // Si el modal de advertencia está abierto, no podemos reiniciar solo moviendo el mouse.
+      if (showWarning) return; // Si el modal de advertencia está abierto, no reiniciamos solo moviendo el mouse.
       lastActivityTime.current = Date.now();
     };
 
@@ -90,6 +119,12 @@ export default function IdleTimerProvider() {
       const currentTime = Date.now();
       const timeIdle = currentTime - lastActivityTime.current;
 
+      // Persist expiry to sessionStorage (survives reload)
+      sessionStorage.setItem(
+        SESSION_STORAGE_KEY,
+        String(lastActivityTime.current + MAX_IDLE_TIME),
+      );
+
       if (timeIdle >= MAX_IDLE_TIME) {
         if (!isExpired) {
           setIsExpired(true);
@@ -104,14 +139,23 @@ export default function IdleTimerProvider() {
       }
     }, 5000); // Check every 5 seconds for accuracy
 
-    // Limpieza de event listeners al desmontar, evitando posibles fugas de memoria
+    // Limpieza de event listeners al desmontar
     return () => {
       events.forEach((event) => {
         document.removeEventListener(event, resetTimer);
       });
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [isAuthenticated, showWarning]);
+  }, [isAuthenticated, showWarning, isExpired, handleLogout]);
+
+  // Auto-logout after expiry grace period
+  useEffect(() => {
+    if (!isExpired) return;
+    const timeout = setTimeout(() => {
+      handleLogout();
+    }, 10_000); // 10-second grace period
+    return () => clearTimeout(timeout);
+  }, [isExpired, handleLogout]);
 
   // Manejador del temporizador de advertencia (- 1 segundo)
   useEffect(() => {
@@ -137,18 +181,13 @@ export default function IdleTimerProvider() {
     };
   }, [showWarning, isExpired]);
 
-  const handleLogout = async () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    if (countdownRef.current) clearInterval(countdownRef.current);
-
-    // Finalizamos la sesión lo cual triggerea el evento SIGNED_OUT, limpiando el estado.
-    await supabase.auth.signOut();
-  };
-
   const handleContinue = () => {
-    // Si el usuario decide continuar, refrescamos el timer.
     setShowWarning(false);
     lastActivityTime.current = Date.now();
+    sessionStorage.setItem(
+      SESSION_STORAGE_KEY,
+      String(Date.now() + MAX_IDLE_TIME),
+    );
   };
 
   if (!isAuthenticated) return null;
