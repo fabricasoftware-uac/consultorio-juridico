@@ -21,8 +21,11 @@ function Field({ label, value }: { label: string; value?: string | number | bool
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  const content = React.Children.toArray(children);
-  const hasContent = content.length > 0;
+  const hasContent = React.Children.toArray(children).some((child) => {
+    if (!React.isValidElement(child)) return false;
+    const v = (child.props as { value?: unknown }).value;
+    return v !== null && v !== undefined && v !== "";
+  });
 
   return (
     <div>

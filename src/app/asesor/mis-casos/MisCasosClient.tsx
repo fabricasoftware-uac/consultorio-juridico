@@ -251,7 +251,7 @@ export default function Asesor() {
             setStatusFilter("todos");
             setAreaFilter("todos");
             setPeriodoFilter("todos");
-            setDateSort("recientes");
+            setDateSort("ultima_mod");
             setClassFilter("todos");
           }}
         >
@@ -290,9 +290,9 @@ export default function Asesor() {
               variant="outline"
               onClick={() => {
                 setSearchTerm("");
-                setStatusFilter("all");
-                setAreaFilter("all");
-                setDateSort("recientes");
+                setStatusFilter("todos");
+                setAreaFilter("todos");
+                setDateSort("ultima_mod");
                 setClassFilter("todos");
               }}
               className="bg-white"
