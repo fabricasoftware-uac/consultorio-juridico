@@ -249,59 +249,61 @@ export function DocumentosCaso({ idCaso }: Props) {
   return (
     <>
     <div className="space-y-3">
-      {documentos.length === 0 ? (
-        <div className="p-6 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
-          <File className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-          <p className="text-sm text-slate-400">No hay documentos aún</p>
-        </div>
-      ) : (
-        documentos.map((doc) => {
-          const { icon: Icon, color } = getIcon(doc.mime_type);
-          return (
-            <div key={doc.id} className={`flex items-center gap-3 p-3 rounded-xl border shadow-sm group transition-opacity ${doc.estado === "archivado" ? "bg-slate-50 border-slate-100 opacity-60" : "bg-white border-slate-100"}`}>
-              <Icon className={`w-5 h-5 ${color} shrink-0`} />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium text-slate-700 truncate">{doc.nombre_original}</p>
-                  {doc.estado_doc === "aprobado" ? (
-                    <Badge variant="outline" className="text-[10px] text-green-700 bg-green-50 border-green-200 h-4 px-1">Aprobado</Badge>
-                  ) : doc.estado_doc === "rechazado" ? (
-                    <Badge variant="outline" className="text-[10px] text-red-700 bg-red-50 border-red-200 h-4 px-1">Rechazado</Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-[10px] text-amber-700 bg-amber-50 border-amber-200 h-4 px-1">Pendiente</Badge>
-                  )}
+      <div className="max-h-64 overflow-y-auto space-y-2 pr-1">
+        {documentos.length === 0 ? (
+          <div className="p-6 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+            <File className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+            <p className="text-sm text-slate-400">No hay documentos aún</p>
+          </div>
+        ) : (
+          documentos.map((doc) => {
+            const { icon: Icon, color } = getIcon(doc.mime_type);
+            return (
+              <div key={doc.id} className={`flex items-center gap-3 p-3 rounded-xl border shadow-sm group transition-opacity ${doc.estado === "archivado" ? "bg-slate-50 border-slate-100 opacity-60" : "bg-white border-slate-100"}`}>
+                <Icon className={`w-5 h-5 ${color} shrink-0`} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium text-slate-700 truncate">{doc.nombre_original}</p>
+                    {doc.estado_doc === "aprobado" ? (
+                      <Badge variant="outline" className="text-[10px] text-green-700 bg-green-50 border-green-200 h-4 px-1">Aprobado</Badge>
+                    ) : doc.estado_doc === "rechazado" ? (
+                      <Badge variant="outline" className="text-[10px] text-red-700 bg-red-50 border-red-200 h-4 px-1">Rechazado</Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-[10px] text-amber-700 bg-amber-50 border-amber-200 h-4 px-1">Pendiente</Badge>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-slate-400">{formatSize(doc.tamano)} {doc.estado === "archivado" && "· Archivado"}</p>
                 </div>
-                <p className="text-[10px] text-slate-400">{formatSize(doc.tamano)} {doc.estado === "archivado" && "· Archivado"}</p>
+                <div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-7 w-7">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem onClick={() => setPreview(doc)}><Eye className="w-4 h-4 mr-2" />Vista previa</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleDownload(doc)}><Download className="w-4 h-4 mr-2" />Descargar</DropdownMenuItem>
+                      {(role === "asesor" || role === "pro_apoyo" || role === "admin") && doc.estado_doc !== "aprobado" && (
+                        <DropdownMenuItem onClick={() => handleAprobarDoc(doc, "aprobado")}><CheckCircle className="w-4 h-4 mr-2 text-green-600" />Aprobar</DropdownMenuItem>
+                      )}
+                      {(role === "asesor" || role === "pro_apoyo" || role === "admin") && doc.estado_doc !== "rechazado" && (
+                        <DropdownMenuItem onClick={() => handleAprobarDoc(doc, "rechazado")}><XCircle className="w-4 h-4 mr-2 text-red-500" />Rechazar</DropdownMenuItem>
+                      )}
+                      {(role === "asesor" || role === "pro_apoyo" || role === "admin") && (
+                        <><DropdownMenuSeparator /><DropdownMenuItem onClick={() => handleArchivar(doc)}><Archive className="w-4 h-4 mr-2" />{doc.estado === "archivado" ? "Restaurar" : "Archivar"}</DropdownMenuItem></>
+                      )}
+                      {(role === "admin" || role === "pro_apoyo") && (
+                        <DropdownMenuItem onClick={() => handleDelete(doc)} className="text-red-600"><Trash2 className="w-4 h-4 mr-2" />Eliminar</DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
-              <div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-7 w-7">
-                      <MoreVertical className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={() => setPreview(doc)}><Eye className="w-4 h-4 mr-2" />Vista previa</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleDownload(doc)}><Download className="w-4 h-4 mr-2" />Descargar</DropdownMenuItem>
-                    {(role === "asesor" || role === "pro_apoyo" || role === "admin") && doc.estado_doc !== "aprobado" && (
-                      <DropdownMenuItem onClick={() => handleAprobarDoc(doc, "aprobado")}><CheckCircle className="w-4 h-4 mr-2 text-green-600" />Aprobar</DropdownMenuItem>
-                    )}
-                    {(role === "asesor" || role === "pro_apoyo" || role === "admin") && doc.estado_doc !== "rechazado" && (
-                      <DropdownMenuItem onClick={() => handleAprobarDoc(doc, "rechazado")}><XCircle className="w-4 h-4 mr-2 text-red-500" />Rechazar</DropdownMenuItem>
-                    )}
-                    {(role === "asesor" || role === "pro_apoyo" || role === "admin") && (
-                      <><DropdownMenuSeparator /><DropdownMenuItem onClick={() => handleArchivar(doc)}><Archive className="w-4 h-4 mr-2" />{doc.estado === "archivado" ? "Restaurar" : "Archivar"}</DropdownMenuItem></>
-                    )}
-                    {(role === "admin" || role === "pro_apoyo") && (
-                      <DropdownMenuItem onClick={() => handleDelete(doc)} className="text-red-600"><Trash2 className="w-4 h-4 mr-2" />Eliminar</DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-          );
-        })
-      )}
+            );
+          })
+        )}
+      </div>
 
       <div className="pt-2">
         <input ref={fileRef} type="file" onChange={handleUpload} className="hidden"
