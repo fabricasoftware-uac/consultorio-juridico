@@ -149,16 +149,6 @@ export function DocumentosCaso({ idCaso }: Props) {
   const [preview, setPreview] = useState<Documento | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.access_token) {
-        const payload = JSON.parse(atob(session.access_token.split(".")[1]));
-        setRole(payload.user_role ?? "");
-      }
-      cargar();
-    });
-  }, [idCaso]);
-
   const cargar = async () => {
     const data = await api(`/api/documentos?id_caso=${idCaso}`);
     if (data) setDocumentos(data.documentos ?? []);
@@ -166,12 +156,23 @@ export function DocumentosCaso({ idCaso }: Props) {
   };
 
   useEffect(() => {
-    cargar();
-    const channel = supabase
-      .channel(`docs-${idCaso}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "documentos_caso", filter: `id_caso=eq.${idCaso}` }, () => cargar())
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    let channel: ReturnType<typeof supabase.channel>;
+
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.access_token) {
+        const payload = JSON.parse(atob(session.access_token.split(".")[1]));
+        setRole(payload.user_role ?? "");
+      }
+      channel = supabase
+        .channel(`docs-${idCaso}`)
+        .on("postgres_changes", { event: "*", schema: "public", table: "documentos_caso", filter: `id_caso=eq.${idCaso}` }, () => cargar())
+        .subscribe();
+      await cargar();
+    });
+
+    return () => {
+      if (channel) supabase.removeChannel(channel);
+    };
   }, [idCaso]);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
