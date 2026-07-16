@@ -148,6 +148,7 @@ export function DocumentosCaso({ idCaso }: Props) {
   const [role, setRole] = useState("");
   const [preview, setPreview] = useState<Documento | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const channelRef = useRef<ReturnType<typeof supabase.channel>>(undefined);
 
   const cargar = async () => {
     const data = await api(`/api/documentos?id_caso=${idCaso}`);
@@ -156,22 +157,35 @@ export function DocumentosCaso({ idCaso }: Props) {
   };
 
   useEffect(() => {
-    let channel: ReturnType<typeof supabase.channel>;
+    const init = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log("[DocumentosCaso] session:", !!session, "role:", session?.access_token ? "token presente" : "sin token");
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.access_token) {
-        const payload = JSON.parse(atob(session.access_token.split(".")[1]));
-        setRole(payload.user_role ?? "");
+        if (session?.access_token) {
+          const payload = JSON.parse(atob(session.access_token.split(".")[1]));
+          setRole(payload.user_role ?? "");
+          console.log("[DocumentosCaso] user_role:", payload.user_role);
+        }
+
+        channelRef.current = supabase
+          .channel(`docs-${idCaso}`)
+          .on("postgres_changes", { event: "*", schema: "public", table: "documentos_caso", filter: `id_caso=eq.${idCaso}` }, () => cargar())
+          .subscribe();
+
+        console.log("[DocumentosCaso] cargando docs para id_caso:", idCaso);
+        await cargar();
+        console.log("[DocumentosCaso] carga completada, docs:", documentos.length);
+      } catch (err) {
+        console.error("[DocumentosCaso] error en init:", err);
+        setLoading(false);
       }
-      channel = supabase
-        .channel(`docs-${idCaso}`)
-        .on("postgres_changes", { event: "*", schema: "public", table: "documentos_caso", filter: `id_caso=eq.${idCaso}` }, () => cargar())
-        .subscribe();
-      await cargar();
-    });
+    };
+
+    init();
 
     return () => {
-      if (channel) supabase.removeChannel(channel);
+      channelRef.current && supabase.removeChannel(channelRef.current);
     };
   }, [idCaso]);
 
