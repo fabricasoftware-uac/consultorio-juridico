@@ -112,7 +112,7 @@ export function Step2InfoSolicitante({ formData, handleInputChange, caso }: Step
           <Label className={LABEL}>Estado Civil *</Label>
           <Select value={formData.estado_civil || ""} onValueChange={(v) => handleInputChange("estado_civil", v)}>
             <SelectTrigger className={SEL}><SelectValue placeholder="Seleccione" /></SelectTrigger>
-            <SelectContent>{["soltero","casado","union libre","viudo","divorciado","otro"].map(o=><SelectItem key={o} value={o}>{o.charAt(0).toUpperCase()+o.slice(1).replace("_"," ")}</SelectItem>)}</SelectContent>
+            <SelectContent>{["soltero","casado","unión libre","viudo","divorciado","otro"].map(o=><SelectItem key={o} value={o}>{o.charAt(0).toUpperCase()+o.slice(1).replace("_"," ")}</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <div className="space-y-1.5">

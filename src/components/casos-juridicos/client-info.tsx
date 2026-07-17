@@ -155,7 +155,7 @@ export const ClientInfo = ({
                 <SelectContent>
                   <SelectItem value="soltero">Soltero</SelectItem>
                   <SelectItem value="casado">Casado</SelectItem>
-                  <SelectItem value="union libre">Union Libre</SelectItem>
+                  <SelectItem value="unión libre">Unión Libre</SelectItem>
                   <SelectItem value="otro">Otro</SelectItem>
                 </SelectContent>
               </Select>
