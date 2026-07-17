@@ -11,6 +11,7 @@ import {
   Send,
   UserCheck,
   Clock,
+  Upload,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase/supabase-client";
 import { getAuditEventsByCaso } from "../../../supabase/queries/auditoriaCasos";
@@ -26,6 +27,7 @@ const ACCION_ICON: Record<string, { icon: typeof FileText; color: string; bg: st
   correccion: { icon: UserCheck, color: "text-purple-600", bg: "bg-purple-100" },
   cierre: { icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-100" },
   archivado: { icon: Archive, color: "text-slate-600", bg: "bg-slate-100" },
+  documento: { icon: Upload, color: "text-indigo-600", bg: "bg-indigo-100" },
 };
 
 interface CasoAuditoriaProps {

@@ -15,6 +15,8 @@ import { FileText, Upload, Download, Trash2, File, Image as ImageIcon, FileSprea
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/supabase-client";
 import { jwtDecode } from "jwt-decode";
+import { formatDate } from "@/lib/format-date";
+import { insertAuditEvent } from "../../../supabase/queries/auditoriaCasos";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -213,6 +215,7 @@ export function DocumentosCaso({ idCaso }: Props) {
     const doc = await uploadDirecto(idCaso, file);
     if (doc) {
       toast.success(`"${file.name}" subido`);
+      await insertAuditEvent(Number(idCaso), "documento", `Subió el documento '${doc.nombre_original}'`);
       cargar();
     }
     setSubiendo(false);
@@ -223,6 +226,7 @@ export function DocumentosCaso({ idCaso }: Props) {
     const data = await api(`/api/documentos/${doc.id}`, { method: "DELETE" });
     if (data?.success) {
       toast.success("Documento eliminado");
+      await insertAuditEvent(doc.id_caso, "documento", `Eliminó el documento '${doc.nombre_original}'`);
       cargar();
     }
   };
@@ -236,6 +240,7 @@ export function DocumentosCaso({ idCaso }: Props) {
     });
     if (data?.success) {
       toast.success(nuevoEstado === "archivado" ? "Documento archivado" : "Documento restaurado");
+      await insertAuditEvent(doc.id_caso, "documento", `${nuevoEstado === "archivado" ? "Archivó" : "Restauró"} el documento '${doc.nombre_original}'`);
       cargar();
     }
   };
@@ -248,6 +253,7 @@ export function DocumentosCaso({ idCaso }: Props) {
     });
     if (data?.success) {
       toast.success(estado === "aprobado" ? "Documento aprobado" : "Documento rechazado");
+      await insertAuditEvent(doc.id_caso, "documento", `${estado === "aprobado" ? "Aprobó" : "Rechazó"} el documento '${doc.nombre_original}'`);
       cargar();
     }
   };
@@ -297,27 +303,32 @@ export function DocumentosCaso({ idCaso }: Props) {
             return (
               <div
                 key={doc.id}
-                onClick={() => handleDownload(doc)}
-                className={`flex items-center gap-3 p-3 rounded-xl border shadow-sm group transition-opacity cursor-pointer hover:bg-slate-50 ${doc.estado === "archivado" ? "bg-slate-50 border-slate-100 opacity-60" : "bg-white border-slate-100"}`}
+                className={`flex items-center gap-3 p-3 rounded-xl border shadow-sm group transition-opacity ${doc.estado === "archivado" ? "bg-slate-50 border-slate-100 opacity-60" : "bg-white border-slate-100"}`}
               >
-                <Icon className={`w-5 h-5 ${color} shrink-0`} />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-slate-700 truncate">{doc.nombre_original}</p>
-                    {doc.estado_doc === "aprobado" ? (
-                      <Badge variant="outline" className="text-[10px] text-green-700 bg-green-50 border-green-200 h-4 px-1">Aprobado</Badge>
-                    ) : doc.estado_doc === "rechazado" ? (
-                      <Badge variant="outline" className="text-[10px] text-red-700 bg-red-50 border-red-200 h-4 px-1">Rechazado</Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-[10px] text-amber-700 bg-amber-50 border-amber-200 h-4 px-1">Pendiente</Badge>
-                    )}
+                <div
+                  onClick={() => handleDownload(doc)}
+                  className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:bg-slate-50 rounded-lg transition-colors"
+                >
+                  <Icon className={`w-5 h-5 ${color} shrink-0`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-slate-700 truncate">{doc.nombre_original}</p>
+                      {doc.estado_doc === "aprobado" ? (
+                        <Badge variant="outline" className="text-[10px] text-green-700 bg-green-50 border-green-200 h-4 px-1">Aprobado</Badge>
+                      ) : doc.estado_doc === "rechazado" ? (
+                        <Badge variant="outline" className="text-[10px] text-red-700 bg-red-50 border-red-200 h-4 px-1">Rechazado</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-[10px] text-amber-700 bg-amber-50 border-amber-200 h-4 px-1">Pendiente</Badge>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-slate-400">{formatSize(doc.tamano)} {doc.estado === "archivado" && "· Archivado"}</p>
+                    <p className="text-[10px] text-slate-400">Subido: {formatDate(doc.created_at)}</p>
                   </div>
-                  <p className="text-[10px] text-slate-400">{formatSize(doc.tamano)} {doc.estado === "archivado" && "· Archivado"}</p>
                 </div>
                 <div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => e.stopPropagation()}>
+                      <Button variant="ghost" size="icon" className="h-7 w-7">
                         <MoreVertical className="w-4 h-4" />
                       </Button>
                     </DropdownMenuTrigger>
