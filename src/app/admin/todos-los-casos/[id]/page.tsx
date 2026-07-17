@@ -19,6 +19,8 @@ import { getStatusBadge } from "@/components/ui/status-badge";
 import { CaseInfoTab } from "@/components/casos-juridicos/case-info-tab";
 import { ClientInfo } from "@/components/casos-juridicos/client-info";
 import { DefendantInfo } from "@/components/casos-juridicos/defendant-info";
+import { ContractInfo } from "@/components/casos-juridicos/contract-info";
+import { getContratoByUsuarioId } from "../../../../../supabase/queries/getContratoByUsuarioId";
 import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
 import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
 import { CasoAuditoria } from "@/components/casos-juridicos/caso-auditoria";
@@ -40,6 +42,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const [activeTab, setActiveTab] = useState("overview");
   const [caso, setCaso] = useState<Caso>();
   const [demandado, setDemandado] = useState<Demandado | null>(null);
+  const [contrato, setContrato] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   async function traerDatos() {
@@ -47,6 +50,10 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       const [c, d] = await Promise.all([getCasoById(id), getDemandadoByCasoId(id)]);
       setCaso(c);
       setDemandado(d);
+      if (c?.usuarios?.id_usuario) {
+        const ct = await getContratoByUsuarioId(c.usuarios.id_usuario);
+        setContrato(ct);
+      }
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   }
@@ -114,6 +121,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               <TabsTrigger value="overview">Resumen</TabsTrigger>
               <TabsTrigger value="client">Usuario</TabsTrigger>
               <TabsTrigger value="defendant">Accionado</TabsTrigger>
+              <TabsTrigger value="contract">Contrato</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview">
@@ -259,6 +267,19 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                 onSave={edit.handleSaveDefendant}
                 onCancel={edit.handleCancelDefendantEdit}
                 onChange={edit.handleDefendantDataChange}
+                canEdit
+              />
+            </TabsContent>
+
+            <TabsContent value="contract">
+              <ContractInfo
+                contrato={edit.isEditingContract ? edit.editedContractData : contrato}
+                isEditing={edit.isEditingContract}
+                editedData={edit.editedContractData}
+                onEdit={() => edit.handleEditContract(contrato)}
+                onSave={edit.handleSaveContract}
+                onCancel={edit.handleCancelContractEdit}
+                onChange={edit.handleContractDataChange}
                 canEdit
               />
             </TabsContent>

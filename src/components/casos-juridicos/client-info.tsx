@@ -1,5 +1,5 @@
 import React from "react";
-import { User, Phone, Mail, MapPin, Smile, DollarSign, Shield } from "lucide-react";
+import { User, Phone, Mail, MapPin, Smile, DollarSign, Shield, FileText, Heart, Building, BookOpen, Briefcase } from "lucide-react";
 import { InfoField, SectionCard } from "./shared-ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -490,6 +490,214 @@ export const ClientInfo = ({
                 </Select>
               </div>
             )}
+          </div>
+        )}
+      </SectionCard>
+
+      {/* Información adicional del usuario */}
+      <SectionCard
+        title="Información adicional del usuario"
+        icon={BookOpen}
+        iconBgColor="bg-violet-100"
+        iconColor="text-violet-600"
+      >
+        {!isEditing ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+            <InfoField label="Tipo de documento" value={usuarios?.tipo_documento} />
+            <InfoField label="Fecha de expedición" value={usuarios?.fecha_expedicion_doc} />
+            <InfoField label="Ciudad de expedición" value={usuarios?.ciudad_expedicion} />
+            <InfoField label="Fecha de nacimiento" value={usuarios?.fecha_nacimiento} />
+            <InfoField label="Nacionalidad" value={usuarios?.nacionalidad} />
+            <InfoField label="Identidad de género" value={usuarios?.identidad_genero} />
+            <InfoField label="Orientación sexual" value={usuarios?.orientacion_sexual} />
+            <InfoField label="Escolaridad" value={usuarios?.escolaridad} />
+            <InfoField label="Grupo étnico" value={usuarios?.grupo_etnico} />
+            <InfoField label="Barrio" value={usuarios?.barrio} />
+            <InfoField label="Zona" value={usuarios?.zona} />
+            <InfoField label="Tenencia de vivienda" value={usuarios?.tenencia_vivienda} />
+            <InfoField label="Comuna" value={usuarios?.comuna} />
+            <InfoField label="Tiene SISBEN" value={usuarios?.tiene_sisben != null ? (usuarios.tiene_sisben ? "Sí" : "No") : "N/A"} />
+            <InfoField label="Personas a cargo" value={usuarios?.personas_cargo} />
+            <InfoField label="Rango salarial" value={usuarios?.rango_salarial} />
+            <InfoField label="Servicios públicos" value={usuarios?.servicios_publicos} />
+            <InfoField label="Sabe leer" value={usuarios?.sabe_leer != null ? (usuarios.sabe_leer ? "Sí" : "No") : "N/A"} />
+            <InfoField label="Discapacidad" value={usuarios?.discapacidad} />
+            <InfoField label="Condición actual" value={usuarios?.condicion_actual} />
+            <InfoField label="¿A nombre propio?" value={usuarios?.tiene_representado != null ? (usuarios.tiene_representado ? "Representante" : "Sí") : "N/A"} />
+            <InfoField label="¿Tiene contrato?" value={usuarios?.tiene_contrato != null ? (usuarios.tiene_contrato ? "Sí" : "No") : "N/A"} />
+            <InfoField label="Tipo de vivienda" value={usuarios?.tipo_vivienda} />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">Tipo de documento</Label>
+              <Select value={editedData?.tipo_documento || ""} onValueChange={(val) => onChange("tipo_documento", val)}>
+                <SelectTrigger><SelectValue placeholder="Tipo" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="CC">CC - Cédula</SelectItem>
+                  <SelectItem value="CE">CE - Extranjería</SelectItem>
+                  <SelectItem value="PEP">PEP</SelectItem>
+                  <SelectItem value="NUIP">NUIP</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">Fecha de expedición</Label>
+              <Input type="date" value={editedData?.fecha_expedicion_doc || ""} onChange={(e) => onChange("fecha_expedicion_doc", e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">Ciudad de expedición</Label>
+              <Input value={editedData?.ciudad_expedicion || ""} onChange={(e) => onChange("ciudad_expedicion", e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">Fecha de nacimiento</Label>
+              <Input type="date" value={editedData?.fecha_nacimiento || ""} onChange={(e) => onChange("fecha_nacimiento", e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">Nacionalidad</Label>
+              <Input value={editedData?.nacionalidad || ""} onChange={(e) => onChange("nacionalidad", e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">Identidad de género</Label>
+              <Select value={editedData?.identidad_genero || ""} onValueChange={(val) => onChange("identidad_genero", val || null)}>
+                <SelectTrigger><SelectValue placeholder="Seleccione" /></SelectTrigger>
+                <SelectContent>
+                  {["Femenino","Masculino","No binario","Diverso","Género fluido","Queer","Transexual","Pangénero","Cisgénero","Agénero","Bigénero","Prefiero no decirlo","Otro"].map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">Orientación sexual</Label>
+              <Select value={editedData?.orientacion_sexual || ""} onValueChange={(val) => onChange("orientacion_sexual", val || null)}>
+                <SelectTrigger><SelectValue placeholder="Seleccione" /></SelectTrigger>
+                <SelectContent>
+                  {["Heterosexual","Homosexual","Bisexual","Pansexual","Asexual","Queer","Prefiero no decirlo","Otro"].map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">Escolaridad</Label>
+              <Select value={editedData?.escolaridad || ""} onValueChange={(val) => onChange("escolaridad", val)}>
+                <SelectTrigger><SelectValue placeholder="Seleccione" /></SelectTrigger>
+                <SelectContent>
+                  {["Primaria completa","Bachillerato incompleto","Bachillerato completo","Técnico","Tecnólogo","Profesional","Pregrado","Posgrado","Ninguno","No informa"].map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">Grupo étnico</Label>
+              <Select value={editedData?.grupo_etnico || ""} onValueChange={(val) => onChange("grupo_etnico", val)}>
+                <SelectTrigger><SelectValue placeholder="Seleccione" /></SelectTrigger>
+                <SelectContent>
+                  {["Indígena","Rom","Raizal","Palenquero","Mestizo","Comunidad negra","Afrocolombiano","Prefiero no decirlo","No informa","Otro"].map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">Barrio</Label>
+              <Input value={editedData?.barrio || ""} onChange={(e) => onChange("barrio", e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">Zona</Label>
+              <Select value={editedData?.zona || ""} onValueChange={(val) => onChange("zona", val)}>
+                <SelectTrigger><SelectValue placeholder="Seleccione" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Rural">Rural</SelectItem>
+                  <SelectItem value="Urbana">Urbana</SelectItem>
+                  <SelectItem value="No informa">No informa</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">Tenencia de vivienda</Label>
+              <Select value={editedData?.tenencia_vivienda || ""} onValueChange={(val) => onChange("tenencia_vivienda", val)}>
+                <SelectTrigger><SelectValue placeholder="Seleccione" /></SelectTrigger>
+                <SelectContent>
+                  {["Propia","Alquilada","Familiar","Invasión","Otra","No informa"].map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">Comuna</Label>
+              <Input value={editedData?.comuna || ""} onChange={(e) => onChange("comuna", e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">Tiene SISBEN</Label>
+              <Select value={editedData?.tiene_sisben === true ? "si" : editedData?.tiene_sisben === false ? "no" : ""} onValueChange={(val) => onChange("tiene_sisben", val === "si" ? true : val === "no" ? false : null)}>
+                <SelectTrigger><SelectValue placeholder="Seleccione" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="si">Sí</SelectItem>
+                  <SelectItem value="no">No</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">Personas a cargo</Label>
+              <Input type="number" value={editedData?.personas_cargo || ""} onChange={(e) => onChange("personas_cargo", e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">Rango salarial</Label>
+              <Select value={editedData?.rango_salarial || ""} onValueChange={(val) => onChange("rango_salarial", val)}>
+                <SelectTrigger><SelectValue placeholder="Seleccione" /></SelectTrigger>
+                <SelectContent>
+                  {["Menos de un salario mínimo","Un salario mínimo","Entre 1 y 2 salarios","Entre 2 y 3 salarios","Más de 3 salarios","No informa"].map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">Servicios públicos</Label>
+              <Input value={editedData?.servicios_publicos || ""} onChange={(e) => onChange("servicios_publicos", e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">Sabe leer</Label>
+              <Select value={editedData?.sabe_leer === true ? "si" : editedData?.sabe_leer === false ? "no" : ""} onValueChange={(val) => onChange("sabe_leer", val === "si" ? true : val === "no" ? false : null)}>
+                <SelectTrigger><SelectValue placeholder="Seleccione" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="si">Sí</SelectItem>
+                  <SelectItem value="no">No</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">Discapacidad</Label>
+              <Input value={editedData?.discapacidad || ""} onChange={(e) => onChange("discapacidad", e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">Condición actual</Label>
+              <Input value={editedData?.condicion_actual || ""} onChange={(e) => onChange("condicion_actual", e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">¿A nombre propio?</Label>
+              <Select value={editedData?.tiene_representado === false ? "true" : editedData?.tiene_representado === true ? "false" : ""} onValueChange={(val) => onChange("tiene_representado", val === "true" ? false : val === "false" ? true : null)}>
+                <SelectTrigger><SelectValue placeholder="Seleccione" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="true">Sí</SelectItem>
+                  <SelectItem value="false">Representante</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">¿Tiene contrato?</Label>
+              <Select value={editedData?.tiene_contrato === true ? "true" : editedData?.tiene_contrato === false ? "false" : ""} onValueChange={(val) => onChange("tiene_contrato", val === "true" ? true : val === "false" ? false : null)}>
+                <SelectTrigger><SelectValue placeholder="Seleccione" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="true">Sí</SelectItem>
+                  <SelectItem value="false">No</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 font-bold">Tipo de vivienda</Label>
+              <Select value={editedData?.tipo_vivienda || ""} onValueChange={(val) => onChange("tipo_vivienda", val)}>
+                <SelectTrigger><SelectValue placeholder="Tipo" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="propia">Propia</SelectItem>
+                  <SelectItem value="arrendada">Arrendada</SelectItem>
+                  <SelectItem value="familiar">Familiar</SelectItem>
+                  <SelectItem value="otra">Otra</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         )}
       </SectionCard>

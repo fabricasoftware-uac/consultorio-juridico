@@ -16,6 +16,8 @@ export function useCaseEdit(idCaso: string, onRefresh: () => Promise<void>) {
     useState<Demandado | null>(null);
   const [isEditingCaseInfo, setIsEditingCaseInfo] = useState(false);
   const [editedCaseData, setEditedCaseData] = useState<Caso | null>(null);
+  const [isEditingContract, setIsEditingContract] = useState(false);
+  const [editedContractData, setEditedContractData] = useState<any>(null);
 
   // ── Client ──────────────────────────────────────────────
 
@@ -47,6 +49,30 @@ export function useCaseEdit(idCaso: string, onRefresh: () => Promise<void>) {
           valor_otros_ingresos: limpio.valor_otros_ingresos,
           otros_ingresos: limpio.otros_ingresos,
           concepto_otros_ingresos: limpio.concepto_otros_ingresos,
+          enfoque_diverso: limpio.enfoque_diverso,
+          caracterizacion_lgbtiq: limpio.caracterizacion_lgbtiq,
+          tipo_documento: limpio.tipo_documento,
+          fecha_expedicion_doc: limpio.fecha_expedicion_doc,
+          ciudad_expedicion: limpio.ciudad_expedicion,
+          fecha_nacimiento: limpio.fecha_nacimiento,
+          nacionalidad: limpio.nacionalidad,
+          identidad_genero: limpio.identidad_genero,
+          orientacion_sexual: limpio.orientacion_sexual,
+          escolaridad: limpio.escolaridad,
+          grupo_etnico: limpio.grupo_etnico,
+          barrio: limpio.barrio,
+          zona: limpio.zona,
+          tenencia_vivienda: limpio.tenencia_vivienda,
+          comuna: limpio.comuna,
+          tiene_sisben: limpio.tiene_sisben,
+          personas_cargo: limpio.personas_cargo,
+          rango_salarial: limpio.rango_salarial,
+          servicios_publicos: limpio.servicios_publicos,
+          sabe_leer: limpio.sabe_leer,
+          discapacidad: limpio.discapacidad,
+          condicion_actual: limpio.condicion_actual,
+          tiene_representado: limpio.tiene_representado,
+          tiene_contrato: limpio.tiene_contrato,
         })
         .eq("id_usuario", editedClientData.id_usuario);
       if (error) throw error;
@@ -76,10 +102,22 @@ export function useCaseEdit(idCaso: string, onRefresh: () => Promise<void>) {
 
   const handleEditDefendant = useCallback(
     (defendant: Demandado | null | undefined) => {
-      setEditedDefendantData(defendant || null);
+      if (defendant) {
+        setEditedDefendantData(defendant);
+      } else {
+        // Si no existe demandado, inicializar objeto vacío para permitir creación
+        setEditedDefendantData({
+          id_caso: Number(idCaso),
+          nombre_completo: "",
+          documento: "",
+          celular: "",
+          lugar_residencia: "",
+          correo: "",
+        } as Demandado);
+      }
       setIsEditingDefendant(true);
     },
-    [],
+    [idCaso],
   );
 
   const handleSaveDefendant = useCallback(async () => {
@@ -87,19 +125,34 @@ export function useCaseEdit(idCaso: string, onRefresh: () => Promise<void>) {
     setIsEditingDefendant(false);
     const limpio = cleanData(editedDefendantData);
     try {
-      const { error } = await supabase
+      const { data: existing } = await supabase
         .from("demandados")
-        .update({
-          nombre_completo: limpio.nombre_completo,
-          lugar_residencia: limpio.lugar_residencia,
-          documento: limpio.documento,
-          correo: limpio.correo,
-          celular: limpio.celular,
-        })
-        .eq("id_caso", idCaso);
-      if (error) throw error;
+        .select("id_demandado")
+        .eq("id_caso", Number(idCaso))
+        .maybeSingle();
+
+      const payload = {
+        id_caso: Number(idCaso),
+        nombre_completo: limpio.nombre_completo,
+        lugar_residencia: limpio.lugar_residencia,
+        documento: limpio.documento,
+        correo: limpio.correo,
+        celular: limpio.celular,
+      };
+
+      if (existing) {
+        const { error } = await supabase
+          .from("demandados")
+          .update(payload)
+          .eq("id_caso", Number(idCaso));
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("demandados").insert(payload);
+        if (error) throw error;
+      }
+
       await onRefresh();
-      toast.success("Información del demandado actualizada");
+      toast.success("Información del demandado guardada");
     } catch (err) {
       console.error(err);
       toast.error("Error al guardar los datos del demandado");
@@ -115,9 +168,10 @@ export function useCaseEdit(idCaso: string, onRefresh: () => Promise<void>) {
 
   const handleDefendantDataChange = useCallback(
     (field: string, value: string) => {
-      setEditedDefendantData((prev) =>
-        prev ? { ...prev, [field]: value } : prev,
-      );
+      setEditedDefendantData((prev) => {
+        if (!prev) return prev;
+        return { ...prev, [field]: value };
+      });
     },
     [],
   );
@@ -188,6 +242,55 @@ export function useCaseEdit(idCaso: string, onRefresh: () => Promise<void>) {
     [],
   );
 
+  // ── Contract ─────────────────────────────────────────────
+
+  const handleEditContract = useCallback((contract: any) => {
+    setEditedContractData(contract || {});
+    setIsEditingContract(true);
+  }, []);
+
+  const handleSaveContract = useCallback(async () => {
+    if (!editedContractData) return;
+    setIsEditingContract(false);
+    const limpio = cleanData(editedContractData);
+    try {
+      const { error } = await supabase
+        .from("contratos_laborales")
+        .upsert({
+          id_usuario: limpio.id_usuario,
+          tipo_contrato: limpio.tipo_contrato,
+          representante_legal: limpio.representante_legal,
+          direccion_empresa: limpio.direccion_empresa,
+          correo_patrono: limpio.correo_patrono,
+          fecha_inicio: limpio.fecha_inicio,
+          fecha_fin: limpio.fecha_fin,
+          continua: limpio.continua,
+          salario_inicial: limpio.salario_inicial,
+          salario_actual: limpio.salario_actual,
+        }, { onConflict: "id_usuario" });
+      if (error) throw error;
+      await onRefresh();
+      toast.success("Información del contrato actualizada");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al guardar los datos del contrato");
+    } finally {
+      setEditedContractData(null);
+    }
+  }, [editedContractData, onRefresh]);
+
+  const handleCancelContractEdit = useCallback(() => {
+    setIsEditingContract(false);
+    setEditedContractData(null);
+  }, []);
+
+  const handleContractDataChange = useCallback(
+    (field: string, value: string | boolean) => {
+      setEditedContractData((prev: any) => (prev ? { ...prev, [field]: value } : prev));
+    },
+    [],
+  );
+
   return {
     isEditingClient,
     editedClientData,
@@ -195,6 +298,8 @@ export function useCaseEdit(idCaso: string, onRefresh: () => Promise<void>) {
     editedDefendantData,
     isEditingCaseInfo,
     editedCaseData,
+    isEditingContract,
+    editedContractData,
     handleEditClient,
     handleSaveClient,
     handleCancelClientEdit,
@@ -207,5 +312,9 @@ export function useCaseEdit(idCaso: string, onRefresh: () => Promise<void>) {
     handleSaveCaseInfo,
     handleCancelCaseEdit,
     handleCaseDataChange,
+    handleEditContract,
+    handleSaveContract,
+    handleCancelContractEdit,
+    handleContractDataChange,
   };
 }
