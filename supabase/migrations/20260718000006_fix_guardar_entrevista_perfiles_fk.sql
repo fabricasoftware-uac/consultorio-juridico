@@ -1,7 +1,7 @@
--- Fix: asegurar que id_usuario existe en perfiles antes de INSERT en auditoria_casos
--- La FK fk_auditoria_usuario apunta a perfiles.id, pero los usuarios creados
--- por insertUsuarioNuevo (gen_random_uuid) o usuarios de auth pueden no tener
--- perfil si el hook handle_new_user fallo o no se ejecuto.
+-- Fix v2: usar auth.uid del estudiante para perfiles/auditoria, y casos.id_usuario para usuarios/contratos
+-- La FK perfiles_id_fkey apunta a auth.users.id, asi que solo p_usuario_id (estudiante) puede ir ahi.
+-- La FK fk_auditoria_usuario apunta a perfiles.id, asi que auditoria usa el mismo UUID.
+-- Los datos del cliente (usuarios, contratos) usan v_id_usuario = casos.id_usuario.
 CREATE OR REPLACE FUNCTION public.guardar_entrevista(
     p_id_caso integer,
     p_usuario_id uuid,
@@ -18,7 +18,7 @@ AS $$
 DECLARE
     v_id_usuario uuid;
 BEGIN
-    -- Obtener id_usuario del caso para auditoria (siempre existe y esta vinculado al cliente)
+    -- Obtener id_usuario del caso (cliente real, para usuarios/contrato)
     SELECT id_usuario INTO v_id_usuario FROM public.casos WHERE id_caso = p_id_caso;
 
     -- Asegurar que el estudiante autenticado exista en perfiles para la FK de auditoria_casos
@@ -39,7 +39,7 @@ BEGIN
         fecha_vencimiento_estudiante = NULL
     WHERE id_caso = p_id_caso;
 
-    -- 2. Actualizar usuarios con todo el formulario sociodemografico
+    -- 2. Actualizar usuarios (cliente, v_id_usuario) con todo el formulario sociodemografico
     UPDATE public.usuarios SET
         correo = NULLIF(p_usuario->>'correo', ''),
         edad = NULLIF(p_usuario->>'edad', '')::int,
@@ -102,7 +102,7 @@ BEGIN
         END IF;
     END IF;
 
-    -- 4. Insertar / actualizar contrato laboral
+    -- 4. Insertar / actualizar contrato laboral (del cliente, v_id_usuario)
     IF p_contrato IS NOT NULL AND NULLIF(p_contrato->>'tipo_contrato', '') IS NOT NULL THEN
         IF EXISTS (SELECT 1 FROM public.contratos_laborales WHERE id_usuario = v_id_usuario) THEN
             UPDATE public.contratos_laborales SET
@@ -144,7 +144,7 @@ BEGIN
       AND tipo = 'estudiante'
       AND resuelto = false;
 
-    -- 6. Insert auditoria con id_usuario del estudiante (garantiza FK)
+    -- 6. Insert auditoria con id_usuario del estudiante (p_usuario_id, garantiza FK a perfiles)
     INSERT INTO public.auditoria_casos (
         id_caso, id_usuario, accion, descripcion, metadata, created_at
     ) VALUES (
