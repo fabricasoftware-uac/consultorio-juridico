@@ -276,7 +276,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                 contrato={edit.isEditingContract ? edit.editedContractData : contrato}
                 isEditing={edit.isEditingContract}
                 editedData={edit.editedContractData}
-                onEdit={() => edit.handleEditContract(contrato)}
+                onEdit={() => edit.handleEditContract(contrato, caso.usuarios?.id_usuario)}
                 onSave={edit.handleSaveContract}
                 onCancel={edit.handleCancelContractEdit}
                 onChange={edit.handleContractDataChange}

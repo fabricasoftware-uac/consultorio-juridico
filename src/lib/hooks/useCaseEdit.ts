@@ -244,8 +244,24 @@ export function useCaseEdit(idCaso: string, onRefresh: () => Promise<void>) {
 
   // ── Contract ─────────────────────────────────────────────
 
-  const handleEditContract = useCallback((contract: any) => {
-    setEditedContractData(contract || {});
+  const handleEditContract = useCallback((contract: any, id_usuario?: string | null) => {
+    if (contract) {
+      setEditedContractData(contract);
+    } else {
+      // Si no existe contrato, inicializar con id_usuario para permitir creación
+      setEditedContractData({
+        id_usuario: id_usuario || "",
+        tipo_contrato: "",
+        representante_legal: "",
+        direccion_empresa: "",
+        correo_patrono: "",
+        fecha_inicio: "",
+        fecha_fin: "",
+        continua: null,
+        salario_inicial: "",
+        salario_actual: "",
+      });
+    }
     setIsEditingContract(true);
   }, []);
 
@@ -254,23 +270,38 @@ export function useCaseEdit(idCaso: string, onRefresh: () => Promise<void>) {
     setIsEditingContract(false);
     const limpio = cleanData(editedContractData);
     try {
-      const { error } = await supabase
+      const { data: existing } = await supabase
         .from("contratos_laborales")
-        .upsert({
-          id_usuario: limpio.id_usuario,
-          tipo_contrato: limpio.tipo_contrato,
-          representante_legal: limpio.representante_legal,
-          direccion_empresa: limpio.direccion_empresa,
-          correo_patrono: limpio.correo_patrono,
-          fecha_inicio: limpio.fecha_inicio,
-          fecha_fin: limpio.fecha_fin,
-          continua: limpio.continua,
-          salario_inicial: limpio.salario_inicial,
-          salario_actual: limpio.salario_actual,
-        }, { onConflict: "id_usuario" });
-      if (error) throw error;
+        .select("id_contrato")
+        .eq("id_usuario", limpio.id_usuario)
+        .maybeSingle();
+
+      const payload = {
+        id_usuario: limpio.id_usuario,
+        tipo_contrato: limpio.tipo_contrato,
+        representante_legal: limpio.representante_legal,
+        direccion_empresa: limpio.direccion_empresa,
+        correo_patrono: limpio.correo_patrono,
+        fecha_inicio: limpio.fecha_inicio,
+        fecha_fin: limpio.fecha_fin,
+        continua: limpio.continua,
+        salario_inicial: limpio.salario_inicial,
+        salario_actual: limpio.salario_actual,
+      };
+
+      if (existing) {
+        const { error } = await supabase
+          .from("contratos_laborales")
+          .update(payload)
+          .eq("id_usuario", limpio.id_usuario);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("contratos_laborales").insert(payload);
+        if (error) throw error;
+      }
+
       await onRefresh();
-      toast.success("Información del contrato actualizada");
+      toast.success("Información del contrato guardada");
     } catch (err) {
       console.error(err);
       toast.error("Error al guardar los datos del contrato");
