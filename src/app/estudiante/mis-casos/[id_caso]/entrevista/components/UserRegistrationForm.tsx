@@ -371,10 +371,10 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
     try {
       setLoading(true);
       const limpio = cleanData(formData);
-      const userId = caso?.usuarios.id_usuario;
+      const userId = currentUserId;
 
       if (!userId) {
-        throw new Error("No se encontró el usuario del caso");
+        throw new Error("No se encontró la sesión del estudiante");
       }
 
       // 1. Caso payload
