@@ -16,6 +16,7 @@ export async function insertCasoNuevo(
       estado: caso.estado,
       observaciones: caso.observaciones,
       tipo_proceso: caso.tipo_proceso || "No creado",
+      ultima_modificacion: new Date().toISOString(),
       fecha_vencimiento_estudiante: sumarDiasHabiles(new Date(), 3).toISOString(),
       periodo: (() => {
         const ahora = new Date();
