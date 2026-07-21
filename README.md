@@ -48,10 +48,10 @@ Cada rol tiene su propio dashboard con vistas, permisos y notificaciones especí
 ## Ciclo de Vida de un Caso
 
 ```
-EN_PROCESO ──► PENDIENTE_APROBACION ──► ACTIVO ──► CERRADO
-                    │      ▲                             │
-                    ▼      │                             ▼
-               EN_CORRECCION                      ARCHIVADO
+EN_PROCESO ──► PENDIENTE_APROBACION ──► ACTIVO ──► CERRADO ──► ARCHIVADO
+                    │      ▲
+                    ▼      │
+               EN_CORRECCION
 ```
 
 | Estado | Significado | Responsable |
@@ -60,8 +60,8 @@ EN_PROCESO ──► PENDIENTE_APROBACION ──► ACTIVO ──► CERRADO
 | `pendiente_aprobacion` | Entrevista enviada, esperando revisión del asesor | Asesor |
 | `en_correccion` | El asesor solicitó ajustes; el estudiante debe corregir y reenviar | Estudiante → Asesor |
 | `activo` | Caso aprobado, en trámite jurídico formal. Documentos activos | Asesor / Pro-Apoyo |
-| `cerrado` | Proceso jurídico concluido exitosamente | Asesor / Pro-Apoyo |
-| `archivado` | Caso inactivo por decisión administrativa; puede restaurarse | Admin / Pro-Apoyo |
+| `cerrado` | El asesor certificó que el caso está completo; pendiente de archivo del pro-apoyo | Asesor |
+| `archivado` | El pro-apoyo dio el visto bueno final. Caso archivado definitivamente | Pro-Apoyo |
 
 ### Transiciones clave
 
@@ -70,8 +70,8 @@ EN_PROCESO ──► PENDIENTE_APROBACION ──► ACTIVO ──► CERRADO
 - **Estudiante reenvía** → `en_correccion` → `pendiente_aprobacion`
 - **Asesor aprueba** → `pendiente_aprobacion` → `activo`
 - **Caso con clasificación "Solo asesoría"** → se cierra directamente desde `pendiente_aprobacion`
-- **Cierre formal** → `activo` → `cerrado` (requiere documentos aprobados si es "En trámite")
-- **Archivo** → `activo` → `archivado` (restaurable)
+- **Cierre formal** → `activo` → `cerrado` (requiere documentos aprobados si es "En trámite", lo ejecuta el asesor)
+- **Archivo final** → `cerrado` → `archivado` (visto bueno final del pro-apoyo)
 
 ## Requisitos Previos
 

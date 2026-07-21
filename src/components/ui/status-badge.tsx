@@ -23,7 +23,7 @@ export const getStatusBadge = (status: string) => {
       text: "Cerrado",
     },
     archivado: {
-      color: "bg-red-50 text-red-700 border-red-200",
+      color: "bg-violet-50 text-violet-700 border-violet-200",
       text: "Archivado",
     },
   };

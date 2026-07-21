@@ -21,7 +21,7 @@ import {
   CheckCircle2,
   XCircle,
   BadgeCheck,
-  TriangleAlert,
+  Archive,
   Upload,
   Search,
 } from "lucide-react";
@@ -113,14 +113,14 @@ export default function CentroAyuda() {
     {
       estado: "Cerrado",
       grad: "from-slate-500 to-slate-600",
-      descripcion: "El proceso jurídico concluyó. El caso ya no requiere acciones y permanece almacenado para consulta histórica.",
+      descripcion: "El asesor certificó que el caso está completo y cerró el proceso jurídico. Pendiente del visto bueno final del profesional de apoyo.",
       icon: BadgeCheck,
     },
     {
       estado: "Archivado",
-      grad: "from-red-500 to-red-600",
-      descripcion: "El caso fue archivado por inactividad o decisión administrativa. Puede ser restaurado por un administrador si es necesario.",
-      icon: TriangleAlert,
+      grad: "from-violet-500 to-violet-600",
+      descripcion: "El profesional de apoyo dio el visto bueno final. El caso se archivó definitivamente y finalizó su ciclo de vida.",
+      icon: Archive,
     },
   ];
 
@@ -166,7 +166,7 @@ export default function CentroAyuda() {
     },
     {
       q: "¿Cómo cierro un caso?",
-      a: "Usa el botón 'Cerrar caso' en la cabecera del detalle del caso. Si la clasificación es 'Solo asesoría', se cierra directamente. Si es 'En trámite', necesitas tener todos los documentos aprobados primero.",
+      a: "Usa el botón 'Cerrar caso' en la cabecera del detalle del caso. Si la clasificación es 'Solo asesoría', se cierra directamente. Si es 'En trámite', necesitas tener todos los documentos aprobados primero. El caso pasará a estado 'Cerrado' y quedará listo para que el profesional de apoyo lo archive.",
     },
     {
       q: "¿Puedo editar los datos del caso o del solicitante?",
@@ -192,8 +192,8 @@ export default function CentroAyuda() {
       a: "En el detalle del caso, sidebar 'Equipo asignado', usa el botón de reasignar. Puedes buscar por nombre, filtrar por día y jornada, y ver la carga de casos de cada candidato antes de asignar.",
     },
     {
-      q: "¿Cuándo puedo cerrar o archivar un caso?",
-      a: "Estos botones aparecen cuando el caso está en estado 'Activo'. Cerrar: el caso concluyó su trámite. Archivar: el caso queda inactivo temporalmente (puede restaurarse). Ambos requieren que los documentos estén aprobados en casos 'En trámite'.",
+      q: "¿Cuándo y cómo archivo un caso?",
+      a: "Cuando el asesor cierra el caso (estado 'Cerrado'), aparece el botón 'Archivar caso' en el detalle. Al hacer clic se abre un modal de confirmación. El caso se archiva definitivamente y finaliza su ciclo de vida.",
     },
     {
       q: "¿Cómo elimino un documento subido por error?",
@@ -285,15 +285,14 @@ export default function CentroAyuda() {
               <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">Activo</span>
               <ArrowRight className="w-4 h-4 text-slate-400 shrink-0" />
               <span className="px-3 py-1 rounded-full text-xs font-medium bg-slate-50 text-slate-700 border border-slate-200">Cerrado</span>
+              <ArrowRight className="w-4 h-4 text-slate-400 shrink-0" />
+              <span className="px-3 py-1 rounded-full text-xs font-medium bg-violet-50 text-violet-700 border border-violet-200">Archivado</span>
             </div>
             <div className="flex justify-center mt-3">
               <span className="text-xs text-orange-600 bg-orange-50 px-3 py-1 rounded-full font-medium border border-orange-200">
                 ↺ En corrección — el asesor pide ajustes y el caso vuelve a "Pendiente aprobación"
               </span>
             </div>
-            <p className="text-xs text-slate-400 text-center mt-3">
-              Un caso Activo también puede pasar directamente a Archivado si se requiere almacenamiento temporal.
-            </p>
           </div>
         </Card>
 

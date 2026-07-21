@@ -400,8 +400,8 @@ Permisos existentes (37 total): `{tabla}.{create|read|update|delete}` para casos
 | `pendiente_aprobacion` | Entrevista enviada, esperando revisión | Asesor revisa y decide |
 | `en_correccion` | Entrevista devuelta con observaciones | Estudiante corrige y reenvía |
 | `activo` | Caso aprobado, en trámite jurídico | Trabajo colaborativo con documentos |
-| `cerrado` | Proceso concluido exitosamente | Solo consulta histórica |
-| `archivado` | Inactivo por decisión administrativa | Restaurable por admin |
+| `cerrado` | Asesor certifica caso completo, pendiente de archivo del pro-apoyo | Asesor |
+| `archivado` | Pro-apoyo dio visto bueno final, caso archivado definitivamente | Pro-Apoyo |
 
 ### 4.3 Reglas de Transición
 
@@ -412,8 +412,8 @@ Permisos existentes (37 total): `{tabla}.{create|read|update|delete}` para casos
 | `en_correccion` → `pendiente_aprobacion` | Estudiante corrige y reenvía |
 | `pendiente_aprobacion` → `activo` | Asesor aprueba (clasificación `en_tramite`) |
 | `pendiente_aprobacion` → `cerrado` | Asesor clasifica como `solo_asesoria` |
-| `activo` → `cerrado` | Asesor/Pro-Apoyo cierra (docs aprobados si `en_tramite`) |
-| `activo` → `archivado` | Admin/Pro-Apoyo archiva |
+| `activo` → `cerrado` | Asesor cierra (docs aprobados si `en_tramite`) |
+| `cerrado` → `archivado` | Pro-Apoyo archiva como paso final |
 
 **Notas históricas:**
 - El estado `aprobado` fue renombrado a `activo` (migración 20260427000000)
