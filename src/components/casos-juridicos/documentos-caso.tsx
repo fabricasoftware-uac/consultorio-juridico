@@ -110,8 +110,9 @@ async function uploadDirecto(idCaso: string, file: File) {
   const { count } = await supabase
     .from("documentos_caso")
     .select("*", { count: "exact", head: true })
-    .eq("id_caso", idCaso);
-  if ((count ?? 0) >= 30) {
+    .eq("id_caso", idCaso)
+    .neq("estado", "archivado");
+  if ((count ?? 0) >= 50) {
     toast.error("Límite de 30 documentos por caso alcanzado");
     return null;
   }

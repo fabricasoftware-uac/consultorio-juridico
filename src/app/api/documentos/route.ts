@@ -57,12 +57,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Archivo demasiado grande (máx. 4.5 MB)" }, { status: 400 });
   }
 
-  // Validar cantidad (max 30 por caso)
+  // Validar cantidad (max 50 activos por caso)
   const { count } = await supabaseAdmin
     .from("documentos_caso")
     .select("*", { count: "exact", head: true })
-    .eq("id_caso", idCaso);
-  if ((count ?? 0) >= 30) {
+    .eq("id_caso", idCaso)
+    .neq("estado", "archivado");
+  if ((count ?? 0) >= 50) {
     return NextResponse.json({ error: "Limite de 30 documentos por caso alcanzado" }, { status: 400 });
   }
 
