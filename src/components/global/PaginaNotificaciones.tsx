@@ -36,6 +36,7 @@ const ICONOS: Record<string, { icon: typeof Bell; color: string; bg: string }> =
   aprobacion: { icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-100" },
   correccion: { icon: AlertTriangle, color: "text-orange-600", bg: "bg-orange-100" },
   observacion: { icon: MessageSquare, color: "text-yellow-600", bg: "bg-yellow-100" },
+  documentos_faltantes: { icon: AlertTriangle, color: "text-amber-600", bg: "bg-amber-100" },
 };
 
 function tiempoRelativo(iso: string) {

@@ -604,7 +604,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         <FileText className="w-5 h-5 text-cyan-600" />
                         <h3 className="font-bold text-slate-800">Documentos</h3>
                       </div>
-                      <div className="p-6"><DocumentosCaso idCaso={id_caso} /></div>
+                      <div className="p-6"><DocumentosCaso idCaso={id_caso} estado={caso.estado} /></div>
                     </Card>
                   </div>
                 </div>

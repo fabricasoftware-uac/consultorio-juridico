@@ -171,6 +171,7 @@ export type Caso = {
   usuarios: Usuario;
   estudiantes_casos: EstudianteCaso[];
   asesores_casos: AsesorCaso[];
+  documentos_caso?: { count: number }[];
 };
 // --- DEMANDADOS -------------------------------------------------
 export type Demandado = {

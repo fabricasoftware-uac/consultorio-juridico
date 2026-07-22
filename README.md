@@ -151,6 +151,8 @@ Persistencia de borrador en `localStorage` para evitar pérdida de datos. El cam
 - **Flujo de aprobación**: `pendiente` → `aprobado` / `rechazado` por el asesor
 - Los documentos aprobados muestran badge verde; para cerrar un caso "En trámite" todos deben estar aprobados
 - Eliminación restringida a admin y pro-apoyo
+- **Casos cerrados**: una vez el caso pasa a `cerrado` o `archivado`, el estudiante ya no puede cargar documentos (bloqueado en la UI y por la política RLS `doc_insert_assign`). Asesor, pro-apoyo y admin conservan la capacidad de subir
+- **Recordatorio de documentos faltantes**: si un caso abierto no tiene documentos adjuntos, el estudiante ve una alerta ámbar en la tarjeta "Documentos" y un badge "Sin documentos" en su lista de casos. El asesor puede enviarle un recordatorio a la campanita con el botón "Recordar al estudiante" (RPC `recordar_documentos_caso`, máximo uno cada 24 h)
 
 ### Llamados de Atención (business-day-aware)
 

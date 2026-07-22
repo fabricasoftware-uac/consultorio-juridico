@@ -292,7 +292,19 @@ export default function MisCasosClient() {
                     Caso <span className="text-slate-700">#{caso.id_caso}</span>
                   </div>
                 </div>
-                <div className="shrink-0">{getStatusBadge(caso.estado)}</div>
+                <div className="shrink-0 flex flex-col items-end gap-1.5">
+                  {getStatusBadge(caso.estado)}
+                  {(caso.documentos_caso?.[0]?.count ?? 0) === 0 &&
+                    caso.estado !== "cerrado" &&
+                    caso.estado !== "archivado" && (
+                      <Badge
+                        variant="outline"
+                        className="text-[10px] text-amber-700 bg-amber-50 border-amber-200 whitespace-nowrap"
+                      >
+                        Sin documentos
+                      </Badge>
+                    )}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-y-4 gap-x-6 mb-6 flex-1">

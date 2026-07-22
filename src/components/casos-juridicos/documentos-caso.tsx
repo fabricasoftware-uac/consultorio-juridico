@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FileText, Upload, Download, Trash2, File, Image as ImageIcon, FileSpreadsheet, FileArchive, Archive, Eye, CheckCircle, XCircle, MoreVertical } from "lucide-react";
+import { FileText, Upload, Download, Trash2, File, Image as ImageIcon, FileSpreadsheet, FileArchive, Archive, Eye, CheckCircle, XCircle, MoreVertical, AlertTriangle, Lock, BellRing } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/supabase-client";
 import { jwtDecode } from "jwt-decode";
@@ -62,6 +62,7 @@ function formatSize(bytes: number) {
 
 interface Props {
   idCaso: string;
+  estado: string;
 }
 
 async function api(path: string, options?: RequestInit) {
@@ -151,15 +152,20 @@ async function uploadDirecto(idCaso: string, file: File) {
   return inserted;
 }
 
-export function DocumentosCaso({ idCaso }: Props) {
+export function DocumentosCaso({ idCaso, estado }: Props) {
   const [documentos, setDocumentos] = useState<Documento[]>([]);
   const [loading, setLoading] = useState(true);
   const [subiendo, setSubiendo] = useState(false);
+  const [recordando, setRecordando] = useState(false);
   const [role, setRole] = useState("");
   const [preview, setPreview] = useState<Documento | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel>>(undefined);
+
+  const casoCerrado = estado === "cerrado" || estado === "archivado";
+  const bloqueadoParaEstudiante = casoCerrado && role === "estudiante";
+  const esRevisor = role === "asesor" || role === "pro_apoyo" || role === "admin";
 
   const cargar = async () => {
     const data = await api(`/api/documentos?id_caso=${idCaso}`);
@@ -212,6 +218,11 @@ export function DocumentosCaso({ idCaso }: Props) {
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (bloqueadoParaEstudiante) {
+      toast.error("El caso está cerrado. Ya no se pueden cargar documentos.");
+      if (fileRef.current) fileRef.current.value = "";
+      return;
+    }
     setSubiendo(true);
     const doc = await uploadDirecto(idCaso, file);
     if (doc) {
@@ -259,6 +270,26 @@ export function DocumentosCaso({ idCaso }: Props) {
     }
   };
 
+  const handleRecordar = async () => {
+    setRecordando(true);
+    try {
+      const { data, error } = await supabase.rpc("recordar_documentos_caso", {
+        p_id_caso: Number(idCaso),
+      });
+      if (error) throw error;
+      if ((data ?? 0) > 0) {
+        toast.success("Recordatorio enviado al estudiante");
+        await insertAuditEvent(Number(idCaso), "documento", "Envió un recordatorio de documentos al estudiante");
+      } else {
+        toast.info("Ya enviaste un recordatorio en las últimas 24 horas");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "No se pudo enviar el recordatorio");
+    } finally {
+      setRecordando(false);
+    }
+  };
+
   const handleDownload = async (doc: Documento) => {
     try {
       const signedUrl = await getFreshSignedUrl(doc.id);
@@ -294,10 +325,36 @@ export function DocumentosCaso({ idCaso }: Props) {
     <div className="space-y-3">
       <div className="max-h-64 overflow-y-auto space-y-2 pr-1">
         {documentos.length === 0 ? (
-          <div className="p-6 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
-            <File className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-            <p className="text-sm text-slate-400">No hay documentos aún</p>
-          </div>
+          casoCerrado ? (
+            <div className="p-6 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+              <File className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+              <p className="text-sm text-slate-400">No se cargaron documentos en este caso</p>
+            </div>
+          ) : (
+            <div className="p-6 text-center bg-amber-50 rounded-xl border border-dashed border-amber-200">
+              <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-2" />
+              <p className="text-sm font-semibold text-amber-800">
+                {role === "estudiante" ? "Aún no has cargado documentos" : "Este caso no tiene documentos adjuntos"}
+              </p>
+              {role === "estudiante" && (
+                <p className="text-xs text-amber-700 mt-1">
+                  Adjunta los soportes del caso para que tu asesor pueda revisarlos.
+                </p>
+              )}
+              {esRevisor && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRecordar}
+                  disabled={recordando}
+                  className="mt-3 h-8 text-xs text-amber-800 border-amber-300 bg-white hover:bg-amber-100"
+                >
+                  <BellRing className="w-3.5 h-3.5 mr-1" />
+                  {recordando ? "Enviando..." : "Recordar al estudiante"}
+                </Button>
+              )}
+            </div>
+          )
         ) : (
           documentos.map((doc) => {
             const { icon: Icon, color } = getIcon(doc.mime_type);
@@ -358,18 +415,29 @@ export function DocumentosCaso({ idCaso }: Props) {
       </div>
 
       <div className="pt-2">
-        <input ref={fileRef} type="file" onChange={handleUpload} className="hidden"
-          accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.zip"
-        />
-        <Button
-          variant="outline"
-          onClick={() => fileRef.current?.click()}
-          disabled={subiendo}
-          className="w-full border-dashed"
-        >
-          <Upload className="w-4 h-4 mr-2" />
-          {subiendo ? "Subiendo..." : "Subir documento"}
-        </Button>
+        {bloqueadoParaEstudiante ? (
+          <div className="flex items-start gap-2 p-3 rounded-xl border border-slate-200 bg-slate-50">
+            <Lock className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+            <p className="text-xs text-slate-500 leading-relaxed">
+              El asesor cerró este caso. Ya no puedes cargar documentos.
+            </p>
+          </div>
+        ) : (
+          <>
+            <input ref={fileRef} type="file" onChange={handleUpload} className="hidden"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.zip"
+            />
+            <Button
+              variant="outline"
+              onClick={() => fileRef.current?.click()}
+              disabled={subiendo}
+              className="w-full border-dashed"
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              {subiendo ? "Subiendo..." : "Subir documento"}
+            </Button>
+          </>
+        )}
       </div>
     </div>
 
