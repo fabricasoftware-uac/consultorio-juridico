@@ -77,7 +77,7 @@ export async function getCasoById(id_caso: string): Promise<Caso> {
             cedula
           )
         )
-      ):estudiantes_casos(order:fecha_asignacion.asc),
+      ),
       asesores_casos (
         fecha_asignacion,
         fecha_fin_asignacion,
@@ -92,7 +92,7 @@ export async function getCasoById(id_caso: string): Promise<Caso> {
             cedula
           )
         )
-      ):asesores_casos(order:fecha_asignacion.asc)
+      )
     `,
     )
     .eq("id_caso", id_caso)
