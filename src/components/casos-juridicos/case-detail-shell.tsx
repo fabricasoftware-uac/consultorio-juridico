@@ -107,8 +107,8 @@ export function CaseDetailShell({
                       Estudiante asignado:
                     </span>
                     <span className="text-sm font-semibold text-blue-700">
-                      {caso.estudiantes_casos[caso.estudiantes_casos.length - 1]
-                        .estudiante.perfil.nombre_completo}
+{caso.estudiantes_casos?.find((e: any) => !e.fecha_fin_asignacion)
+                          ?.estudiante?.perfil?.nombre_completo}
                     </span>
                   </div>
                 ) : null}

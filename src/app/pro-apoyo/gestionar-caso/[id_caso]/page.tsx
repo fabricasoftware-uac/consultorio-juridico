@@ -398,11 +398,10 @@ export default function Page({
                     Estudiante asignado:
                   </span>
                   <span className="text-sm font-semibold text-blue-700">
-                    {caso?.estudiantes_casos &&
-                    caso.estudiantes_casos.length > 0
-                      ? caso.estudiantes_casos[
-                          caso.estudiantes_casos.length - 1
-                        ].estudiante.perfil.nombre_completo
+                    {caso?.estudiantes_casos?.length
+                      ? caso.estudiantes_casos.find(
+                          (e: any) => !e.fecha_fin_asignacion,
+                        )?.estudiante?.perfil?.nombre_completo
                       : "Sin asignar"}
                   </span>
                 </div>
@@ -589,14 +588,14 @@ export default function Page({
                       <AdminReasignarEquipo
                         idCaso={id_caso}
                         type="estudiante"
-                        currentName={displayCaseData?.estudiantes_casos?.[displayCaseData.estudiantes_casos.length - 1]?.estudiante?.perfil?.nombre_completo}
+                        currentName={displayCaseData?.estudiantes_casos?.find(e => !e.fecha_fin_asignacion)?.estudiante?.perfil?.nombre_completo}
                         onRefresh={traerDatos}
                       />
                       <div className="border-t border-slate-100 pt-6">
                         <AdminReasignarEquipo
                           idCaso={id_caso}
                           type="asesor"
-                          currentName={displayCaseData?.asesores_casos?.[displayCaseData.asesores_casos.length - 1]?.asesor?.perfil?.nombre_completo}
+                          currentName={displayCaseData?.asesores_casos?.find(a => !a.fecha_fin_asignacion)?.asesor?.perfil?.nombre_completo}
                           onRefresh={traerDatos}
                         />
                       </div>

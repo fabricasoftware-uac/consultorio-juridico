@@ -218,7 +218,7 @@ export default function TodosLosCasosPage() {
                     <td className="p-3 text-slate-600 text-xs">{formatArea(c.area)}</td>
                     <td className="p-3">{getStatusBadge(c.estado)}</td>
                     <td className="p-3 text-slate-600 text-xs hidden lg:table-cell">
-                      {c.estudiantes_casos?.[c.estudiantes_casos.length - 1]?.estudiante?.perfil?.nombre_completo || "—"}
+                      {c.estudiantes_casos?.find(e => !e.fecha_fin_asignacion)?.estudiante?.perfil?.nombre_completo || "—"}
                     </td>
                     <td className="p-3 text-slate-500 text-xs hidden lg:table-cell">{c.periodo || "—"}</td>
                     <td className="p-3 text-right">

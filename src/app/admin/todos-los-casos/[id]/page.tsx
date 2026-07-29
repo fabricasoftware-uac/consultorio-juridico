@@ -106,7 +106,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               {caso.periodo && <p className="text-xs text-slate-400 mt-1">Período: {caso.periodo}</p>}
               {caso.estudiantes_casos?.length ? (
                 <p className="text-xs text-blue-600 mt-1">
-                  Estudiante: {caso.estudiantes_casos[caso.estudiantes_casos.length - 1]?.estudiante?.perfil?.nombre_completo || "—"}
+                  Estudiante: {caso.estudiantes_casos?.find(e => !e.fecha_fin_asignacion)?.estudiante?.perfil?.nombre_completo || "—"}
                 </p>
               ) : null}
             </div>
@@ -213,13 +213,13 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     <div className="p-6 space-y-6">
                       <AdminReasignarEquipo
                         idCaso={id} type="estudiante"
-                        currentName={caso.estudiantes_casos?.[caso.estudiantes_casos.length - 1]?.estudiante?.perfil?.nombre_completo}
+                        currentName={caso.estudiantes_casos?.find(e => !e.fecha_fin_asignacion)?.estudiante?.perfil?.nombre_completo}
                         onRefresh={refetch}
                       />
                       <div className="border-t border-slate-100 pt-6">
                         <AdminReasignarEquipo
                           idCaso={id} type="asesor"
-                          currentName={caso.asesores_casos?.[caso.asesores_casos.length - 1]?.asesor?.perfil?.nombre_completo}
+                          currentName={caso.asesores_casos?.find(a => !a.fecha_fin_asignacion)?.asesor?.perfil?.nombre_completo}
                           onRefresh={refetch}
                         />
                       </div>

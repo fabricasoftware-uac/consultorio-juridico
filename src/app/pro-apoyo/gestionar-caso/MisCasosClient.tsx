@@ -315,9 +315,9 @@ export default function SupportCasesPage() {
                     {caso.estudiantes_casos?.length ? (
                       <p className="text-sm font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md truncate max-w-full">
                         {
-                          caso.estudiantes_casos[
-                            caso.estudiantes_casos.length - 1
-                          ].estudiante.perfil.nombre_completo
+                          caso.estudiantes_casos.find(
+                            (e: any) => !e.fecha_fin_asignacion,
+                          )?.estudiante?.perfil?.nombre_completo
                         }
                       </p>
                     ) : (
@@ -333,8 +333,9 @@ export default function SupportCasesPage() {
                     {caso.asesores_casos?.length ? (
                       <p className="text-sm font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md truncate max-w-full">
                         {
-                          caso.asesores_casos[caso.asesores_casos.length - 1]
-                            .asesor.perfil.nombre_completo
+                          caso.asesores_casos.find(
+                            (a: any) => !a.fecha_fin_asignacion,
+                          )?.asesor?.perfil?.nombre_completo
                         }
                       </p>
                     ) : (

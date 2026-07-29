@@ -71,8 +71,8 @@ export default function Asesor() {
   // 1. First, filter only cases where the advisor is current active assignment
   const advisorActiveCasos = (casos ?? []).filter((caso) => {
     const activeAsesor =
-      caso.asesores_casos && caso.asesores_casos.length > 0
-        ? caso.asesores_casos[caso.asesores_casos.length - 1].asesor
+      caso.asesores_casos?.length
+        ? caso.asesores_casos.find(a => !a.fecha_fin_asignacion)?.asesor
         : null;
 
     return activeAsesor?.id_perfil === currentUserId;
@@ -348,9 +348,8 @@ export default function Asesor() {
                       </span>
                       {caso.estudiantes_casos?.length ? (
                         <p className="text-sm font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md truncate max-w-full">
-                          {caso.estudiantes_casos[
-                            caso.estudiantes_casos.length - 1
-                          ]?.estudiante?.perfil?.nombre_completo ||
+                          {caso.estudiantes_casos?.find(e => !e.fecha_fin_asignacion)
+                            ?.estudiante?.perfil?.nombre_completo ||
                             "Sin asignar"}
                         </p>
                       ) : (

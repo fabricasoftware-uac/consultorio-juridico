@@ -79,8 +79,8 @@ export default function MisCasosClient() {
   // 1. First, filter only cases where the student is current active assignment
   const studentActiveCasos = (casos ?? []).filter((caso) => {
     const activeStudent =
-      caso.estudiantes_casos && caso.estudiantes_casos.length > 0
-        ? caso.estudiantes_casos[caso.estudiantes_casos.length - 1].estudiante
+      caso.estudiantes_casos?.length
+        ? caso.estudiantes_casos.find(e => !e.fecha_fin_asignacion)?.estudiante
         : null;
 
     return activeStudent?.id_perfil === currentUserId;
@@ -322,9 +322,9 @@ export default function MisCasosClient() {
                     <Search className="w-3 h-3" /> Asesor Asignado
                   </span>
                   <p className="text-sm font-semibold text-slate-800 line-clamp-1">
-                    {caso.asesores_casos && caso.asesores_casos.length > 0
-                      ? caso.asesores_casos[caso.asesores_casos.length - 1]
-                          .asesor?.perfil?.nombre_completo
+                    {caso.asesores_casos?.length
+                      ? caso.asesores_casos.find(a => !a.fecha_fin_asignacion)
+                          ?.asesor?.perfil?.nombre_completo
                       : "Sin asignar"}
                   </p>
                 </div>

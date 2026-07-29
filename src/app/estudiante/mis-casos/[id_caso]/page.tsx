@@ -132,7 +132,7 @@ export default function Page({ params }: { params: Promise<{ id_caso: string }> 
               {caso.periodo && <p className="text-xs text-slate-400 mt-1">Período: {caso.periodo}</p>}
               {caso.asesores_casos?.length ? (
                 <p className="text-xs text-emerald-600 mt-1">
-                  Asesor: {caso.asesores_casos[caso.asesores_casos.length - 1]?.asesor?.perfil?.nombre_completo || "—"}
+                  Asesor: {caso.asesores_casos?.find(a => !a.fecha_fin_asignacion)?.asesor?.perfil?.nombre_completo || "—"}
                 </p>
               ) : null}
             </div>

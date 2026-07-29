@@ -94,12 +94,12 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       setCaso(casoFetch);
 
       const lastEstudiante =
-        casoFetch.estudiantes_casos?.[casoFetch.estudiantes_casos.length - 1]
+        casoFetch.estudiantes_casos?.find(e => !e.fecha_fin_asignacion)
           ?.estudiante;
       if (lastEstudiante) setUltimoEstudiante(lastEstudiante);
 
       const lastAsesor =
-        casoFetch.asesores_casos?.[casoFetch.asesores_casos.length - 1]?.asesor;
+        casoFetch.asesores_casos?.find(a => !a.fecha_fin_asignacion)?.asesor;
       if (lastAsesor) setUltimoAsesor(lastAsesor);
 
       if (demandadoFetch) {

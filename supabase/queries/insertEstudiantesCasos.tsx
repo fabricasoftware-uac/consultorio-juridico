@@ -4,7 +4,7 @@ export async function insertEstudiantesCasos(
   id_caso: string,
   id_estudiante: string,
 ) {
-  const { data, error } = await supabase.from("estudiantes_casos").upsert({
+  const { error } = await supabase.from("estudiantes_casos").insert({
     id_estudiante,
     id_caso,
     fecha_asignacion: new Date().toISOString(),
@@ -15,5 +15,4 @@ export async function insertEstudiantesCasos(
     console.error("Error al insertar el estudiante:", error);
     throw error;
   }
-  return data;
 }
