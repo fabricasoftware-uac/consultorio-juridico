@@ -1,0 +1,32 @@
+# Dependencias y artefactos de build (se regeneran dentro de la imagen)
+node_modules
+.next
+out
+build
+dist
+
+# Entornos y secretos — NUNCA copiar al contexto de build
+.env
+.env.*
+!.env.production.example
+!.env.example
+
+# Git y metadatos
+.git
+.gitignore
+*.md
+!README.md
+
+# Editor / herramientas locales
+.vscode
+.opencode
+.snaplet
+.idea
+
+# Infra de despliegue (no necesaria para construir el frontend)
+deploy
+
+# Logs y temporales
+*.log
+*.tsbuildinfo
+npm-debug.log*

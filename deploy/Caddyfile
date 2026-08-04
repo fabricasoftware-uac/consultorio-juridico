@@ -1,0 +1,26 @@
+# =====================================================================
+# Reverse proxy + HTTPS automático (Let's Encrypt).
+# Los dominios y credenciales llegan por variables de entorno ({$VAR}).
+# Caddy proxea WebSockets (realtime) sin configuración extra.
+# =====================================================================
+
+# Frontend Next.js
+{$APP_DOMAIN} {
+	encode gzip zstd
+	reverse_proxy web:3000
+}
+
+# API de Supabase (Kong). El navegador habla directo con este host para
+# auth, realtime y subida directa a Storage.
+{$API_DOMAIN} {
+	encode gzip zstd
+	reverse_proxy kong:8000
+}
+
+# Supabase Studio, protegido con basic auth. Considera además limitarlo por IP.
+{$STUDIO_DOMAIN} {
+	basic_auth {
+		{$STUDIO_USER} {$STUDIO_PASSWORD_HASH}
+	}
+	reverse_proxy studio:3000
+}

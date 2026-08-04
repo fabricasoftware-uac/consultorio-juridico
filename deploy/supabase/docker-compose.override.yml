@@ -1,0 +1,28 @@
+# =====================================================================
+# Customizaciones sobre el docker-compose.yml OFICIAL de supabase/docker.
+# Clona https://github.com/supabase/supabase (carpeta docker/) en este
+# directorio y levanta con:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.override.yml -p supabase up -d
+#
+# (config.toml NO se lee en el stack Docker; todo se configura por env.)
+# =====================================================================
+
+services:
+  db:
+    # Postgres 17 (el proyecto usa major_version 17). Verifica el último tag
+    # 17.x en https://hub.docker.com/r/supabase/postgres/tags y ajústalo.
+    image: supabase/postgres:17.4.1.043
+
+  auth:
+    environment:
+      # CRÍTICO: activa el custom_access_token_hook, que inyecta el claim
+      # `user_role` en el JWT. Sin esto, toda la RLS vía authorize() falla
+      # en cerrado (los usuarios no ven sus casos).
+      GOTRUE_HOOK_CUSTOM_ACCESS_TOKEN_ENABLED: "true"
+      GOTRUE_HOOK_CUSTOM_ACCESS_TOKEN_URI: "pg-functions://postgres/public/custom_access_token_hook"
+
+  storage:
+    environment:
+      # 50 MiB, coherente con config.toml (documentos-casos).
+      FILE_SIZE_LIMIT: 52428800

@@ -1,0 +1,69 @@
+# =====================================================================
+# Compose de la APLICACIÓN: web (Next.js) + Caddy (TLS).
+# Se une a la red del stack de Supabase, que debe levantarse PRIMERO con el
+# nombre de proyecto `supabase` (crea la red `supabase_default`).
+#
+# Los cron NO corren aquí: se disparan desde cron-job.org contra los endpoints
+# públicos /api/cron/* con el header Authorization: Bearer <CRON_SECRET>.
+#
+# Uso:
+#   1) cd deploy/supabase && docker compose -p supabase up -d
+#   2) cd deploy && docker compose --env-file .env up -d --build
+#
+# Variables: ver .env (copiar de ../.env.production.example)
+# =====================================================================
+
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        # Se hornean en el bundle del cliente durante el build.
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+    image: consultorio-web:latest
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      # NEXT_PUBLIC_* también en runtime (Server Components / middleware las usan)
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+      NEXT_SUPABASE_SERVICE_ROLE_KEY: ${NEXT_SUPABASE_SERVICE_ROLE_KEY}
+      CRON_SECRET: ${CRON_SECRET}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-RESEND}
+      NOTIFICATIONS_FROM_EMAIL: ${NOTIFICATIONS_FROM_EMAIL}
+    expose:
+      - "3000"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN}
+      API_DOMAIN: ${API_DOMAIN}
+      STUDIO_DOMAIN: ${STUDIO_DOMAIN}
+      STUDIO_USER: ${STUDIO_USER}
+      STUDIO_PASSWORD_HASH: ${STUDIO_PASSWORD_HASH}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+# Reutiliza la red creada por el stack de Supabase (proyecto `supabase`).
+networks:
+  default:
+    name: supabase_default
+    external: true
