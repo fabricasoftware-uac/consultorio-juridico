@@ -59,6 +59,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/components/ui/utils";
+import { nombreMostrado } from "@/lib/utils";
 
 interface StudentForm {
   nombre: string;
@@ -69,6 +71,8 @@ interface StudentForm {
   jornada: JornadaEnum | "";
   horarios: { turno: string; dia: string }[];
 }
+
+const POR_PAGINA = 15;
 
 const EMPTY_FORM: StudentForm = {
   nombre: "",
@@ -85,7 +89,17 @@ export default function EstudiantesPage() {
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [filtroJornada, setFiltroJornada] = useState("todas");
+  const [filtroSemestre, setFiltroSemestre] = useState("todos");
+  const [filtroEstado, setFiltroEstado] = useState("todos");
+  const [pagina, setPagina] = useState(1);
   const [isPending, startTransition] = useTransition();
+
+  // Al cambiar cualquier filtro se vuelve a la primera página, si no el usuario
+  // puede quedar viendo una página que ya no existe.
+  useEffect(() => {
+    setPagina(1);
+  }, [searchTerm, filtroJornada, filtroSemestre, filtroEstado]);
 
   // Edit State
   const [editingStudent, setEditingStudent] = useState<Estudiante | null>(null);
@@ -167,11 +181,12 @@ export default function EstudiantesPage() {
   const openEdit = (student: Estudiante) => {
     setEditingStudent(student);
     setEditForm({
-      nombre: student.perfil.nombre_completo,
+      nombre: student.perfil.nombre_completo ?? "",
       correo: student.perfil.correo || "",
       cedula: student.perfil.cedula || "",
       telefono: student.perfil.telefono || "",
-      semestre: student.semestre.toString(),
+      // semestre es NULL mientras el estudiante no complete su perfil.
+      semestre: student.semestre?.toString() ?? "",
       jornada: student.jornada,
       horarios: [],
     });
@@ -200,15 +215,53 @@ export default function EstudiantesPage() {
     });
   };
 
-  const filteredEstudiantes = estudiantes.filter(
-    (e) =>
-      e.perfil.nombre_completo
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      e.perfil.cedula?.includes(searchTerm) ||
-      e.perfil.correo?.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredEstudiantes = estudiantes.filter((e) => {
+    const q = searchTerm.trim().toLowerCase();
+    const coincideBusqueda =
+      q === "" ||
+      e.perfil.nombre_completo?.toLowerCase().includes(q) ||
+      e.perfil.cedula?.includes(searchTerm.trim()) ||
+      e.perfil.correo?.toLowerCase().includes(q);
 
+    const coincideJornada =
+      filtroJornada === "todas" || e.jornada === filtroJornada;
+
+    const coincideSemestre =
+      filtroSemestre === "todos" ||
+      (filtroSemestre === "sin" && e.semestre == null) ||
+      e.semestre?.toString() === filtroSemestre;
+
+    const coincideEstado =
+      filtroEstado === "todos" ||
+      (filtroEstado === "activos" ? e.perfil.activo : !e.perfil.activo);
+
+    return (
+      coincideBusqueda && coincideJornada && coincideSemestre && coincideEstado
+    );
+  });
+
+  const totalPaginas = Math.max(
+    1,
+    Math.ceil(filteredEstudiantes.length / POR_PAGINA),
   );
+  const paginaSegura = Math.min(pagina, totalPaginas);
+  const estudiantesPagina = filteredEstudiantes.slice(
+    (paginaSegura - 1) * POR_PAGINA,
+    paginaSegura * POR_PAGINA,
+  );
+
+  const hayFiltros =
+    searchTerm !== "" ||
+    filtroJornada !== "todas" ||
+    filtroSemestre !== "todos" ||
+    filtroEstado !== "todos";
+
+  const limpiarFiltros = () => {
+    setSearchTerm("");
+    setFiltroJornada("todas");
+    setFiltroSemestre("todos");
+    setFiltroEstado("todos");
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-linear-to-br from-slate-50 to-slate-100">
@@ -371,12 +424,76 @@ export default function EstudiantesPage() {
               <div className="relative w-full sm:w-64">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
                 <Input
-                  placeholder="Buscar estudiante..."
+                  placeholder="Nombre, cédula o correo..."
                   className="pl-9 h-9"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  aria-label="Buscar estudiante"
                 />
               </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <Select value={filtroJornada} onValueChange={setFiltroJornada}>
+                <SelectTrigger className="h-9 w-auto min-w-36 text-sm" aria-label="Filtrar por jornada">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todas">Toda jornada</SelectItem>
+                  <SelectItem value="diurna">Diurna</SelectItem>
+                  <SelectItem value="nocturna">Nocturna</SelectItem>
+                  <SelectItem value="mixto">Mixto</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={filtroSemestre} onValueChange={setFiltroSemestre}>
+                <SelectTrigger className="h-9 w-auto min-w-36 text-sm" aria-label="Filtrar por semestre">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todo semestre</SelectItem>
+                  {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                    <SelectItem key={n} value={n.toString()}>
+                      Semestre {n}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="sin">Sin semestre</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={filtroEstado} onValueChange={setFiltroEstado}>
+                <SelectTrigger className="h-9 w-auto min-w-32 text-sm" aria-label="Filtrar por estado">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todo estado</SelectItem>
+                  <SelectItem value="activos">Activos</SelectItem>
+                  <SelectItem value="inactivos">Inactivos</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {hayFiltros && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={limpiarFiltros}
+                  className="h-9 text-slate-600 hover:text-slate-900"
+                >
+                  <X className="w-3.5 h-3.5 mr-1" />
+                  Limpiar
+                </Button>
+              )}
+
+              <span
+                className="ml-auto text-xs text-slate-500"
+                aria-live="polite"
+              >
+                {filteredEstudiantes.length}{" "}
+                {filteredEstudiantes.length === 1
+                  ? "estudiante"
+                  : "estudiantes"}
+                {hayFiltros && ` de ${estudiantes.length}`}
+              </span>
             </div>
 
             <Card className="shadow-sm border-slate-200 overflow-hidden">
@@ -411,23 +528,43 @@ export default function EstudiantesPage() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredEstudiantes.map((student) => (
+                      estudiantesPagina.map((student) => (
                         <TableRow key={student.id_perfil}>
                           <TableCell>
-                            <div className="font-medium text-slate-900">
-                              {student.perfil.nombre_completo}
+                            <div
+                              className={cn(
+                                "font-medium",
+                                student.perfil.nombre_completo
+                                  ? "text-slate-900"
+                                  : "text-slate-400 italic",
+                              )}
+                            >
+                              {nombreMostrado(student.perfil.nombre_completo)}
                             </div>
                             <div className="text-xs text-slate-500">
-                              CC: {student.perfil.cedula}
+                              {student.perfil.cedula
+                                ? `CC: ${student.perfil.cedula}`
+                                : "Sin documento"}
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="text-sm">
-                              Semestre {student.semestre}
-                            </div>
-                             <div className="text-xs text-slate-400 capitalize">
-                               {student.jornada} · {student.semestre}° semestre
-                             </div>
+                            {student.semestre == null ? (
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] border-amber-200 bg-amber-50 text-amber-700"
+                              >
+                                Perfil incompleto
+                              </Badge>
+                            ) : (
+                              <>
+                                <div className="text-sm">
+                                  Semestre {student.semestre}
+                                </div>
+                                <div className="text-xs text-slate-400 capitalize">
+                                  {student.jornada}
+                                </div>
+                              </>
+                            )}
                           </TableCell>
                           <TableCell>
                             <Badge
@@ -475,6 +612,48 @@ export default function EstudiantesPage() {
                   </TableBody>
                 </Table>
               </div>
+
+              {totalPaginas > 1 && (
+                <nav
+                  aria-label="Paginación de estudiantes"
+                  className="flex items-center justify-between gap-3 border-t border-slate-200 px-4 py-3"
+                >
+                  <span className="text-xs text-slate-500">
+                    Mostrando{" "}
+                    <span className="font-medium text-slate-700">
+                      {(paginaSegura - 1) * POR_PAGINA + 1}–
+                      {Math.min(
+                        paginaSegura * POR_PAGINA,
+                        filteredEstudiantes.length,
+                      )}
+                    </span>{" "}
+                    de {filteredEstudiantes.length}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8"
+                      onClick={() => setPagina(paginaSegura - 1)}
+                      disabled={paginaSegura <= 1}
+                    >
+                      Anterior
+                    </Button>
+                    <span className="text-xs text-slate-600 tabular-nums">
+                      {paginaSegura} / {totalPaginas}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8"
+                      onClick={() => setPagina(paginaSegura + 1)}
+                      disabled={paginaSegura >= totalPaginas}
+                    >
+                      Siguiente
+                    </Button>
+                  </div>
+                </nav>
+              )}
             </Card>
           </div>
         </div>

@@ -213,13 +213,13 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     <div className="p-6 space-y-6">
                       <AdminReasignarEquipo
                         idCaso={id} type="estudiante"
-                        currentName={caso.estudiantes_casos?.find(e => !e.fecha_fin_asignacion)?.estudiante?.perfil?.nombre_completo}
+                        currentName={caso.estudiantes_casos?.find(e => !e.fecha_fin_asignacion)?.estudiante?.perfil?.nombre_completo ?? undefined}
                         onRefresh={refetch}
                       />
                       <div className="border-t border-slate-100 pt-6">
                         <AdminReasignarEquipo
                           idCaso={id} type="asesor"
-                          currentName={caso.asesores_casos?.find(a => !a.fecha_fin_asignacion)?.asesor?.perfil?.nombre_completo}
+                          currentName={caso.asesores_casos?.find(a => !a.fecha_fin_asignacion)?.asesor?.perfil?.nombre_completo ?? undefined}
                           onRefresh={refetch}
                         />
                       </div>

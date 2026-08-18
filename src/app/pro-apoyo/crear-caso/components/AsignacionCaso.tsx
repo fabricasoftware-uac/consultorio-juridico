@@ -16,10 +16,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, Users, UserCheck, X } from "lucide-react";
+import { AlertCircle, CheckCircle2, Users, UserCheck, X } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/components/ui/utils";
+import { mismoDia, nombreMostrado } from "@/lib/utils";
 import { Asesor, Caso, Estudiante, Usuario } from "app/types/database";
 import { getEstudiantes } from "../../../../../supabase/queries/getEstudiantes";
 import { getAsesores } from "../../../../../supabase/queries/getAsesores";
@@ -106,11 +107,20 @@ export function AsignacionCaso({
     getData();
   }, []);
 
+  // El horario real está en `horarios`; estudiantes.dia quedó muerta tras la
+  // migración 20260423000000 y siempre es NULL, así que filtrar por ella
+  // dejaba la lista vacía siempre.
+  //
+  // Se comparan sin tildes: aquí los días se generan como "Miércoles"/"Sábado"
+  // pero se guardan como "Miercoles"/"Sabado".
+  const atiendeHoy = (e: Estudiante) =>
+    (e.horarios ?? []).some((h) => mismoDia(h.dia, diaActual));
+
   const estudiantesFiltrados = mostrarTodos
     ? estudiantesDisponibles
-    : estudiantesDisponibles.filter(
-        (e) => e.dia?.toLowerCase() === diaActual.toLowerCase(),
-      );
+    : estudiantesDisponibles.filter(atiendeHoy);
+
+  const hayEstudiantesHoy = estudiantesDisponibles.some(atiendeHoy);
 
   const handleRegistrarCaso = () => {
     if (!estudianteId) {
@@ -256,10 +266,28 @@ export function AsignacionCaso({
                     className="text-[11px] h-7 text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-bold uppercase tracking-wider"
                   >
                     {mostrarTodos
-                      ? "Ver solo estudiantes de hoy"
-                      : "Ver todos los estudiantes"}
+                      ? `Ver solo los de hoy (${diaActual})`
+                      : `Ver todos (${estudiantesDisponibles.length})`}
                   </Button>
                 </div>
+
+                {!mostrarTodos && !hayEstudiantesHoy && (
+                  <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
+                    <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                    <p className="text-xs text-amber-800">
+                      Ningún estudiante tiene turno registrado para hoy (
+                      {diaActual}).{" "}
+                      <button
+                        type="button"
+                        onClick={() => setMostrarTodos(true)}
+                        className="font-semibold underline cursor-pointer"
+                      >
+                        Ver todos los estudiantes
+                      </button>
+                      .
+                    </p>
+                  </div>
+                )}
                 <div className="w-full">
                   <SearchableSelector
                     items={estudiantesFiltrados}
@@ -272,24 +300,40 @@ export function AsignacionCaso({
                     }
                     searchPlaceholder="Buscar por nombre o cédula..."
                     getItemValue={(e) => e.id_perfil.toString()}
-                    getItemLabel={(e) => e.perfil.nombre_completo}
+                    getItemLabel={(e) => nombreMostrado(e.perfil.nombre_completo)}
                     getItemSearchValue={(e) => e.perfil.cedula || ""}
                     renderItem={(estudiante) => (
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full py-2 gap-2">
                         <div className="flex flex-col">
                           <span className="font-semibold text-sm text-slate-800">
-                            {estudiante.perfil.nombre_completo}
+                            {nombreMostrado(estudiante.perfil.nombre_completo)}
                           </span>
                           <span className="text-[11px] text-slate-500 flex flex-wrap items-center gap-1.5 mt-0.5">
                             <span className="font-medium font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">
-                              CC: {estudiante.perfil.cedula}
+                              CC: {estudiante.perfil.cedula ?? "—"}
                             </span>
-                            <span className="hidden sm:inline">•</span>
-                            <span className="font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
-                              {estudiante.dia}
-                            </span>
-                            <span className="hidden sm:inline">•</span>
-                            <span>{estudiante.turno}</span>
+                            {(estudiante.horarios ?? []).length === 0 ? (
+                              <>
+                                <span className="hidden sm:inline">•</span>
+                                <span className="text-amber-600 font-medium">
+                                  Sin horario registrado
+                                </span>
+                              </>
+                            ) : (
+                              (estudiante.horarios ?? []).map((h, i) => (
+                                <span
+                                  key={i}
+                                  className={cn(
+                                    "px-1.5 py-0.5 rounded font-medium",
+                                    mismoDia(h.dia, diaActual)
+                                      ? "bg-blue-50 text-blue-700 font-bold"
+                                      : "bg-slate-100 text-slate-600",
+                                  )}
+                                >
+                                  {h.dia.substring(0, 3)} {h.turno}
+                                </span>
+                              ))
+                            )}
                           </span>
                         </div>
                         <Badge
@@ -347,7 +391,7 @@ export function AsignacionCaso({
                           </p>
                           <p
                             className="text-sm font-medium text-slate-700 truncate"
-                            title={est.perfil.nombre_completo}
+                            title={nombreMostrado(est.perfil.nombre_completo)}
                           >
                             {est.perfil.nombre_completo}
                           </p>
@@ -479,7 +523,7 @@ export function AsignacionCaso({
                     placeholder="Sin asignar..."
                     searchPlaceholder="Buscar por nombre o cédula..."
                     getItemValue={(a) => a.id_perfil.toString()}
-                    getItemLabel={(a) => a.perfil.nombre_completo}
+                    getItemLabel={(a) => nombreMostrado(a.perfil.nombre_completo)}
                     getItemSearchValue={(a) => a.perfil.cedula || ""}
                     renderItem={(asesor) => (
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full py-2 gap-2">
@@ -533,7 +577,7 @@ export function AsignacionCaso({
                           </p>
                           <p
                             className="text-sm font-medium text-slate-700 truncate"
-                            title={ase.perfil.nombre_completo}
+                            title={nombreMostrado(ase.perfil.nombre_completo)}
                           >
                             {ase.perfil.nombre_completo}
                           </p>

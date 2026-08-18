@@ -43,9 +43,29 @@ export async function getEstudiantes(
     countMap[c.id_estudiante] = (countMap[c.id_estudiante] || 0) + 1;
   });
 
+  // Los horarios reales viven en `horarios` desde la migración
+  // 20260423000000_formulario_unificado. Las columnas estudiantes.dia y
+  // estudiantes.turno quedaron muertas: registerEstudiante nunca las escribe.
+  const { data: horarios, error: errorHorarios } = await supabase
+    .from("horarios")
+    .select("id_perfil, dia, turno")
+    .in("id_perfil", ids);
+
+  // Si esto falla en silencio, el filtro "estudiantes de hoy" se vacía y parece
+  // que no hubiera nadie disponible. Mejor que quede constancia en consola.
+  if (errorHorarios) {
+    console.error("Error al traer los horarios:", errorHorarios);
+  }
+
+  const horariosMap: Record<string, { dia: string; turno: string }[]> = {};
+  horarios?.forEach((h) => {
+    (horariosMap[h.id_perfil] ??= []).push({ dia: h.dia, turno: h.turno });
+  });
+
   const formattedData = data?.map((est) => ({
     ...est,
     total_casos: countMap[est.id_perfil] || 0,
+    horarios: horariosMap[est.id_perfil] ?? [],
   }));
 
   return formattedData as unknown as Estudiante[];

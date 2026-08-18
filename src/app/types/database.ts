@@ -98,7 +98,7 @@ export type Usuario = {
 // --- PERFILES --------------------------------------------------
 export type Perfil = {
   id: string;
-  nombre_completo: string;
+  nombre_completo: string | null;
   correo?: string | null;
   cedula?: string | null;
   telefono?: string | null;
@@ -109,12 +109,17 @@ export type Perfil = {
 
 export type Estudiante = {
   id_perfil: string;
-  semestre: number;
+  /** NULL mientras el estudiante no complete su perfil (alta por Google). */
+  semestre: number | null;
   jornada: JornadaEnum;
+  /** @deprecated Columna muerta; el horario real está en `horarios`. */
   turno: TurnoEnum;
+  /** @deprecated Columna muerta; el horario real está en `horarios`. */
   dia?: string | null;
   perfil: Perfil;
   total_casos?: number;
+  /** Días y turnos reales, desde la tabla `horarios`. */
+  horarios?: { dia: string; turno: string }[];
 };
 
 // --- ASESORES --------------------------------------------------

@@ -588,14 +588,14 @@ export default function Page({
                       <AdminReasignarEquipo
                         idCaso={id_caso}
                         type="estudiante"
-                        currentName={displayCaseData?.estudiantes_casos?.find(e => !e.fecha_fin_asignacion)?.estudiante?.perfil?.nombre_completo}
+                        currentName={displayCaseData?.estudiantes_casos?.find(e => !e.fecha_fin_asignacion)?.estudiante?.perfil?.nombre_completo ?? undefined}
                         onRefresh={traerDatos}
                       />
                       <div className="border-t border-slate-100 pt-6">
                         <AdminReasignarEquipo
                           idCaso={id_caso}
                           type="asesor"
-                          currentName={displayCaseData?.asesores_casos?.find(a => !a.fecha_fin_asignacion)?.asesor?.perfil?.nombre_completo}
+                          currentName={displayCaseData?.asesores_casos?.find(a => !a.fecha_fin_asignacion)?.asesor?.perfil?.nombre_completo ?? undefined}
                           onRefresh={traerDatos}
                         />
                       </div>

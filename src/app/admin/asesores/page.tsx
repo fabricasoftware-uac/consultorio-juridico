@@ -167,7 +167,7 @@ export default function AsesoresPage() {
   const openEdit = (asesor: Asesor) => {
     setEditingAsesor(asesor);
     setEditForm({
-      nombre: asesor.perfil.nombre_completo,
+      nombre: asesor.perfil.nombre_completo ?? "",
       correo: asesor.perfil.correo || "",
       cedula: asesor.perfil.cedula || "",
       telefono: asesor.perfil.telefono || "",
@@ -244,7 +244,7 @@ export default function AsesoresPage() {
   const filteredAsesores = asesores.filter(
     (a) =>
       a.perfil.nombre_completo
-        .toLowerCase()
+        ?.toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
       a.perfil.cedula?.includes(searchTerm) ||
       a.perfil.correo?.toLowerCase().includes(searchTerm.toLowerCase()),

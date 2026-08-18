@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Navbar } from "../../components/NavbarAdmin";
 import { Spinner } from "@/components/ui/spinner";
 import { getStatusBadge } from "@/components/ui/status-badge";
-import { formatArea } from "@/lib/utils";
+import { formatArea, nombreMostrado } from "@/lib/utils";
 import { formatDate } from "@/lib/format-date";
 import { supabase } from "@/lib/supabase/supabase-client";
 import {
@@ -19,15 +19,20 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = React.use(params);
   const [estudiante, setEstudiante] = useState<any>(null);
   const [casos, setCasos] = useState<any[]>([]);
+  const [horarios, setHorarios] = useState<{ dia: string; turno: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       supabase.from("estudiantes").select("*, perfil:perfiles(*)").eq("id_perfil", id).single(),
       supabase.from("estudiantes_casos").select("*, casos!inner(id_caso, area, estado, fecha_creacion, fecha_cierre, periodo, usuarios!inner(nombre_completo, cedula))").eq("id_estudiante", id).order("fecha_asignacion", { ascending: false }),
-    ]).then(([{ data: est }, { data: casosData }]) => {
+      // Los turnos reales viven en `horarios`; estudiantes.dia/turno son
+      // columnas muertas desde la migración 20260423000000.
+      supabase.from("horarios").select("dia, turno").eq("id_perfil", id),
+    ]).then(([{ data: est }, { data: casosData }, { data: horariosData }]) => {
       setEstudiante(est);
       setCasos(casosData ?? []);
+      setHorarios(horariosData ?? []);
       setLoading(false);
     });
   }, [id]);
@@ -55,13 +60,26 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             <div className="flex items-center gap-4 mb-4">
               <div className="p-3 bg-blue-100 rounded-xl"><GraduationCap className="w-6 h-6 text-blue-600" /></div>
               <div>
-                <h1 className="text-xl font-bold text-slate-900">{estudiante.perfil?.nombre_completo}</h1>
+                <h1 className="text-xl font-bold text-slate-900">{nombreMostrado(estudiante.perfil?.nombre_completo)}</h1>
                 <p className="text-xs text-slate-500">CC: {estudiante.perfil?.cedula || "—"}</p>
               </div>
             </div>
             <div className="space-y-3 text-sm">
-              <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-slate-400" /><span className="text-slate-600">{estudiante.semestre}° Semestre · {estudiante.jornada} · {estudiante.dia || "Día no definido"}</span></div>
-              <div className="flex items-center gap-2"><User className="w-4 h-4 text-slate-400" /><span className="text-slate-600">Turno: {estudiante.turno}</span></div>
+              <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-slate-400" /><span className="text-slate-600">{estudiante.semestre != null ? `${estudiante.semestre}° Semestre · ` : ""}{estudiante.jornada || "Jornada no definida"}</span></div>
+              <div className="flex items-start gap-2">
+                <User className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                {horarios.length === 0 ? (
+                  <span className="text-amber-600">Sin turnos registrados</span>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5">
+                    {horarios.map((h, i) => (
+                      <Badge key={i} variant="secondary" className="text-[11px] font-medium">
+                        {h.dia} · {h.turno}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
               <div className="flex items-center gap-2"><Phone className="w-4 h-4 text-slate-400" /><span className="text-slate-600">{estudiante.perfil?.telefono || "—"}</span></div>
               <div className="flex items-center gap-2"><Mail className="w-4 h-4 text-slate-400" /><span className="text-slate-600 truncate">{estudiante.perfil?.correo || "—"}</span></div>
             </div>

@@ -32,3 +32,30 @@ export function sumarDiasHabiles(fecha: Date, dias: number): Date {
   }
   return result;
 }
+/**
+ * `perfiles.nombre_completo` acepta NULL: un usuario que entra por Google antes
+ * de que su perfil se complete puede no tener nombre todavía. Usar este helper
+ * para mostrarlo evita renderizar vacío y evita reventar al encadenar métodos.
+ */
+export function nombreMostrado(nombre: string | null | undefined): string {
+  return nombre?.trim() || "Sin nombre";
+}
+
+/**
+ * Compara nombres de día ignorando tildes y mayúsculas. Necesario porque el
+ * día actual se calcula como "Miércoles"/"Sábado" pero en `horarios` se
+ * almacenan sin tilde ("Miercoles"/"Sabado").
+ */
+export function mismoDia(
+  a: string | null | undefined,
+  b: string | null | undefined,
+): boolean {
+  const norm = (s: string | null | undefined) =>
+    (s ?? "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim()
+      .toLowerCase();
+  const na = norm(a);
+  return na !== "" && na === norm(b);
+}
