@@ -195,6 +195,30 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
     }));
   }, [caso?.usuarios]);
 
+  // Prellenado de los campos del propio caso (área, resumen, observaciones).
+  //
+  // Faltaba: al enviar la entrevista se borra el borrador de localStorage, así
+  // que cuando el asesor pide ajustes y el estudiante vuelve a entrar, estos
+  // campos aparecían vacíos aunque ya estuvieran guardados en la base.
+  //
+  // `prev.x || ...` conserva lo que el estudiante esté escribiendo ahora y solo
+  // rellena lo que esté vacío, igual que los demás efectos.
+  useEffect(() => {
+    if (!caso) return;
+    setFormData((prev) => ({
+      ...prev,
+      // 'no_asignada' es el valor con el que el pro-apoyo crea todo caso, no una
+      // elección real del estudiante. Prellenarlo dejaría el selector marcado y
+      // validateStep(7) lo daría por bueno, permitiendo enviar sin área.
+      area:
+        prev.area ||
+        (caso.area && caso.area !== "no_asignada" ? caso.area : ""),
+      resumen_hechos: prev.resumen_hechos || caso.resumen_hechos || "",
+      observaciones_estudiante:
+        prev.observaciones_estudiante || caso.observaciones_estudiante || "",
+    }));
+  }, [caso]);
+
   useEffect(() => {
     if (!demandado) return;
     setFormData((prev) => ({
