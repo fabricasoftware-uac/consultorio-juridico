@@ -20,6 +20,8 @@ export async function getCasoById(id_caso: string): Promise<Caso> {
       estado,
       area,
       clasificacion,
+      borrador_entrevista,
+      borrador_actualizado_en,
       usuarios (
         id_usuario,
         nombre_completo,

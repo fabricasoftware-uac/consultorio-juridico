@@ -171,6 +171,8 @@ export type Caso = {
   area: AreaEnum;
   tipo_proceso?: string;
   clasificacion?: ClasificacionEnum | null;
+  borrador_entrevista?: Record<string, unknown> | null;
+  borrador_actualizado_en?: string | null;
 
   // Relaciones
   usuarios: Usuario;

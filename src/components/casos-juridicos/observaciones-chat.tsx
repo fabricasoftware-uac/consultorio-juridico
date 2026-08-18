@@ -29,7 +29,8 @@ export function ObservacionesChat({
   const [texto, setTexto] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [loading, setLoading] = useState(true);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const yaScrolleoRef = useRef(false);
 
   const cargar = async () => {
     const data = await getObservacionesByCaso(idCaso);
@@ -61,8 +62,27 @@ export function ObservacionesChat({
     };
   }, [idCaso]);
 
+  // El scroll se mueve DENTRO del contenedor del chat, no con scrollIntoView:
+  // ese propaga el desplazamiento a los ancestros y arrastraba toda la página
+  // del detalle del caso hacia abajo apenas cargaban las observaciones.
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const cont = scrollRef.current;
+    if (!cont) return;
+
+    // Primera carga: posicionarse abajo sin animación y sin tocar la página.
+    if (!yaScrolleoRef.current) {
+      cont.scrollTop = cont.scrollHeight;
+      yaScrolleoRef.current = true;
+      return;
+    }
+
+    // Mensajes nuevos: solo seguir al final si el usuario ya estaba abajo. Si
+    // subió a leer algo, no se le mueve la vista.
+    const cercaDelFinal =
+      cont.scrollHeight - cont.scrollTop - cont.clientHeight < 120;
+    if (cercaDelFinal) {
+      cont.scrollTo({ top: cont.scrollHeight, behavior: "smooth" });
+    }
   }, [observaciones]);
 
   const handleEnviar = async () => {
@@ -96,7 +116,7 @@ export function ObservacionesChat({
           </p>
         </div>
       ) : (
-        <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+        <div ref={scrollRef} className="space-y-3 max-h-80 overflow-y-auto pr-1">
           {obsLegacy?.trim() && (
             <div className="p-4 bg-yellow-50 rounded-xl border border-yellow-100">
               <div className="flex items-center gap-2 mb-1.5">
@@ -144,7 +164,6 @@ export function ObservacionesChat({
               </p>
             </div>
           ))}
-          <div ref={bottomRef} />
         </div>
       )}
 

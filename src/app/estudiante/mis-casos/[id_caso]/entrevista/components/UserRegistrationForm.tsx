@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import {
   Card,
@@ -39,6 +39,7 @@ import { Asesor, Caso, Demandado } from "app/types/database";
 import { getCasoById } from "../../../../../../../supabase/queries/getCasoById";
 import { getAsesores } from "../../../../../../../supabase/queries/getAsesores";
 import { asignarAsesorRetroalimentacion } from "../../../../../../../supabase/queries/asignarAsesorRetroalimentacion";
+import { guardarBorradorEntrevista, limpiarBorradorEntrevista } from "../../../../../../../supabase/queries/borradorEntrevista";
 import { getDemandadoByCasoId } from "../../../../../../../supabase/queries/getDemandadoByCasoId";
 import { getContratoByUsuarioId } from "../../../../../../../supabase/queries/getContratoByUsuarioId";
 import { guardarEntrevista } from "../../../../../../../supabase/queries/guardarEntrevista";
@@ -80,6 +81,12 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [asesores, setAsesores] = useState<Asesor[]>([]);
   const [guardandoAsesor, setGuardandoAsesor] = useState(false);
+  const [borradorGuardadoEn, setBorradorGuardadoEn] = useState<string | null>(null);
+  // Se calcula una sola vez, antes de que el autoguardado escriba nada.
+  const habiaBorradorLocalRef = useRef(
+    typeof window !== "undefined" &&
+      !!localStorage.getItem(`entrevista_draft_${idCaso}`),
+  );
   const router = useRouter();
 
   // El asesor que dio la retroalimentación es el asesor asignado al caso.
@@ -194,6 +201,28 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
       caracterizacion_lgbtiq: prev.caracterizacion_lgbtiq || u.caracterizacion_lgbtiq || null,
     }));
   }, [caso?.usuarios]);
+
+  // Restaura el borrador guardado en el servidor.
+  //
+  // Solo se aplica si en este dispositivo no había borrador local: lo que el
+  // estudiante tenga a medio escribir aquí es más reciente que lo último que
+  // se subió, y no queremos pisárselo.
+  const borradorRestauradoRef = useRef(false);
+  useEffect(() => {
+    if (borradorRestauradoRef.current) return;
+    const remoto = caso?.borrador_entrevista;
+    if (!remoto || typeof remoto !== "object") return;
+    borradorRestauradoRef.current = true;
+
+    if (habiaBorradorLocalRef.current) {
+      setBorradorGuardadoEn(caso?.borrador_actualizado_en ?? null);
+      return;
+    }
+
+    setFormData((prev) => ({ ...prev, ...(remoto as object) }));
+    setBorradorGuardadoEn(caso?.borrador_actualizado_en ?? null);
+    toast.info("Recuperamos tu avance guardado");
+  }, [caso]);
 
   // Prellenado de los campos del propio caso (área, resumen, observaciones).
   //
@@ -355,6 +384,48 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
       );
     }
   }, [formData, idCaso]);
+
+  // Autoguardado en el servidor.
+  //
+  // localStorage solo sirve en el mismo navegador: si el estudiante empieza en
+  // el PC del consultorio y sigue en su celular, no encontraba nada. Esto lo
+  // sube al caso cada 20 s, pero solo si algo cambió y el caso sigue editable.
+  const formDataRef = useRef(formData);
+  useEffect(() => { formDataRef.current = formData; }, [formData]);
+
+  const ultimoGuardadoRef = useRef<string>("");
+  const editable = !!caso && ["en_proceso", "en_correccion"].includes(caso.estado ?? "");
+
+  useEffect(() => {
+    if (!editable) return;
+
+    const subir = async () => {
+      const actual = JSON.stringify(formDataRef.current);
+      if (actual === ultimoGuardadoRef.current) return;
+      try {
+        const ts = await guardarBorradorEntrevista(
+          Number(idCaso),
+          formDataRef.current as Record<string, unknown>,
+        );
+        ultimoGuardadoRef.current = actual;
+        setBorradorGuardadoEn(ts);
+      } catch (e) {
+        // Silencioso: localStorage sigue siendo la red de seguridad inmediata.
+        console.error("No se pudo guardar el borrador en el servidor:", e);
+      }
+    };
+
+    const id = setInterval(subir, 20_000);
+    // Último intento al cerrar la pestaña o cambiar de app.
+    const alOcultar = () => { if (document.visibilityState === "hidden") void subir(); };
+    document.addEventListener("visibilitychange", alOcultar);
+
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", alOcultar);
+      void subir();
+    };
+  }, [editable, idCaso]);
 
   const CAMPOS_SOLO_DIGITOS = new Set([
     "edad",
@@ -523,6 +594,9 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
       if (typeof window !== "undefined") {
         localStorage.removeItem(`entrevista_draft_${idCaso}`);
       }
+      // Evita que el autoguardado del desmontaje vuelva a subir el borrador.
+      ultimoGuardadoRef.current = JSON.stringify(formDataRef.current);
+      await limpiarBorradorEntrevista(Number(idCaso));
       toast.success("Entrevista completada exitosamente");
       router.push(`/estudiante/mis-casos`);
       clearForm();
@@ -648,6 +722,14 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
             <p className="text-xs sm:text-sm text-slate-500 font-medium">
               Paso {currentStep} de {STEPS.length}
             </p>
+            {editable && (
+              <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
+                {borradorGuardadoEn
+                  ? `Guardado automáticamente · ${new Date(borradorGuardadoEn).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}`
+                  : "Tu avance se guarda solo; puedes salir y continuar después"}
+              </p>
+            )}
           </div>
           <div className="text-left sm:text-right flex items-center gap-3">
             <Button variant="outline" size="sm" className="text-xs" onClick={async () => {
