@@ -20,17 +20,79 @@ import {
   MailIcon,
 } from "lucide-react";
 import { supabase } from "../../lib/supabase/supabase-client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 import { CustomJwtPayload } from "app/types/jwt";
+import { Separator } from "@/components/ui/separator";
+import { DOMINIO_INSTITUCIONAL } from "@/lib/roles";
+
+const ERRORES_OAUTH: Record<string, string> = {
+  dominio_no_permitido: `Debes ingresar con tu correo institucional ${DOMINIO_INSTITUCIONAL}.`,
+  sin_rol: "Tu cuenta no tiene un rol asignado. Contacta al administrador.",
+  oauth: "No se pudo completar el ingreso con Google. Intenta de nuevo.",
+};
+
+function GoogleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        fill="#4285F4"
+        d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.63h6.46a5.52 5.52 0 0 1-2.4 3.62v3h3.88c2.27-2.09 3.58-5.17 3.58-8.8z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 24c3.24 0 5.96-1.08 7.94-2.91l-3.88-3.01c-1.08.72-2.45 1.15-4.06 1.15-3.13 0-5.78-2.11-6.73-4.95H1.26v3.1A12 12 0 0 0 12 24z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.27 14.28a7.2 7.2 0 0 1 0-4.56v-3.1H1.26a12 12 0 0 0 0 10.76l4.01-3.1z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 4.77c1.76 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.18 15.24 0 12 0A12 12 0 0 0 1.26 6.62l4.01 3.1C6.22 6.88 8.87 4.77 12 4.77z"
+      />
+    </svg>
+  );
+}
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // El callback de /auth/callback devuelve el motivo del rechazo en ?error=.
+  useEffect(() => {
+    const codigo = searchParams.get("error");
+    if (codigo) {
+      setError(ERRORES_OAUTH[codigo] ?? "No se pudo iniciar sesión.");
+    }
+  }, [searchParams]);
+
+  const handleGoogleLogin = async () => {
+    setError(null);
+    setIsGoogleLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        // `hd` solo pre-filtra la lista de cuentas en Google; la validación real
+        // del dominio ocurre en el servidor, en /auth/callback.
+        queryParams: {
+          hd: DOMINIO_INSTITUCIONAL.replace("@", ""),
+          prompt: "select_account",
+        },
+      },
+    });
+    if (error) {
+      setError("No se pudo iniciar el ingreso con Google. " + error.message);
+      setIsGoogleLoading(false);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,6 +163,34 @@ export function LoginForm() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6 pt-8 px-8 pb-8">
+        <div className="space-y-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleGoogleLogin}
+            disabled={isGoogleLoading || isLoading}
+            className="w-full h-12 rounded-xl border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-base"
+          >
+            {isGoogleLoading ? (
+              <Spinner className="mr-2 h-5 w-5" />
+            ) : (
+              <GoogleIcon className="mr-2 h-5 w-5" />
+            )}
+            {isGoogleLoading ? "Conectando..." : "Continuar con Google"}
+          </Button>
+          <p className="text-xs text-center text-slate-500">
+            Para estudiantes con correo{" "}
+            <span className="font-medium">{DOMINIO_INSTITUCIONAL}</span>
+          </p>
+
+          <div className="relative">
+            <Separator className="bg-slate-200" />
+            <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-3 text-xs text-slate-400 font-medium">
+              o ingresa con tu correo
+            </span>
+          </div>
+        </div>
+
         <form onSubmit={handleLogin} className="space-y-5">
           <div className="space-y-2.5">
             <Label

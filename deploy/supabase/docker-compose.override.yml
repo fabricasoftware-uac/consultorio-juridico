@@ -22,6 +22,16 @@ services:
       GOTRUE_HOOK_CUSTOM_ACCESS_TOKEN_ENABLED: "true"
       GOTRUE_HOOK_CUSTOM_ACCESS_TOKEN_URI: "pg-functions://postgres/public/custom_access_token_hook"
 
+      # Ingreso con Google para estudiantes. config.toml NO se lee aquí, por eso
+      # el proveedor se declara por env. En Google Cloud Console el redirect
+      # autorizado es ${API_EXTERNAL_URL}/auth/v1/callback.
+      GOTRUE_EXTERNAL_GOOGLE_ENABLED: "true"
+      GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOTRUE_EXTERNAL_GOOGLE_SECRET: ${GOOGLE_SECRET}
+      GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI: ${API_EXTERNAL_URL}/auth/v1/callback
+      # La lista blanca de destinos post-autenticación la sigue aportando
+      # ADDITIONAL_REDIRECT_URLS del .env (ya incluye /auth/callback).
+
   storage:
     environment:
       # 50 MiB, coherente con config.toml (documentos-casos).

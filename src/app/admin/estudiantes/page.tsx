@@ -4,6 +4,7 @@ import { useState, useEffect, useTransition } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { HorariosEditor } from "@/components/HorariosEditor";
+import { HorarioAdder } from "@/components/HorarioAdder";
 import { Navbar } from "../components/NavbarAdmin";
 import { registerEstudiante } from "../actions/registerUser";
 import {
@@ -23,7 +24,6 @@ import {
   Search,
   Eye,
   X,
-  Plus,
   ChartNoAxesColumnDecreasingIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -578,24 +578,4 @@ export default function EstudiantesPage() {
   );
 }
 
-function HorarioAdder({ onAdd }: { onAdd: (h: {turno:string,dia:string}) => void }) {
-  const [dia, setDia] = useState(""); const [turno, setTurno] = useState("");
-  const DIAS = ["Lunes","Martes","Miercoles","Jueves","Viernes","Sabado"];
-  return (
-    <div className="flex gap-2 items-center mt-2">
-      <Select value={dia} onValueChange={setDia}>
-        <SelectTrigger className="h-8 text-xs w-24"><SelectValue placeholder="Dia" /></SelectTrigger>
-        <SelectContent>{DIAS.map(d=><SelectItem key={d} value={d}>{d.substring(0,3)}</SelectItem>)}</SelectContent>
-      </Select>
-      <Select value={turno} onValueChange={setTurno}>
-        <SelectTrigger className="h-8 text-xs w-24"><SelectValue placeholder="Turno" /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="9-11">9-11</SelectItem><SelectItem value="2-4">2-4</SelectItem><SelectItem value="4-6">4-6</SelectItem>
-        </SelectContent>
-      </Select>
-      <Input placeholder="Otro..." value={turno} onChange={e=>setTurno(e.target.value)} className="h-8 text-xs w-20" />
-      <Button size="sm" variant="outline" className="h-8" onClick={()=>{if(dia&&turno){onAdd({dia,turno});setTurno("")}}} disabled={!dia||!turno}><Plus className="w-3.5 h-3.5" /></Button>
-    </div>
-  );
-}
 

@@ -1,4 +1,5 @@
 "use client";
+import { Suspense } from "react";
 import { LoginForm } from "@/components/global/LoginForm";
 import { GeometricBackground } from "@/components/global/GeometricBackground";
 import { Logo } from "@/components/global/LogoUac";
@@ -56,7 +57,10 @@ export default function App() {
 
         {/* Login Form Container */}
         <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
-          <LoginForm />
+          {/* LoginForm lee ?error= con useSearchParams, que exige un límite de Suspense. */}
+          <Suspense fallback={<div className="h-[520px] rounded-2xl bg-white/60 animate-pulse" />}>
+            <LoginForm />
+          </Suspense>
         </div>
       </div>
     </div>
