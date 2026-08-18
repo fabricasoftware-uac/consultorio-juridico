@@ -36,7 +36,11 @@ export default function RecuperarContrasenaPage() {
 
     setIsLoading(true);
     try {
-      const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL}/cambiar-contrasena`;
+      // Si NEXT_PUBLIC_SITE_URL no estaba definida al construir, quedaría la
+      // cadena literal "undefined/cambiar-contrasena". El origen real del
+      // navegador es un fallback más confiable.
+      const base = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+      const redirectTo = `${base}/cambiar-contrasena`;
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo,
       });
