@@ -10,7 +10,9 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, User, MapPin, Briefcase, FileText, Scale, CheckCircle } from "lucide-react";
-import { Caso } from "app/types/database";
+import { Asesor, Caso } from "app/types/database";
+import { SearchableSelector } from "@/components/SearchableSelector";
+import { formatArea, nombreMostrado } from "@/lib/utils";
 
 function toggleMulti(list: string, item: string): string {
   const arr = list?.split(",").filter(Boolean) ?? [];
@@ -22,6 +24,14 @@ export interface StepProps {
   handleInputChange: (field: any, value: any) => void;
   caso?: Caso;
   currentUserId?: string | null;
+  /** Solo el paso 1: asesores disponibles para elegir. */
+  asesores?: Asesor[];
+  /** Solo el paso 1: guarda la selección de asesor vía RPC. */
+  onSeleccionarAsesor?: (idAsesor: string) => void;
+  /** Solo el paso 1: true mientras se guarda la selección. */
+  guardandoAsesor?: boolean;
+  /** Solo el paso 1: la entrevista ya fue enviada, el asesor queda fijo. */
+  asesorBloqueado?: boolean;
 }
 
 const CARD = "border-slate-200 shadow-sm rounded-2xl";
@@ -33,8 +43,88 @@ const SECTION = "text-[11px] font-bold text-slate-400 uppercase tracking-wider";
 
 // ─── STEP 1 ──────────────────────────────────────────────────────────────────
 
-export function Step1InfoEntrevista({ caso, currentUserId }: StepProps) {
+export function Step1InfoEntrevista({
+  caso,
+  currentUserId,
+  asesores = [],
+  onSeleccionarAsesor,
+  guardandoAsesor,
+  asesorBloqueado,
+}: StepProps) {
+  const asesorActual = caso?.asesores_casos?.find((ac) => !ac.fecha_fin_asignacion)
+    ?.asesor;
+
   return (
+    <>
+    <Card className={`${CARD} mb-4 border-blue-200 bg-blue-50/40`}>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <div className="p-2 bg-blue-100 rounded-xl"><Scale className="h-5 w-5 text-blue-600" /></div>
+          ¿Qué asesor te brindó la retroalimentación?
+        </CardTitle>
+        <CardDescription>
+          Selecciona el asesor con quien revisaste este caso antes de la
+          entrevista. Quedará asignado como el asesor responsable, así que
+          asegúrate de elegir el correcto.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {asesorBloqueado ? (
+          <div className="space-y-1.5">
+            <Label className={LABEL}>Asesor asignado</Label>
+            <Input
+              className={INP_DISABLED}
+              value={asesorActual?.perfil?.nombre_completo ?? "Sin asesor"}
+              disabled
+            />
+            <p className="text-[11px] text-slate-500">
+              La entrevista ya fue enviada. Si necesitas cambiarlo, pídeselo al
+              profesional de apoyo.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            <Label className={LABEL}>
+              Asesor <span className="text-red-500">*</span>
+            </Label>
+            <SearchableSelector
+              items={asesores}
+              value={asesorActual?.id_perfil ?? ""}
+              onValueChange={(v) => onSeleccionarAsesor?.(v)}
+              placeholder="Selecciona el asesor"
+              searchPlaceholder="Buscar por nombre o cédula..."
+              getItemValue={(a) => a.id_perfil}
+              getItemLabel={(a) => nombreMostrado(a.perfil?.nombre_completo)}
+              getItemSearchValue={(a) => a.perfil?.cedula || ""}
+              renderItem={(a) => (
+                <div className="flex flex-col py-1">
+                  <span className="font-medium text-sm text-slate-800">
+                    {nombreMostrado(a.perfil?.nombre_completo)}
+                  </span>
+                  <span className="text-[11px] text-slate-500">
+                    {formatArea(a.area) || "Área no asignada"}
+                  </span>
+                </div>
+              )}
+            />
+            {guardandoAsesor && (
+              <p className="text-[11px] text-blue-600">Guardando…</p>
+            )}
+            {!guardandoAsesor && !asesorActual && (
+              <p className="text-[11px] text-amber-600 font-medium">
+                Debes seleccionar un asesor para continuar.
+              </p>
+            )}
+            {!guardandoAsesor && asesorActual && (
+              <p className="text-[11px] text-green-600 font-medium">
+                Asesor registrado y asignado al caso.
+              </p>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+
     <Card className={CARD}>
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 text-lg">
@@ -58,6 +148,7 @@ export function Step1InfoEntrevista({ caso, currentUserId }: StepProps) {
         </div>
       </CardContent>
     </Card>
+    </>
   );
 }
 

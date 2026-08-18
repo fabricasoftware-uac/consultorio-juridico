@@ -35,8 +35,10 @@ import {
   Download,
 } from "lucide-react";
 import { ProgressIndicator } from "@radix-ui/react-progress";
-import { Caso, Demandado } from "app/types/database";
+import { Asesor, Caso, Demandado } from "app/types/database";
 import { getCasoById } from "../../../../../../../supabase/queries/getCasoById";
+import { getAsesores } from "../../../../../../../supabase/queries/getAsesores";
+import { asignarAsesorRetroalimentacion } from "../../../../../../../supabase/queries/asignarAsesorRetroalimentacion";
 import { getDemandadoByCasoId } from "../../../../../../../supabase/queries/getDemandadoByCasoId";
 import { getContratoByUsuarioId } from "../../../../../../../supabase/queries/getContratoByUsuarioId";
 import { guardarEntrevista } from "../../../../../../../supabase/queries/guardarEntrevista";
@@ -76,7 +78,31 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
   const [demandado, setDemandado] = useState<Demandado | null>();
   const [contrato, setContrato] = useState<import("app/types/database").ContratoLaboral | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [asesores, setAsesores] = useState<Asesor[]>([]);
+  const [guardandoAsesor, setGuardandoAsesor] = useState(false);
   const router = useRouter();
+
+  // El asesor que dio la retroalimentación es el asesor asignado al caso.
+  const asesorAsignado = caso?.asesores_casos?.find(
+    (ac) => !ac.fecha_fin_asignacion,
+  )?.asesor;
+
+  // Queda fijo al enviar la entrevista; el RPC valida lo mismo en el servidor.
+  const asesorBloqueado = !!caso && !["en_proceso", "en_correccion"].includes(caso.estado ?? "");
+
+  const seleccionarAsesor = async (idAsesor: string) => {
+    if (!idAsesor || guardandoAsesor) return;
+    setGuardandoAsesor(true);
+    try {
+      await asignarAsesorRetroalimentacion(Number(idCaso), idAsesor);
+      await traerDatos();
+      toast.success("Asesor registrado");
+    } catch (err: any) {
+      toast.error(err?.message || "No se pudo registrar el asesor");
+    } finally {
+      setGuardandoAsesor(false);
+    }
+  };
 
   async function traerDatos() {
     try {
@@ -117,6 +143,13 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
 
   useEffect(() => {
     traerDatos();
+  }, []);
+
+  // El estudiante tiene el permiso `asesores.read`, así que puede listarlos.
+  useEffect(() => {
+    getAsesores(true)
+      .then(setAsesores)
+      .catch(() => toast.error("No se pudieron cargar los asesores"));
   }, []);
 
   useEffect(() => {
@@ -327,7 +360,9 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
   const validateStep = (step: number): boolean => {
     switch (step) {
       case 1:
-        return true; // No required fields
+        // Sin asesor no se puede avanzar: es el registro de quién dio la
+        // retroalimentación y evita que un caso llegue sin asesor responsable.
+        return !!asesorAsignado;
       case 2:
         return !!(
           formData.direccion &&
@@ -490,6 +525,10 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
             currentUserId={currentUserId}
             formData={formData}
             handleInputChange={handleInputChange}
+            asesores={asesores}
+            onSeleccionarAsesor={seleccionarAsesor}
+            guardandoAsesor={guardandoAsesor}
+            asesorBloqueado={asesorBloqueado}
           />
         );
       case 2:
