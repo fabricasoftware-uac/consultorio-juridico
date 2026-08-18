@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/supabase-server";
 import { supabaseAdmin } from "@/lib/supabase/supabase-admin";
 import { esCorreoInstitucional } from "@/lib/roles";
-import type { JornadaEnum } from "@/app/types/database";
+import type { JornadaEnum } from "../types/database";
 
 type ActionResult =
   | { success: true; message: string }

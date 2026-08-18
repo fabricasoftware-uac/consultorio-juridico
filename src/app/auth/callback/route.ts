@@ -61,11 +61,51 @@ export async function GET(request: NextRequest) {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  const rol = filaRol?.role as string | undefined;
+  let rol = filaRol?.role as string | undefined;
+
+  // Auto-reparación: una cuenta de Google institucional sin rol es siempre un
+  // estudiante. Pasa con usuarios creados antes de que existiera el trigger
+  // (que solo dispara en el INSERT, así que reingresar no los arregla) y
+  // cubre cualquier diferencia de versión de GoTrue.
+  if (!rol && user.app_metadata?.provider === "google") {
+    const { error } = await supabaseAdmin
+      .from("perfiles_roles")
+      .insert({ user_id: user.id, role: "estudiante" });
+
+    if (error) {
+      console.error("No se pudo asignar el rol de estudiante:", error);
+    } else {
+      rol = "estudiante";
+      // El token se emitió sin el claim; hay que renovarlo.
+      await supabase.auth.refreshSession();
+    }
+  }
 
   if (!rol) {
     await supabase.auth.signOut();
     return irA("/?error=sin_rol");
+  }
+
+  // El mismo caso deja el perfil sin nombre, porque el trigger viejo solo leía
+  // la clave 'nombre_completo' que Google no envía.
+  const nombreGoogle =
+    (user.user_metadata?.nombre_completo as string | undefined) ??
+    (user.user_metadata?.full_name as string | undefined) ??
+    (user.user_metadata?.name as string | undefined);
+
+  if (nombreGoogle) {
+    const { data: perfil } = await supabaseAdmin
+      .from("perfiles")
+      .select("nombre_completo")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (perfil && !perfil.nombre_completo) {
+      await supabaseAdmin
+        .from("perfiles")
+        .update({ nombre_completo: nombreGoogle })
+        .eq("id", user.id);
+    }
   }
 
   // Defensivo: si el claim no alcanzó a incluir el rol, se fuerza un token nuevo
