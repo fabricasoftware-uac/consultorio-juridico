@@ -1,21 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-
-// ─── Route Permission Map ─────────────────────────────────────────────
-const ROLE_ROUTES: Record<string, string[]> = {
-  "/admin": ["admin"],
-  "/asesor": ["asesor"],
-  "/estudiante": ["estudiante"],
-  "/pro-apoyo": ["pro_apoyo"],
-};
-
-// ─── Default home per role ─────────────────────────────────────────────
-const ROLE_HOME: Record<string, string> = {
-  admin: "/admin/inicio",
-  asesor: "/asesor/inicio",
-  estudiante: "/estudiante/inicio",
-  pro_apoyo: "/pro-apoyo/inicio",
-};
+import { ROLE_HOME, ROLE_ROUTES } from "@/lib/roles";
 
 // ─── Decode JWT (solo para leer el claim de rol) ──────────────────────
 function decodeJwtPayload(token: string): Record<string, any> {

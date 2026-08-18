@@ -1,0 +1,1 @@
+{"nodes": [{"id": "$graphify-root$_supabase_migrations_20251025225033_permite_auth_hook_manejar_tablas_con_permisos_sql", "label": "20251025225033_permite_auth_hook_manejar_tablas_con_permisos.sql", "file_type": "code", "source_file": "supabase/migrations/20251025225033_permite_auth_hook_manejar_tablas_con_permisos.sql", "source_location": null}], "edges": []}
