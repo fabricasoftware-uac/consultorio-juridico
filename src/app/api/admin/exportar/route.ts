@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
             area: c.area,
             estado: c.estado,
             clasificacion: c.clasificacion,
-            tipo_proceso: c.tipo_proceso,
+            pretension: c.tipo_proceso,
             fecha_creacion: c.fecha_creacion,
             fecha_cierre: c.fecha_cierre,
             cliente: c.usuarios?.nombre_completo,

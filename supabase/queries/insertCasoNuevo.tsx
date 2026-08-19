@@ -15,7 +15,10 @@ export async function insertCasoNuevo(
       fecha_creacion: caso.fecha_creacion,
       estado: caso.estado,
       observaciones: caso.observaciones,
-      tipo_proceso: caso.tipo_proceso || "No creado",
+      // La pretensión la define el asesor al clasificar el caso; al crearlo
+      // todavía no se conoce. Antes se guardaba el literal "No creado", que
+      // ensuciaba los reportes y parecía un dato real.
+      tipo_proceso: caso.tipo_proceso || null,
       ultima_modificacion: new Date().toISOString(),
       fecha_vencimiento_estudiante: sumarDiasHabiles(new Date(), 3).toISOString(),
       periodo: (() => {

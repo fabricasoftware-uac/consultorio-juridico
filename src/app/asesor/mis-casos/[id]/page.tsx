@@ -4,6 +4,8 @@ export const dynamic = "force-dynamic";
 import React, { useEffect, useState, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Navbar } from "app/asesor/components/NavBarAsesor";
@@ -92,6 +94,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       }
 
       setCaso(casoFetch);
+      // Precarga la pretensión existente para no perderla al aprobar.
+      setPretension((prev) => prev || casoFetch.tipo_proceso || "");
 
       const lastEstudiante =
         casoFetch.estudiantes_casos?.find(e => !e.fecha_fin_asignacion)
@@ -138,16 +142,21 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   // Clasificación Rápida de Casos
   const [isSavingClasificacion, setIsSavingClasificacion] = useState(false);
   const [isSolicitandoAjustes, setIsSolicitandoAjustes] = useState(false);
+  const [pretension, setPretension] = useState("");
 
   const handleClasificarCaso = async (clasificacion: string) => {
     try {
       setIsSavingClasificacion(true);
+      const pretensionLimpia = pretension.trim();
       const { error: errorCaso } = await supabase
         .from("casos")
         .update({
           clasificacion: clasificacion,
           estado: "activo",
           fecha_vencimiento_asesor: null,
+          // Solo se escribe si el asesor puso algo: un campo vacío no debe
+          // borrar una pretensión ya registrada.
+          ...(pretensionLimpia ? { tipo_proceso: pretensionLimpia } : {}),
         })
         .eq("id_caso", id_caso);
 
@@ -497,7 +506,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             {/* Overview Tab */}
             <TabsContent value="overview" className="space-y-6">
               {caso.estado === "pendiente_aprobacion" && (
-                <Card className="p-6 bg-amber-50 border-amber-200">
+                <Card className="p-6 bg-amber-50 border-amber-200 space-y-5">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div>
                       <h3 className="text-lg font-bold text-amber-900">
@@ -535,6 +544,24 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         Aprobar y continuar
                       </Button>
                     </div>
+                  </div>
+
+                  {/* La pretensión se define aquí: es el momento en que el
+                      asesor tiene el criterio jurídico para nombrarla. */}
+                  <div className="border-t border-amber-200 pt-4 space-y-1.5">
+                    <Label className="text-sm font-bold text-amber-900">
+                      Pretensión o motivo del caso
+                    </Label>
+                    <p className="text-xs text-amber-700">
+                      Qué pretende el solicitante. Se guarda al aprobar.
+                    </p>
+                    <Input
+                      value={pretension}
+                      onChange={(e) => setPretension(e.target.value)}
+                      placeholder="Ej: cuota alimentaria, despido injustificado..."
+                      disabled={isSavingClasificacion}
+                      className="bg-white border-amber-300 h-10 max-w-md"
+                    />
                   </div>
                 </Card>
               )}

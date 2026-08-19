@@ -132,10 +132,17 @@ export const CaseInfoTab = ({
 
           <div className="bg-amber-50/30 rounded-xl p-4 border border-amber-100/50">
             <InfoField
-              label="Tipo de proceso"
-              value={caseData?.tipo_proceso || "No especificado"}
+              label="Pretensión o motivo"
+              value={
+                caseData?.tipo_proceso ||
+                "Lo define el asesor al clasificar el caso"
+              }
               icon={ClipboardList}
-              valueClassName="text-base font-semibold text-slate-800"
+              valueClassName={
+                caseData?.tipo_proceso
+                  ? "text-base font-semibold text-slate-800"
+                  : "text-sm italic text-slate-400"
+              }
             />
           </div>
         </div>
@@ -191,14 +198,17 @@ export const CaseInfoTab = ({
             <div className="space-y-2">
               <Label className="text-sm font-bold text-slate-700 flex items-center gap-2">
                 <ClipboardList className="w-4 h-4 text-amber-500" />
-                Tipo de proceso
+                Pretensión o motivo
               </Label>
               <Input
                 value={editedData?.tipo_proceso || ""}
                 onChange={(e) => onChange("tipo_proceso", e.target.value)}
-                placeholder="Ej: Ordinario, Ejecutivo..."
+                placeholder="Ej: cuota alimentaria, despido injustificado..."
                 className="border-slate-200 focus:ring-blue-500/20 focus:border-blue-500 rounded-lg h-11"
               />
+              <p className="text-[11px] text-slate-500">
+                Qué pretende el solicitante. Complétalo al clasificar el caso.
+              </p>
             </div>
           </div>
 

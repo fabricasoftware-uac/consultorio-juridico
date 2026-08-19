@@ -360,10 +360,16 @@ export default function Asesor() {
                     </div>
                     <div className="space-y-1 overflow-hidden">
                       <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                        Tipo
+                        Pretensión
                       </span>
-                      <p className="text-sm font-semibold text-slate-800 truncate">
-                        {caso.tipo_proceso || "Sin especificar"}
+                      <p
+                        className={
+                          caso.tipo_proceso
+                            ? "text-sm font-semibold text-slate-800 truncate"
+                            : "text-sm italic text-slate-400 truncate"
+                        }
+                      >
+                        {caso.tipo_proceso || "Por definir"}
                       </p>
                     </div>
                   </div>
