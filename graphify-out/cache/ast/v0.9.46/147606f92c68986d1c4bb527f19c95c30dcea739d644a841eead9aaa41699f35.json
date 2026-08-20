@@ -1,0 +1,1 @@
+{"nodes": [{"id": "$graphify-root$_supabase_migrations_20260820000000_restaura_estado_activo_sql", "label": "20260820000000_restaura_estado_activo.sql", "file_type": "code", "source_file": "supabase/migrations/20260820000000_restaura_estado_activo.sql", "source_location": null}], "edges": []}
