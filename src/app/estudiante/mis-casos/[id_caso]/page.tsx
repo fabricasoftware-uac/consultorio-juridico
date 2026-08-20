@@ -32,9 +32,11 @@ import {
   FileText, Send,
 } from "lucide-react";
 import { sumarDiasHabiles } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 export default function Page({ params }: { params: Promise<{ id_caso: string }> }) {
   const { id_caso } = React.use(params);
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
   const [caso, setCaso] = useState<Caso>();
   const [demandado, setDemandado] = useState<Demandado | null>(null);
@@ -120,6 +122,20 @@ export default function Page({ params }: { params: Promise<{ id_caso: string }> 
                 {getStatusBadge(caso.estado)}
                 {caso.estado !== "en_proceso" && caso.estado !== "en_correccion" && (
                   <BotonesEntrevista idCaso={id_caso} caso={caso} demandado={demandado} />
+                )}
+                {/* Antes solo existía en la lista de casos: para llenar la
+                    entrevista había que volver atrás. */}
+                {(caso.estado === "en_proceso" || caso.estado === "en_correccion") && (
+                  <Button
+                    onClick={() => router.push(`/estudiante/mis-casos/${id_caso}/entrevista`)}
+                    size="sm"
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    <ClipboardList className="w-4 h-4 mr-1" />
+                    {caso.estado === "en_correccion"
+                      ? "Continuar entrevista"
+                      : "Ir a entrevista"}
+                  </Button>
                 )}
                 {caso.estado === "en_correccion" && (
                   <Button onClick={handleReenviar} disabled={enviando} size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { rutaDetalleCaso } from "@/lib/roles";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -143,8 +144,16 @@ export function PaginaNotificaciones({ role, backHref }: Props) {
                       ) : (
                         <span className="text-[11px] text-green-600 font-medium">Leída</span>
                       )}
-                      {n.id_caso && (
-                        <Link href={`/${role}/mis-casos/${n.id_caso}`} className="text-[11px] text-blue-600 hover:underline whitespace-nowrap">
+                      {/* La ruta NO se puede derivar del nombre del rol:
+                          pro_apoyo usa /pro-apoyo/gestionar-caso y admin usa
+                          /admin/todos-los-casos. Antes se armaba como
+                          `/${role}/mis-casos/...`, que daba 404 en esos dos. */}
+                      {rutaDetalleCaso(role, n.id_caso) && (
+                        <Link
+                          href={rutaDetalleCaso(role, n.id_caso)!}
+                          onClick={() => { if (!n.leida) marcarLeida(n.id); }}
+                          className="text-[11px] text-blue-600 hover:underline whitespace-nowrap"
+                        >
                           Caso #{n.id_caso} <ChevronRight className="w-3 h-3 inline" />
                         </Link>
                       )}

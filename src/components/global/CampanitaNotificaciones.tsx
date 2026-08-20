@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { rutaDetalleCaso } from "@/lib/roles";
 import { Bell, CheckCheck, MessageSquare, Send, CheckCircle2, UserCheck, AlertTriangle, FileText, Volume2, VolumeX, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -29,25 +31,63 @@ function tiempoRelativo(iso: string) {
   return new Date(iso).toLocaleDateString("es-CO", { day: "numeric", month: "short" });
 }
 
-function NotificacionItem({ n, onLeer }: { n: Notificacion; onLeer: (id: number) => void }) {
+function NotificacionItem({
+  n,
+  onLeer,
+  onAbrir,
+}: {
+  n: Notificacion;
+  onLeer: (id: number) => void;
+  onAbrir: (n: Notificacion) => void;
+}) {
   const config = ICONOS[n.tipo] ?? { icon: FileText, color: "text-slate-600", bg: "bg-slate-100" };
   const Icon = config.icon;
+  // Sin caso asociado no hay a dónde ir (ej. avisos generales).
+  const navegable = n.id_caso != null;
 
   return (
-    <div className={`flex gap-3 p-3 rounded-lg transition-colors ${!n.leida ? "bg-blue-50/50" : "hover:bg-slate-50"}`}>
+    <div
+      role={navegable ? "button" : undefined}
+      tabIndex={navegable ? 0 : undefined}
+      onClick={navegable ? () => onAbrir(n) : undefined}
+      onKeyDown={
+        navegable
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onAbrir(n);
+              }
+            }
+          : undefined
+      }
+      className={`flex gap-3 p-3 rounded-lg transition-colors ${
+        !n.leida ? "bg-blue-50/50" : "hover:bg-slate-50"
+      } ${navegable ? "cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400" : ""}`}
+    >
       <div className={`p-1.5 rounded-full ${config.bg} mt-0.5 shrink-0`}>
         <Icon className={`w-3.5 h-3.5 ${config.color}`} />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs font-bold text-slate-800">{n.titulo}</p>
         <p className="text-[11px] text-slate-500 truncate">{n.mensaje}</p>
-        <p className="text-[10px] text-slate-400 mt-0.5">{tiempoRelativo(n.created_at)}</p>
+        <div className="flex items-center gap-1.5 mt-0.5">
+          <p className="text-[10px] text-slate-400">{tiempoRelativo(n.created_at)}</p>
+          {navegable && (
+            <span className="text-[10px] text-blue-500 font-medium">
+              · Caso #{n.id_caso}
+            </span>
+          )}
+        </div>
       </div>
       {!n.leida && (
         <button
-          onClick={() => onLeer(n.id)}
-          className="shrink-0 p-1 rounded hover:bg-blue-100 text-blue-500 cursor-pointer"
-          title="Marcar como leída"
+          // stopPropagation: marcar como leída no debe además navegar.
+          onClick={(e) => {
+            e.stopPropagation();
+            onLeer(n.id);
+          }}
+          className="shrink-0 p-1 rounded hover:bg-blue-100 text-blue-500 cursor-pointer self-start"
+          title="Marcar como leída sin abrir"
         >
           <CheckCheck className="w-3.5 h-3.5" />
         </button>
@@ -58,6 +98,7 @@ function NotificacionItem({ n, onLeer }: { n: Notificacion; onLeer: (id: number)
 
 export function CampanitaNotificaciones({ role }: { role?: string }) {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
   const { noLeidas, notificaciones, loading, muted, toggleMute, cargarLista, marcarLeida, marcarTodasLeidas } = useNotificaciones();
 
@@ -72,6 +113,14 @@ export function CampanitaNotificaciones({ role }: { role?: string }) {
   const handleToggle = () => {
     if (!open) cargarLista();
     setOpen(!open);
+  };
+
+  const abrirNotificacion = (n: Notificacion) => {
+    const ruta = rutaDetalleCaso(role, n.id_caso);
+    if (!ruta) return;
+    if (!n.leida) marcarLeida(n.id);
+    setOpen(false);
+    router.push(ruta);
   };
 
   return (
@@ -128,7 +177,7 @@ export function CampanitaNotificaciones({ role }: { role?: string }) {
             ) : (
               <>
                 {notificaciones.slice(0, 10).map((n) => (
-                  <NotificacionItem key={n.id} n={n} onLeer={marcarLeida} />
+                  <NotificacionItem key={n.id} n={n} onLeer={marcarLeida} onAbrir={abrirNotificacion} />
                 ))}
                 {notificaciones.length > 10 && (
                   <p className="text-center text-[11px] text-slate-400 py-1">
