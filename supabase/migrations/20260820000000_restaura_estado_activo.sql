@@ -1,0 +1,23 @@
+-- ============================================================================
+-- Restaura el valor 'activo' en estado_enum — Agosto 2026
+--
+-- La migración 20260427000000 lo agregó, pero 20260619231334_remote_schema
+-- (autogenerada con `supabase db diff`) RECREA el tipo desde cero:
+--
+--   alter type estado_enum rename to estado_enum__old_version_to_be_dropped;
+--   create type estado_enum as enum ('aprobado', ..., 'en_correccion');
+--
+-- Esa lista no incluye 'activo', así que al correr después revirtió en silencio
+-- la migración anterior. En Supabase Cloud el valor sí quedó; solo se rompió en
+-- una base reconstruida desde cero con estas migraciones.
+--
+-- Efecto visible: el asesor no podía aprobar ningún caso. El UPDATE moría con
+-- "invalid input value for enum estado_enum: 'activo'", que en la interfaz solo
+-- se veía como un error genérico al guardar.
+--
+-- El UPDATE de datos va en una migración aparte (20260820000001) porque
+-- Postgres no permite USAR un valor de enum recién agregado dentro de la misma
+-- transacción que lo agrega, y la CLI envuelve cada archivo en una.
+-- ============================================================================
+
+ALTER TYPE public.estado_enum ADD VALUE IF NOT EXISTS 'activo';
