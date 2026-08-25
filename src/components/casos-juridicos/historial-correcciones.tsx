@@ -10,6 +10,34 @@ interface HistorialCorreccionesProps {
   idCaso: string;
 }
 
+type Cambio = { anterior: string | null; nuevo: string | null };
+
+/**
+ * El metadata de auditoría ha tenido tres formas y en la base conviven las tres:
+ *   1. antigua:    { campo: { anterior, nuevo } }
+ *   2. intermedia: { es_correccion, cambios }            -- cambios puede ser null
+ *   3. actual:     { es_correccion, cambios, documento_verificado }
+ *
+ * Detectar la forma por `es_correccion` y no por `metadata.cambios` es lo que
+ * importa: con `metadata?.cambios ?? metadata`, un `cambios: null` (envío sin
+ * cambios detectados) caía al metadata completo y se acababa leyendo
+ * `.anterior` sobre null.
+ */
+function extraerCambios(metadata: any): Record<string, Cambio> {
+  if (!metadata || typeof metadata !== "object") return {};
+
+  const fuente = "es_correccion" in metadata ? metadata.cambios : metadata;
+  if (!fuente || typeof fuente !== "object") return {};
+
+  // Solo las entradas con forma {anterior, nuevo}: así una bandera suelta o un
+  // campo nuevo en el metadata no vuelve a romper el render.
+  return Object.fromEntries(
+    Object.entries(fuente).filter(
+      ([, v]) => !!v && typeof v === "object" && ("anterior" in v || "nuevo" in v),
+    ),
+  ) as Record<string, Cambio>;
+}
+
 export function HistorialCorrecciones({ idCaso }: HistorialCorreccionesProps) {
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -96,10 +124,8 @@ export function HistorialCorrecciones({ idCaso }: HistorialCorreccionesProps) {
       {history.map((record) => {
         const isSolicitud = record.accion === "solicitud_correccion_asesor" || record.accion === "correccion";
         const autor = record.perfiles?.nombre_completo || "Usuario";
-        // Formato actual: metadata = { es_correccion, cambios: {campo: {anterior,nuevo}} }.
-        // Formato antiguo: metadata era directamente el mapa de campos.
-        const cambios = record.metadata?.cambios ?? record.metadata;
-        const tieneCambios = !!cambios && Object.keys(cambios).length > 0;
+        const cambios = extraerCambios(record.metadata);
+        const tieneCambios = Object.keys(cambios).length > 0;
 
         return (
           <Card key={record.id} className="overflow-hidden border-slate-200">
