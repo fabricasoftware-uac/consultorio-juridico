@@ -1,1 +1,0 @@
-{"nodes": [{"id": "$graphify-root$_supabase_migrations_20260818000000_grants_authenticated_tablas_nuevas_sql", "label": "20260818000000_grants_authenticated_tablas_nuevas.sql", "file_type": "code", "source_file": "supabase/migrations/20260818000000_grants_authenticated_tablas_nuevas.sql", "source_location": null}], "edges": []}

@@ -355,9 +355,13 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
     resumen_hechos: "",
     observaciones_estudiante: "",
 
-    // Signatures
+    // Verificación y autorización.
+    // Reemplaza a `cedulaSolicitante`, que pedía re-escribir un número que ya
+    // estaba en usuarios.cedula, no se guardaba y no se comparaba con nada.
     firmasSolicitante: false,
-    cedulaSolicitante: "",
+    documentoVerificado: false,
+    // Solo se llena si el estudiante detecta que la cédula registrada está mal.
+    cedulaCorregida: "",
   };
 
   type FormData = typeof initialFormData;
@@ -393,6 +397,7 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
   const formDataRef = useRef(formData);
   useEffect(() => { formDataRef.current = formData; }, [formData]);
 
+  const isSubmittingRef = useRef(false);
   const ultimoGuardadoRef = useRef<string>("");
   const editable = !!caso && ["en_proceso", "en_correccion"].includes(caso.estado ?? "");
 
@@ -400,6 +405,7 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
     if (!editable) return;
 
     const subir = async () => {
+      if (isSubmittingRef.current) return;
       const actual = JSON.stringify(formDataRef.current);
       if (actual === ultimoGuardadoRef.current) return;
       try {
@@ -409,21 +415,26 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
         );
         ultimoGuardadoRef.current = actual;
         setBorradorGuardadoEn(ts);
-      } catch (e) {
-        // Silencioso: localStorage sigue siendo la red de seguridad inmediata.
-        console.error("No se pudo guardar el borrador en el servidor:", e);
+      } catch (e: any) {
+        // Silencioso si la entrevista ya fue enviada o no es editable
+        if (e?.message?.includes("no es editable")) {
+          return;
+        }
+        console.warn("No se pudo guardar el borrador en el servidor:", e?.message || e);
       }
     };
 
     const id = setInterval(subir, 20_000);
     // Último intento al cerrar la pestaña o cambiar de app.
-    const alOcultar = () => { if (document.visibilityState === "hidden") void subir(); };
+    const alOcultar = () => { if (document.visibilityState === "hidden" && !isSubmittingRef.current) void subir(); };
     document.addEventListener("visibilitychange", alOcultar);
 
     return () => {
       clearInterval(id);
       document.removeEventListener("visibilitychange", alOcultar);
-      void subir();
+      if (!isSubmittingRef.current) {
+        void subir();
+      }
     };
   }, [editable, idCaso]);
 
@@ -431,7 +442,7 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
     "edad",
     "documentoDemandado",
     "celularDemandado",
-    "cedulaSolicitante",
+    "cedulaCorregida",
     "estrato",
     "valor_otros_ingresos",
     "salarioInicial",
@@ -478,7 +489,7 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
       case 7:
         return !!formData.area; // Area is required
       case 8:
-        return !!(formData.firmasSolicitante && formData.cedulaSolicitante);
+        return !!(formData.firmasSolicitante && formData.documentoVerificado);
       default:
         return true;
     }
@@ -500,6 +511,7 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
 
     try {
       setLoading(true);
+      isSubmittingRef.current = true;
       const limpio = cleanData(formData);
       const userId = currentUserId;
 
@@ -512,10 +524,14 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
         area: limpio.area,
         resumen_hechos: limpio.resumen_hechos,
         observaciones_estudiante: limpio.observaciones_estudiante,
+        documento_verificado: formData.documentoVerificado,
       };
 
       // 2. Usuario payload
       const usuarioPayload = {
+        // Solo viaja si el estudiante corrigió el número contra el documento
+        // físico; vacía, el RPC conserva la cédula ya registrada.
+        cedula: limpio.cedulaCorregida,
         correo: limpio.correo_contacto,
         edad: limpio.edad,
         contacto_familiar: limpio.contacto_familiar,
@@ -581,7 +597,19 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
           }
         : null;
 
-      // 5. Llamada atomica RPC: todo o nada
+      // 5. Detectar cambios si estamos en correccion
+      const esCorreccion = caso?.estado === "en_correccion";
+      let cambios = {};
+      if (esCorreccion && caso) {
+        if (caso.resumen_hechos !== casoPayload.resumen_hechos) {
+          cambios = { ...cambios, resumen_hechos: { anterior: caso.resumen_hechos, nuevo: casoPayload.resumen_hechos } };
+        }
+        if (caso.observaciones_estudiante !== casoPayload.observaciones_estudiante) {
+          cambios = { ...cambios, observaciones_estudiante: { anterior: caso.observaciones_estudiante, nuevo: casoPayload.observaciones_estudiante } };
+        }
+      }
+
+      // 6. Llamada atomica RPC: todo o nada
       await guardarEntrevista({
         idCaso: Number(idCaso),
         usuarioId: userId,
@@ -589,6 +617,8 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
         usuario: usuarioPayload,
         demandado: demandadoPayload,
         contrato: contratoPayload,
+        cambios: Object.keys(cambios).length > 0 ? cambios : null,
+        esCorreccion: esCorreccion,
       });
 
       if (typeof window !== "undefined") {
@@ -601,6 +631,7 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
       router.push(`/estudiante/mis-casos`);
       clearForm();
     } catch (err: any) {
+      isSubmittingRef.current = false;
       console.error("❌ Error durante la actualización:", err);
       toast.error(err.message || "Ocurrió un error al guardar la entrevista. Intente de nuevo.");
     } finally {
@@ -677,6 +708,7 @@ export function UserRegistrationForm({ idCaso }: { idCaso: string }) {
           <Step8Firmas
             formData={formData}
             handleInputChange={handleInputChange}
+            caso={caso}
           />
         );
       default:

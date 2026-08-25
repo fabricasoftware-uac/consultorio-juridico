@@ -1,1 +1,0 @@
-{"nodes": [{"id": "$graphify-root$_supabase_migrations_20260225031321_permission_to_see_own_data_sql", "label": "20260225031321_permission_to_see_own_data.sql", "file_type": "code", "source_file": "supabase/migrations/20260225031321_permission_to_see_own_data.sql", "source_location": null}], "edges": []}

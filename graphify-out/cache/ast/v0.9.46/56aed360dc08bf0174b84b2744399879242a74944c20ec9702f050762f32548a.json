@@ -1,1 +1,0 @@
-{"nodes": [{"id": "$graphify-root$_supabase_migrations_20260716000000_contratos_permisos_estudiante_sql", "label": "20260716000000_contratos_permisos_estudiante.sql", "file_type": "code", "source_file": "supabase/migrations/20260716000000_contratos_permisos_estudiante.sql", "source_location": null}], "edges": []}

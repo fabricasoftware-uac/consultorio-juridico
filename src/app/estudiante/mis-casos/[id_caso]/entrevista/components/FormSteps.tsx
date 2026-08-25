@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -532,23 +533,81 @@ export function Step7DetallesCaso({ formData, handleInputChange }: StepProps) {
 
 // ─── STEP 8 ──────────────────────────────────────────────────────────────────
 
-export function Step8Firmas({ formData, handleInputChange }: StepProps) {
+export function Step8Firmas({ formData, handleInputChange, caso }: StepProps) {
+  // Antes este paso pedía re-escribir la cédula en un input vacío. Ese dato ya
+  // estaba en usuarios.cedula (lo registra el profesional de apoyo, donde es
+  // obligatorio), no se guardaba en ninguna parte y no se comparaba con nada.
+  // Ahora se muestra lo registrado y el estudiante confirma contra el documento
+  // físico, con opción de corregirlo si venía mal digitado.
+  const [corrigiendo, setCorrigiendo] = useState(false);
+  const registrada = caso?.usuarios?.cedula || "";
+  const cedulaMostrada = formData.cedulaCorregida || registrada;
+
   return (
     <Card className={CARD}>
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 text-lg">
           <div className="p-2 bg-emerald-100 rounded-xl"><CheckCircle className="h-5 w-5 text-emerald-600" /></div>
-          Firmas y Autorización
+          Verificación y Autorización
         </CardTitle>
-        <CardDescription>Confirmación y firma del solicitante</CardDescription>
+        <CardDescription>Coteje el documento físico del solicitante antes de enviar</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-1.5">
-          <Label className={LABEL}>C.C. del Solicitante para Firma *</Label>
-          <Input className={INP} value={formData.cedulaSolicitante || ""} onChange={(e) => handleInputChange("cedulaSolicitante", e.target.value)} placeholder="Número de cédula para confirmación" />
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2">
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+            Documento registrado
+          </p>
+          <p className="text-base font-semibold text-slate-900">
+            {caso?.usuarios?.nombre_completo || "Sin nombre registrado"}
+          </p>
+          <p className="text-sm text-slate-600">
+            {(formData.tipo_documento || "CC")}{" "}
+            <span className="font-mono font-semibold text-slate-900">
+              {cedulaMostrada || "sin registrar"}
+            </span>
+            {formData.cedulaCorregida && (
+              <span className="ml-2 text-xs font-medium text-amber-600">(corregido)</span>
+            )}
+          </p>
+
+          {!corrigiendo ? (
+            <button
+              type="button"
+              onClick={() => setCorrigiendo(true)}
+              className="text-xs font-medium text-blue-600 hover:underline"
+            >
+              El número no coincide con el documento
+            </button>
+          ) : (
+            <div className="space-y-1.5 pt-1">
+              <Label className={LABEL}>Número correcto según el documento físico</Label>
+              <Input
+                className={INP}
+                value={formData.cedulaCorregida || ""}
+                onChange={(e) => handleInputChange("cedulaCorregida", e.target.value)}
+                placeholder={registrada}
+              />
+              <p className="text-xs text-slate-500">
+                Se actualizará en el registro del solicitante al enviar la entrevista.
+              </p>
+            </div>
+          )}
         </div>
+
+        <div className="flex items-start space-x-2">
+          <Checkbox
+            id="documentoVerificado"
+            checked={formData.documentoVerificado}
+            onCheckedChange={(c: boolean) => handleInputChange("documentoVerificado", c)}
+          />
+          <Label htmlFor="documentoVerificado" className="text-sm text-slate-600">
+            Verifiqué el documento de identidad del solicitante y los datos mostrados coinciden *
+          </Label>
+        </div>
+
         <Separator />
-        <div className="flex items-center space-x-2">
+
+        <div className="flex items-start space-x-2">
           <Checkbox id="firmasSolicitante" checked={formData.firmasSolicitante} onCheckedChange={(c: boolean) => handleInputChange("firmasSolicitante", c)} />
           <Label htmlFor="firmasSolicitante" className="text-sm text-slate-600">Confirmo que toda la información proporcionada es veraz y autorizo el procesamiento de estos datos para los fines legales correspondientes *</Label>
         </div>

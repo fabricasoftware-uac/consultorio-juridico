@@ -1,1 +1,0 @@
-{"nodes": [{"id": "$graphify-root$_supabase_migrations_20260406000000_realtime_notificaciones_sql", "label": "20260406000000_realtime_notificaciones.sql", "file_type": "code", "source_file": "supabase/migrations/20260406000000_realtime_notificaciones.sql", "source_location": null}], "edges": []}

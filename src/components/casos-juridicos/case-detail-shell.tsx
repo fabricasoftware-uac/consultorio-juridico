@@ -3,6 +3,9 @@
 import { useState, ReactNode } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import Link from "next/link";
 import { Calendar, AlertTriangle, ChevronLeft } from "lucide-react";
 import { Label } from "@/components/ui/label";
@@ -12,9 +15,38 @@ import { LlamadosList } from "@/components/casos-juridicos/llamados-list";
 import { CasoAuditoria } from "@/components/casos-juridicos/caso-auditoria";
 import type { Caso } from "app/types/database";
 
+/**
+ * Orden y etiquetas canónicos de las pestañas del detalle de caso.
+ *
+ * Las cuatro pantallas de rol habían divergido: ningún par tenía el mismo
+ * conjunto y el orden tampoco coincidía (el estudiante ponía Correcciones en
+ * segundo lugar y el asesor al final). Que el orden y el nombre vivan aquí y no
+ * en cada página hace que volver a divergir requiera tocar este archivo: una
+ * página solo declara QUÉ pestañas muestra, nunca cómo se llaman ni en qué
+ * posición van.
+ */
+export const ORDEN_PESTANAS = [
+  "overview",
+  "client",
+  "defendant",
+  "contract",
+  "team",
+  "corrections",
+] as const;
+
+export type PestanaCaso = (typeof ORDEN_PESTANAS)[number];
+
+export const ETIQUETAS_PESTANAS: Record<PestanaCaso, string> = {
+  overview: "Resumen",
+  client: "Usuario",
+  defendant: "Accionado",
+  contract: "Contrato",
+  team: "Equipo",
+  corrections: "Correcciones",
+};
+
 export interface TabConfig {
-  value: string;
-  label: string;
+  value: PestanaCaso;
   content: ReactNode;
 }
 
@@ -29,6 +61,17 @@ interface CaseDetailShellProps {
   backHref: string;
   backLabel: string;
   statusBadge?: ReactNode;
+  /** Acciones propias del rol junto al título (botones, avisos). */
+  headerActions?: ReactNode;
+  /** Bloque a ancho completo sobre las pestañas (paneles de aprobación, alertas). */
+  banner?: ReactNode;
+  /**
+   * Panel del rol al PRINCIPIO de la barra lateral, antes de "Fechas
+   * importantes". Para lo accionable: los usuarios reportaron tener que bajar
+   * demasiado para llegar a paneles como "Equipo asignado", que estaba de
+   * último. Lo que se usa va arriba; lo informativo, debajo.
+   */
+  sidebarTop?: ReactNode;
 }
 
 export function CaseDetailShell({
@@ -42,8 +85,16 @@ export function CaseDetailShell({
   backHref,
   backLabel,
   statusBadge,
+  headerActions,
+  banner,
+  sidebarTop,
 }: CaseDetailShellProps) {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState<string>("overview");
+
+  // El orden lo impone ORDEN_PESTANAS, no el arreglo que pase la página.
+  const pestanas = [...tabs].sort(
+    (a, b) => ORDEN_PESTANAS.indexOf(a.value) - ORDEN_PESTANAS.indexOf(b.value),
+  );
 
   if (loading) {
     return (
@@ -113,23 +164,48 @@ export function CaseDetailShell({
                   </div>
                 ) : null}
               </div>
+              {headerActions && (
+                <div className="flex flex-wrap items-center gap-2">{headerActions}</div>
+              )}
             </div>
           </div>
+
+          {banner && <div className="mb-6">{banner}</div>}
 
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList className="w-full overflow-x-auto flex-nowrap">
-              {tabs.map((tab) => (
-                <TabsTrigger key={tab.value} value={tab.value}>
-                  {tab.label}
+            {/* Seis pestañas no caben en un móvil. El scroll horizontal esconde
+                las últimas sin avisar y obliga a arrastrar para descubrirlas,
+                así que en pantallas chicas se cambia por un desplegable que
+                muestra siempre en qué sección estás y las lista todas de una.
+                Desde md hay ancho de sobra y vuelven las pestañas. */}
+            <div className="md:hidden mb-4">
+              <Select value={activeTab} onValueChange={setActiveTab}>
+                <SelectTrigger className="w-full bg-white" aria-label="Sección del caso">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {pestanas.map((tab) => (
+                    <SelectItem key={tab.value} value={tab.value}>
+                      {ETIQUETAS_PESTANAS[tab.value]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <TabsList className="hidden md:flex w-full flex-nowrap">
+              {pestanas.map((tab) => (
+                <TabsTrigger key={tab.value} value={tab.value} className="shrink-0">
+                  {ETIQUETAS_PESTANAS[tab.value]}
                 </TabsTrigger>
               ))}
             </TabsList>
 
-            {tabs.map((tab) => (
+            {pestanas.map((tab) => (
               <TabsContent key={tab.value} value={tab.value}>
                 {tab.value === "overview" ? (
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -137,6 +213,11 @@ export function CaseDetailShell({
                       {tab.content}
                     </div>
                     <aside className="space-y-6">
+                      {/* Lo accionable del rol va primero: los usuarios se
+                          quejaron de bajar demasiado para llegar a paneles como
+                          "Equipo asignado", que quedaba de último. */}
+                      {sidebarTop}
+
                       <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">
                         <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center gap-3">
                           <div className="p-2 bg-purple-100 rounded-lg text-purple-600">
@@ -196,7 +277,9 @@ export function CaseDetailShell({
                             Historial del Caso
                           </h3>
                         </div>
-                        <div className="p-6">
+                        {/* Crece sin límite con cada evento del caso y estiraba
+                            la página entera. Se acota y hace scroll propio. */}
+                        <div className="p-6 max-h-80 overflow-y-auto">
                           <CasoAuditoria idCaso={idCaso} />
                         </div>
                       </Card>

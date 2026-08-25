@@ -1,1 +1,0 @@
-{"nodes": [{"id": "$graphify-root$_supabase_migrations_20260303040742_permission_to_see_perfiles_roles_data_sql", "label": "20260303040742_permission_to_see_perfiles_roles_data.sql", "file_type": "code", "source_file": "supabase/migrations/20260303040742_permission_to_see_perfiles_roles_data.sql", "source_location": null}], "edges": []}

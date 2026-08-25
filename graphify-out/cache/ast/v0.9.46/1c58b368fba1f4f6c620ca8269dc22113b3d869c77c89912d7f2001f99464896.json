@@ -1,1 +1,0 @@
-{"nodes": [{"id": "$graphify-root$_supabase_migrations_20260331000000_realtime_auditoria_sql", "label": "20260331000000_realtime_auditoria.sql", "file_type": "code", "source_file": "supabase/migrations/20260331000000_realtime_auditoria.sql", "source_location": null}], "edges": []}

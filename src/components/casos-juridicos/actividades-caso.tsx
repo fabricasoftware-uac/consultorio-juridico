@@ -45,8 +45,8 @@ export function ActividadesCaso({ idCaso }: Props) {
   const enviar = async () => {
     if (!titulo.trim()) return;
     setEnviando(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    await api("/api/actividades", { method: "POST", body: JSON.stringify({ id_caso: Number(idCaso), id_usuario: user?.id, titulo: titulo.trim(), descripcion: desc.trim() }) });
+    // El autor lo deriva el servidor del token; mandarlo desde aqui no aporta.
+    await api("/api/actividades", { method: "POST", body: JSON.stringify({ id_caso: Number(idCaso), titulo: titulo.trim(), descripcion: desc.trim() }) });
     setTitulo(""); setDesc("");
     toast.success("Actividad registrada");
     cargar();
