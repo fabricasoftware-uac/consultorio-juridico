@@ -13,6 +13,7 @@ import {
   updateEstudiante,
 } from "../actions/userActions";
 import { getEstudiantes } from "../../../../supabase/queries/getEstudiantes";
+import { matchesSearch } from "@/lib/search";
 import type { JornadaEnum, TurnoEnum, Estudiante } from "../../types/database";
 import {
   GraduationCap,
@@ -216,12 +217,14 @@ export default function EstudiantesPage() {
   };
 
   const filteredEstudiantes = estudiantes.filter((e) => {
-    const q = searchTerm.trim().toLowerCase();
-    const coincideBusqueda =
-      q === "" ||
-      e.perfil.nombre_completo?.toLowerCase().includes(q) ||
-      e.perfil.cedula?.includes(searchTerm.trim()) ||
-      e.perfil.correo?.toLowerCase().includes(q);
+    const coincideBusqueda = matchesSearch(
+      searchTerm,
+      e.perfil.nombre_completo,
+      e.perfil.cedula,
+      e.perfil.correo,
+      e.jornada,
+      e.semestre?.toString(),
+    );
 
     const coincideJornada =
       filtroJornada === "todas" || e.jornada === filtroJornada;

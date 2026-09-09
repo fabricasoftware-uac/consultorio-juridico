@@ -19,6 +19,7 @@ import { insertAsesoresCasos } from "../../../supabase/queries/insertAsesoresCas
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/supabase-client";
 import { Search, UserPlus, Users } from "lucide-react";
+import { matchesSearch } from "@/lib/search";
 import type { Estudiante, Asesor } from "app/types/database";
 
 interface Props {
@@ -94,8 +95,12 @@ export function AdminReasignarEquipo({ idCaso, type, currentName, onRefresh }: P
   const filtrados = items
     .filter((item) => {
       const perfil = "perfil" in item ? item.perfil : (item as Asesor).perfil;
-      const term = search.toLowerCase();
-      const matchSearch = !term || perfil?.nombre_completo?.toLowerCase().includes(term) || perfil?.cedula?.toLowerCase().includes(term);
+      const matchSearch = matchesSearch(
+        search,
+        perfil?.nombre_completo,
+        perfil?.cedula,
+        perfil?.correo,
+      );
       const matchDia = diaFilter === "todos" || item.dia?.toLowerCase() === diaFilter.toLowerCase();
       const matchJornada = jornadaFilter === "todos" || ("jornada" in item ? item.jornada?.toLowerCase() === jornadaFilter.toLowerCase() : true);
       return matchSearch && matchDia && matchJornada;

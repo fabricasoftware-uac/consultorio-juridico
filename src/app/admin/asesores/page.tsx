@@ -11,6 +11,7 @@ import {
   updateAsesorHorario,
 } from "../actions/userActions";
 import { getAsesores } from "../../../../supabase/queries/getAsesores";
+import { matchesSearch } from "@/lib/search";
 import type { AreaEnum, TurnoEnum, Asesor } from "../../types/database";
 import {
   Users,
@@ -241,13 +242,13 @@ export default function AsesoresPage() {
     });
   };
 
-  const filteredAsesores = asesores.filter(
-    (a) =>
-      a.perfil.nombre_completo
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      a.perfil.cedula?.includes(searchTerm) ||
-      a.perfil.correo?.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredAsesores = asesores.filter((a) =>
+    matchesSearch(
+      searchTerm,
+      a.perfil.nombre_completo,
+      a.perfil.cedula,
+      a.perfil.correo,
+    ),
   );
 
   return (

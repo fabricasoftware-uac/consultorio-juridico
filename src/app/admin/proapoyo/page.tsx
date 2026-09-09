@@ -10,6 +10,7 @@ import {
   updateProApoyo,
 } from "../actions/userActions";
 import { getProApoyo } from "../../../../supabase/queries/getProApoyo";
+import { matchesSearch } from "@/lib/search";
 import {
   UserPlus,
   Loader2,
@@ -156,13 +157,13 @@ export default function ProApoyoPage() {
     });
   };
 
-  const filteredProfesionales = profesionales.filter(
-    (p) =>
-      p.perfil.nombre_completo
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      p.perfil.cedula?.includes(searchTerm) ||
-      p.perfil.correo?.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredProfesionales = profesionales.filter((p) =>
+    matchesSearch(
+      searchTerm,
+      p.perfil.nombre_completo,
+      p.perfil.cedula,
+      p.perfil.correo,
+    ),
   );
 
   return (

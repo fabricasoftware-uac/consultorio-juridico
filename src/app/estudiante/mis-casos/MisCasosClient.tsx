@@ -33,6 +33,7 @@ import { formatArea } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
 import { CaseFilters } from "@/components/casos-juridicos/case-filters";
 import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
+import { matchesSearch } from "@/lib/search";
 import {
   ArrowLeft,
   Check,
@@ -88,15 +89,15 @@ export default function MisCasosClient() {
 
   // 2. Then apply UI filters (search, status, area)
   const filteredCases = studentActiveCasos.filter((caso) => {
-    const nombre = caso.usuarios?.nombre_completo?.toLowerCase() || "";
-    const cedula = caso.usuarios?.cedula?.toString().toLowerCase() || "";
-    const area = caso.area?.toLowerCase() || "";
-
-    // Búsqueda general
-    const matchesSearch =
-      nombre.includes(searchTerm.toLowerCase()) ||
-      cedula.includes(searchTerm.toLowerCase()) ||
-      area.includes(searchTerm.toLowerCase());
+    // Búsqueda general flexible
+    const isSearchMatch = matchesSearch(
+      searchTerm,
+      caso.usuarios?.nombre_completo,
+      caso.usuarios?.cedula,
+      caso.id_caso,
+      caso.area,
+      caso.resumen_hechos,
+    );
 
     // Estado, área
     const matchesStatus =
@@ -109,7 +110,7 @@ export default function MisCasosClient() {
     const matchesPeriodo =
       periodoFilter === "todos" || caso.periodo === periodoFilter;
 
-    return matchesSearch && matchesStatus && matchesArea && matchesClass && matchesPeriodo;
+    return isSearchMatch && matchesStatus && matchesArea && matchesClass && matchesPeriodo;
   });
 
   const sortedCases = [...filteredCases].sort((a, b) => {

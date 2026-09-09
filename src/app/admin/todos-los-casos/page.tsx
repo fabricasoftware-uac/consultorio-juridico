@@ -28,6 +28,7 @@ import { getStatusBadge } from "@/components/ui/status-badge";
 import { formatArea } from "@/lib/utils";
 import { formatDate } from "@/lib/format-date";
 import { Spinner } from "@/components/ui/spinner";
+import { matchesSearch } from "@/lib/search";
 import {
   ArrowLeft,
   Search,
@@ -57,10 +58,14 @@ export default function TodosLosCasosPage() {
   const periodos = [...new Set(casos.map((c) => c.periodo).filter(Boolean))].sort().reverse();
 
   const filtrados = casos.filter((c) => {
-    const nombre = c.usuarios?.nombre_completo?.toLowerCase() || "";
-    const cedula = c.usuarios?.cedula?.toLowerCase() || "";
-    const term = searchTerm.toLowerCase();
-    const matchSearch = !term || nombre.includes(term) || cedula.includes(term) || `${c.id_caso}`.includes(term);
+    const matchSearch = matchesSearch(
+      searchTerm,
+      c.usuarios?.nombre_completo,
+      c.usuarios?.cedula,
+      c.id_caso,
+      c.area,
+      c.resumen_hechos,
+    );
     const matchStatus = statusFilter === "todos" || c.estado === statusFilter;
     const matchArea = areaFilter === "todos" || c.area === areaFilter;
     const matchPeriodo = periodoFilter === "todos" || c.periodo === periodoFilter;

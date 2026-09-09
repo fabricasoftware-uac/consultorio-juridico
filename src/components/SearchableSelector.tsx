@@ -13,6 +13,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { matchesSearch } from "@/lib/search";
 import {
   Popover,
   PopoverContent,
@@ -72,7 +73,7 @@ export function SearchableSelector<T>({
         className="w-[--radix-popover-trigger-width + 100px] p-0"
         align="start"
       >
-        <Command>
+        <Command filter={(value, search) => (matchesSearch(search, value) ? 1 : 0)}>
           <CommandInput placeholder={searchPlaceholder} />
           <CommandList className="max-h-[400px]">
             <CommandEmpty>{emptyMessage}</CommandEmpty>

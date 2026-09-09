@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/pagination";
 import { getStatusBadge } from "@/components/ui/status-badge";
 import { Spinner } from "@/components/ui/spinner";
+import { matchesSearch } from "@/lib/search";
 import {
   ArrowLeft,
   Check,
@@ -73,17 +74,15 @@ export default function SupportCasesPage() {
   useRealtimeCasos(refetch);
 
   const filteredCases = (casos ?? []).filter((caso) => {
-    const nombre = caso.usuarios?.nombre_completo?.toLowerCase() || "";
-    const cedula = caso.usuarios?.cedula?.toString().toLowerCase() || "";
-    const resumenHechos = caso.resumen_hechos?.toLowerCase() || "";
-    const area = caso.area?.toLowerCase() || "";
-
-    // Búsqueda general
-    const matchesSearch =
-      nombre.includes(searchTerm.toLowerCase()) ||
-      cedula.includes(searchTerm.toLowerCase()) ||
-      resumenHechos.includes(searchTerm.toLowerCase()) ||
-      area.includes(searchTerm.toLowerCase());
+    // Búsqueda general flexible
+    const isSearchMatch = matchesSearch(
+      searchTerm,
+      caso.usuarios?.nombre_completo,
+      caso.usuarios?.cedula,
+      caso.id_caso,
+      caso.area,
+      caso.resumen_hechos,
+    );
 
     // Estado, área y estudiante
     const matchesStatus =
@@ -102,7 +101,7 @@ export default function SupportCasesPage() {
       periodoFilter === "todos" || caso.periodo === periodoFilter;
 
     return (
-      matchesSearch &&
+      isSearchMatch &&
       matchesStatus &&
       matchesArea &&
       matchesStudent &&

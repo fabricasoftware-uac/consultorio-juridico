@@ -33,6 +33,7 @@ import { CaseFilters } from "@/components/casos-juridicos/case-filters";
 import { formatArea } from "@/lib/utils";
 import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
 import { useRealtimeCasos } from "@/lib/hooks/useRealtimeCasos";
+import { matchesSearch } from "@/lib/search";
 
 export default function Asesor() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -80,15 +81,14 @@ export default function Asesor() {
 
   // 2. Then apply UI filters (search, status, area)
   const filteredCases = advisorActiveCasos.filter((caso) => {
-    const matchesSearch =
-      caso.usuarios?.nombre_completo
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      false ||
-      caso.usuarios?.cedula?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      false ||
-      caso.area?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      false;
+    const isSearchMatch = matchesSearch(
+      searchTerm,
+      caso.usuarios?.nombre_completo,
+      caso.usuarios?.cedula,
+      caso.id_caso,
+      caso.area,
+      caso.resumen_hechos,
+    );
 
     const matchesStatus =
       statusFilter === "todos" || caso.estado === statusFilter;
@@ -99,7 +99,7 @@ export default function Asesor() {
     const matchesPeriodo =
       periodoFilter === "todos" || caso.periodo === periodoFilter;
 
-    return matchesSearch && matchesStatus && matchesArea && matchesClass && matchesPeriodo;
+    return isSearchMatch && matchesStatus && matchesArea && matchesClass && matchesPeriodo;
   });
 
   const sortedCases = [...filteredCases].sort((a, b) => {
