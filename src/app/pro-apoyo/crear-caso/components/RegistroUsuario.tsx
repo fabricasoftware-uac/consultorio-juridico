@@ -135,6 +135,7 @@ export function RegistroUsuario({
                   onChange={(e) =>
                     handleChange("nombre_completo", e.target.value)
                   }
+                  maxLength={200}
                   className="bg-white border-slate-200 focus-visible:ring-blue-500/30 h-11"
                   required
                 />
@@ -221,6 +222,7 @@ export function RegistroUsuario({
                     placeholder="ejemplo@correo.com"
                     value={formData.correo || ""}
                     onChange={(e) => handleChange("correo", e.target.value)}
+                    maxLength={150}
                     className="bg-white border-slate-200 focus-visible:ring-blue-500/30 h-11"
                   />
                 </div>

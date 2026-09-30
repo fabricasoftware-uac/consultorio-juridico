@@ -194,11 +194,11 @@ export function Step2InfoSolicitante({ formData, handleInputChange, caso }: Step
         </div>
         <div className="space-y-1.5">
           <Label className={LABEL}>Correo electrónico</Label>
-          <Input className={INP} type="email" value={formData.correo_contacto || ""} onChange={(e) => handleInputChange("correo_contacto", e.target.value)} placeholder="correo@ejemplo.com" />
+          <Input className={INP} type="email" maxLength={150} value={formData.correo_contacto || ""} onChange={(e) => handleInputChange("correo_contacto", e.target.value)} placeholder="correo@ejemplo.com" />
         </div>
         <div className="space-y-1.5">
           <Label className={LABEL}>Contacto familiar</Label>
-          <Input className={INP} value={formData.contacto_familiar || ""} onChange={(e) => handleInputChange("contacto_familiar", e.target.value)} placeholder="Nombre y teléfono" />
+          <Input className={INP} maxLength={255} value={formData.contacto_familiar || ""} onChange={(e) => handleInputChange("contacto_familiar", e.target.value)} placeholder="Nombre y teléfono" />
         </div>
         <div className="space-y-1.5">
           <Label className={LABEL}>Estado Civil *</Label>
@@ -216,7 +216,7 @@ export function Step2InfoSolicitante({ formData, handleInputChange, caso }: Step
         </div>
         <div className="space-y-1.5 md:col-span-2">
           <Label className={LABEL}>Dirección *</Label>
-          <Input className={INP} value={formData.direccion || ""} onChange={(e) => handleInputChange("direccion", e.target.value)} placeholder="Dirección completa" />
+          <Input className={INP} maxLength={255} value={formData.direccion || ""} onChange={(e) => handleInputChange("direccion", e.target.value)} placeholder="Dirección completa" />
         </div>
         <div className="space-y-1.5">
           <Label className={LABEL}>Tipo de vivienda *</Label>
@@ -244,7 +244,7 @@ export function Step2InfoSolicitante({ formData, handleInputChange, caso }: Step
         </div>
         <div className="space-y-1.5">
           <Label className={LABEL}>Ciudad de expedición</Label>
-          <Input className={INP} value={formData.ciudad_expedicion || ""} onChange={(e) => handleInputChange("ciudad_expedicion", e.target.value)} placeholder="Ej: Popayán" />
+          <Input className={INP} maxLength={100} value={formData.ciudad_expedicion || ""} onChange={(e) => handleInputChange("ciudad_expedicion", e.target.value)} placeholder="Ej: Popayán" />
         </div>
         <div className="space-y-1.5">
           <Label className={LABEL}>Fecha de nacimiento</Label>
@@ -252,7 +252,7 @@ export function Step2InfoSolicitante({ formData, handleInputChange, caso }: Step
         </div>
         <div className="space-y-1.5">
           <Label className={LABEL}>Nacionalidad</Label>
-          <Input className={INP} value={formData.nacionalidad || ""} onChange={(e) => handleInputChange("nacionalidad", e.target.value)} placeholder="Ej: Colombiana" />
+          <Input className={INP} maxLength={100} value={formData.nacionalidad || ""} onChange={(e) => handleInputChange("nacionalidad", e.target.value)} placeholder="Ej: Colombiana" />
         </div>
 
         {/* ── Sociodemográficos ── */}
@@ -334,10 +334,10 @@ export function Step2InfoSolicitante({ formData, handleInputChange, caso }: Step
         <Separator />
         <p className={SECTION}>Vivienda y Ubicación</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-1.5"><Label className={LABEL}>Barrio</Label><Input className={INP} value={formData.barrio || ""} onChange={(e) => handleInputChange("barrio", e.target.value)} placeholder="Ej: Centro" /></div>
+          <div className="space-y-1.5"><Label className={LABEL}>Barrio</Label><Input className={INP} maxLength={100} value={formData.barrio || ""} onChange={(e) => handleInputChange("barrio", e.target.value)} placeholder="Ej: Centro" /></div>
           <div className="space-y-1.5"><Label className={LABEL}>Zona</Label><Select value={formData.zona || ""} onValueChange={(v) => handleInputChange("zona", v)}><SelectTrigger className={SEL}><SelectValue placeholder="Seleccione" /></SelectTrigger><SelectContent><SelectItem value="Rural">Rural</SelectItem><SelectItem value="Urbana">Urbana</SelectItem><SelectItem value="No informa">No informa</SelectItem></SelectContent></Select></div>
           <div className="space-y-1.5"><Label className={LABEL}>Tenencia de vivienda</Label><Select value={formData.tenencia_vivienda || ""} onValueChange={(v) => handleInputChange("tenencia_vivienda", v)}><SelectTrigger className={SEL}><SelectValue placeholder="Seleccione" /></SelectTrigger><SelectContent>{["Propia","Alquilada","Familiar","Invasión","Otra","No informa"].map(o=><SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent></Select></div>
-          <div className="space-y-1.5"><Label className={LABEL}>Comuna / Localidad</Label><Input className={INP} value={formData.comuna || ""} onChange={(e) => handleInputChange("comuna", e.target.value)} placeholder="Ej: Comuna 1" /></div>
+          <div className="space-y-1.5"><Label className={LABEL}>Comuna / Localidad</Label><Input className={INP} maxLength={100} value={formData.comuna || ""} onChange={(e) => handleInputChange("comuna", e.target.value)} placeholder="Ej: Comuna 1" /></div>
           <div className="space-y-1.5"><Label className={LABEL}>¿Tiene SISBEN?</Label><Select value={formData.tiene_sisben === true ? "si" : formData.tiene_sisben === false ? "no" : ""} onValueChange={(v) => handleInputChange("tiene_sisben", v === "si" ? true : v === "no" ? false : null)}><SelectTrigger className={SEL}><SelectValue placeholder="Seleccione" /></SelectTrigger><SelectContent><SelectItem value="si">Sí</SelectItem><SelectItem value="no">No</SelectItem></SelectContent></Select></div>
         </div>
 
@@ -408,7 +408,7 @@ export function Step4InfoLaboral({ formData, handleInputChange }: StepProps) {
         {formData.otros_ingresos && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6">
             <div className="space-y-1.5"><Label className={LABEL}>Valor mensual</Label><Input className={INP} type="number" value={formData.valor_otros_ingresos || ""} onChange={(e) => handleInputChange("valor_otros_ingresos", e.target.value)} placeholder="0" /></div>
-            <div className="space-y-1.5"><Label className={LABEL}>Concepto</Label><Input className={INP} value={formData.concepto_otros_ingresos || ""} onChange={(e) => handleInputChange("concepto_otros_ingresos", e.target.value)} placeholder="Ej: Arriendos" /></div>
+            <div className="space-y-1.5"><Label className={LABEL}>Concepto</Label><Input className={INP} maxLength={255} value={formData.concepto_otros_ingresos || ""} onChange={(e) => handleInputChange("concepto_otros_ingresos", e.target.value)} placeholder="Ej: Arriendos" /></div>
           </div>
         )}
       </CardContent>
@@ -446,11 +446,11 @@ export function Step5DatosAccionado({ formData, handleInputChange }: StepProps) 
         </div>
         {!formData.sinDemandado && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1.5 md:col-span-2"><Label className={LABEL}>Nombres Completos *</Label><Input className={INP} value={formData.nombreDemandado || ""} onChange={(e) => handleInputChange("nombreDemandado", e.target.value)} placeholder="Nombre completo del accionado" /></div>
-            <div className="space-y-1.5"><Label className={LABEL}>Identificación</Label><Input className={INP} value={formData.documentoDemandado || ""} onChange={(e) => handleInputChange("documentoDemandado", e.target.value)} placeholder="Número de identificación" /></div>
-            <div className="space-y-1.5"><Label className={LABEL}>Celular</Label><Input className={INP} type="tel" value={formData.celularDemandado || ""} onChange={(e) => handleInputChange("celularDemandado", e.target.value)} placeholder="Número de celular" /></div>
-            <div className="space-y-1.5 md:col-span-2"><Label className={LABEL}>Lugar de Residencia</Label><Input className={INP} value={formData.lugarResidenciaDemandado || ""} onChange={(e) => handleInputChange("lugarResidenciaDemandado", e.target.value)} placeholder="Dirección de residencia" /></div>
-            <div className="space-y-1.5 md:col-span-2"><Label className={LABEL}>Correo Electrónico</Label><Input className={INP} type="email" value={formData.correoDemandado || ""} onChange={(e) => handleInputChange("correoDemandado", e.target.value)} placeholder="correo@ejemplo.com" /></div>
+            <div className="space-y-1.5 md:col-span-2"><Label className={LABEL}>Nombres Completos *</Label><Input className={INP} maxLength={200} value={formData.nombreDemandado || ""} onChange={(e) => handleInputChange("nombreDemandado", e.target.value)} placeholder="Nombre completo del accionado" /></div>
+            <div className="space-y-1.5"><Label className={LABEL}>Identificación</Label><Input className={INP} maxLength={45} value={formData.documentoDemandado || ""} onChange={(e) => handleInputChange("documentoDemandado", e.target.value)} placeholder="Número de identificación" /></div>
+            <div className="space-y-1.5"><Label className={LABEL}>Celular</Label><Input className={INP} type="tel" maxLength={45} value={formData.celularDemandado || ""} onChange={(e) => handleInputChange("celularDemandado", e.target.value)} placeholder="Número de celular" /></div>
+            <div className="space-y-1.5 md:col-span-2"><Label className={LABEL}>Lugar de Residencia</Label><Input className={INP} maxLength={255} value={formData.lugarResidenciaDemandado || ""} onChange={(e) => handleInputChange("lugarResidenciaDemandado", e.target.value)} placeholder="Dirección de residencia" /></div>
+            <div className="space-y-1.5 md:col-span-2"><Label className={LABEL}>Correo Electrónico</Label><Input className={INP} type="email" maxLength={150} value={formData.correoDemandado || ""} onChange={(e) => handleInputChange("correoDemandado", e.target.value)} placeholder="correo@ejemplo.com" /></div>
           </div>
         )}
       </CardContent>
@@ -483,9 +483,9 @@ export function Step6InfoContrato({ formData, handleInputChange }: StepProps) {
         <CardContent className="space-y-4 pt-0">
           <div className="space-y-1.5"><Label className={LABEL}>Tipo de Contrato</Label><Select value={formData.tipoContrato || ""} onValueChange={(v) => handleInputChange("tipoContrato", v)}><SelectTrigger className={SEL}><SelectValue placeholder="Seleccione" /></SelectTrigger><SelectContent>{["escrito","verbal","prestacion_servicios","otro"].map(o=><SelectItem key={o} value={o}>{o==="prestacion_servicios"?"Prestación de Servicios":o.charAt(0).toUpperCase()+o.slice(1)}</SelectItem>)}</SelectContent></Select></div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1.5"><Label className={LABEL}>Representante Legal / Patrono</Label><Input className={INP} value={formData.nombreRepresentanteLegal || ""} onChange={(e) => handleInputChange("nombreRepresentanteLegal", e.target.value)} placeholder="Nombre del empleador" /></div>
-            <div className="space-y-1.5"><Label className={LABEL}>Correo Empleador</Label><Input className={INP} type="email" value={formData.correoEmpleador || ""} onChange={(e) => handleInputChange("correoEmpleador", e.target.value)} placeholder="correo@empresa.com" /></div>
-            <div className="space-y-1.5 md:col-span-2"><Label className={LABEL}>Dirección Empresa</Label><Input className={INP} value={formData.direccionEmpresa || ""} onChange={(e) => handleInputChange("direccionEmpresa", e.target.value)} placeholder="Dirección de la empresa" /></div>
+            <div className="space-y-1.5"><Label className={LABEL}>Representante Legal / Patrono</Label><Input className={INP} maxLength={200} value={formData.nombreRepresentanteLegal || ""} onChange={(e) => handleInputChange("nombreRepresentanteLegal", e.target.value)} placeholder="Nombre del empleador" /></div>
+            <div className="space-y-1.5"><Label className={LABEL}>Correo Empleador</Label><Input className={INP} type="email" maxLength={150} value={formData.correoEmpleador || ""} onChange={(e) => handleInputChange("correoEmpleador", e.target.value)} placeholder="correo@empresa.com" /></div>
+            <div className="space-y-1.5 md:col-span-2"><Label className={LABEL}>Dirección Empresa</Label><Input className={INP} maxLength={255} value={formData.direccionEmpresa || ""} onChange={(e) => handleInputChange("direccionEmpresa", e.target.value)} placeholder="Dirección de la empresa" /></div>
             <div className="space-y-1.5"><Label className={LABEL}>Fecha Inicio</Label><Input className={INP} type="date" value={formData.fechaInicio || ""} onChange={(e) => handleInputChange("fechaInicio", e.target.value)} /></div>
             <div className="space-y-1.5"><Label className={LABEL}>Fecha Terminación</Label><Input className={INP} type="date" value={formData.fechaTerminacion || ""} onChange={(e) => handleInputChange("fechaTerminacion", e.target.value)} /></div>
             <div className="flex items-center space-x-2 pt-4"><Checkbox id="continuaContrato" checked={formData.continuaContrato} onCheckedChange={(c: boolean) => handleInputChange("continuaContrato", c)} /><Label htmlFor="continuaContrato" className={LABEL}>¿Continúa el Contrato?</Label></div>
