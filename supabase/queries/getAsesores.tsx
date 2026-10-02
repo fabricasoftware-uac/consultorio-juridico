@@ -10,6 +10,7 @@ export async function getAsesores(
     area,
     horario,
     perfil:perfiles!${soloActivos ? "inner" : "asesores_id_perfil_fkey"} (
+      id,
       nombre_completo,
       correo,
       telefono,
@@ -19,7 +20,7 @@ export async function getAsesores(
   `);
 
   if (soloActivos) {
-    query = query.eq("perfiles.activo", true);
+    query = query.eq("perfil.activo", true);
   }
 
   const { data, error } = await query;

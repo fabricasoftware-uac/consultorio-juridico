@@ -1,16 +1,16 @@
-# Graph Report - consultorio-juridico  (2026-10-02)
+# Graph Report - consultorio-juridico  (2026-09-04)
 
 ## Corpus Check
-- 284 files · ~177,904 words
+- 282 files · ~175,950 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1222 nodes · 3180 edges · 100 communities (50 shown, 50 thin omitted)
+- 1217 nodes · 3167 edges · 102 communities (52 shown, 50 thin omitted)
 - Extraction: 99% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 14 edges (avg confidence: 0.83)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `32ea6186`
+- Built from commit: `ba5f6491`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -20,14 +20,14 @@
 - PaginaNotificaciones.tsx
 - cn
 - sidebar.tsx
-- cmdk
+- estudiante/mis-casos/MisCasosClient.tsx
 - Servicio Docker web (Next.js)
 - Módulo Centro de Conciliación
-- estudiante/mis-casos/MisCasosClient.tsx
+- button.tsx
 - Consultorio Jurídico — UAC
 - devDependencies
 - compilerOptions
-- button.tsx
+- app/layout.tsx
 - ui/utils.ts
 - menubar.tsx
 - AI Context — Consultorio Jurídico
@@ -47,6 +47,7 @@
 - callback/route.ts
 - form.tsx
 - chart.tsx
+- drawer.tsx
 - roles.ts
 - 14. Patrones y Convenciones
 - 2.2 Tablas Principales
@@ -64,6 +65,7 @@
 - migrar-storage.ts
 - notificaciones/route.ts
 - Graphify Agent Rule
+- class-variance-authority
 - clsx
 - Supabase Auth Service Configuration
 - dotenv
@@ -120,9 +122,9 @@
 5. `Input()` - 30 edges
 6. `Caso` - 29 edges
 7. `Label()` - 27 edges
-8. `matchesSearch()` - 25 edges
-9. `SelectTrigger()` - 24 edges
-10. `SelectContent()` - 24 edges
+8. `SelectTrigger()` - 24 edges
+9. `SelectContent()` - 24 edges
+10. `SelectItem()` - 24 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `pnpm allowBuilds / onlyBuiltDependencies` --conceptually_related_to--> `Servicio Docker web (Next.js)`  [AMBIGUOUS]
@@ -131,10 +133,10 @@
   MANUAL_USUARIO.md → docs/despliegue-docker.md
 - `Modificación de Datos de Identidad Maestros` --semantically_similar_to--> `Migración de Datos desde Supabase Cloud`  [INFERRED] [semantically similar]
   MANUAL_USUARIO.md → docs/despliegue-docker.md
-- `searchCaso()` --calls--> `matchesSearch()`  [EXTRACTED]
-  scripts/test-qa-suite.ts → src/lib/search.ts
 - `UserRegistrationForm()` --calls--> `getAsesores()`  [EXTRACTED]
   src/app/estudiante/mis-casos/[id_caso]/entrevista/components/UserRegistrationForm.tsx → supabase/queries/getAsesores.tsx
+- `DocumentosCaso()` --calls--> `insertAuditEvent()`  [EXTRACTED]
+  src/components/casos-juridicos/documentos-caso.tsx → supabase/queries/auditoriaCasos.tsx
 
 ## Import Cycles
 - None detected.
@@ -145,27 +147,31 @@
 - **Cadena de autorización JWT → user_role → RLS** — docs_despliegue_docker_generacion_de_secretos, docs_despliegue_docker_custom_access_token_hook, docs_despliegue_docker_migraciones_supabase_db_push, docs_despliegue_docker_verificacion_end_to_end [INFERRED 0.85]
 - **Dual-Surface University Branding Asset Set** — public_autonoma_logo, public_logo_uniautonoma_blanco_logo, public_autonoma_griffin_emblem, public_autonoma_institutional_brand_identity [INFERRED 0.85]
 
-## Communities (100 total, 50 thin omitted)
+## Communities (102 total, 50 thin omitted)
 
 ### Community 0 - "mis-casos/[id]/page.tsx"
 Cohesion: 0.07
-Nodes (70): dynamic, Page(), dynamic, Page(), dynamic, Page(), AsignacionCasoProps, ResumenCasoProps (+62 more)
+Nodes (63): dynamic, Page(), dynamic, Page(), StepProps, UserRegistrationForm(), dynamic, Page() (+55 more)
 
 ### Community 1 - "asesores/page.tsx"
-Cohesion: 0.07
-Nodes (63): mockCaso, searchCaso(), ActionResult, generateTempPassword(), registerAsesor(), RegisterAsesorInput, registerEstudiante(), RegisterEstudianteInput (+55 more)
+Cohesion: 0.05
+Nodes (78): ActionResult, generateTempPassword(), registerAsesor(), RegisterAsesorInput, registerEstudiante(), RegisterEstudianteInput, registerProApoyo(), RegisterProApoyoInput (+70 more)
 
 ### Community 2 - "PaginaNotificaciones.tsx"
-Cohesion: 0.07
-Nodes (35): Navbar(), Navbars, RolIcons, RolLabels, Navbar(), GeometricBackground(), GeometricBackgroundProps, dynamic (+27 more)
+Cohesion: 0.06
+Nodes (45): Navbar(), Navbars, RolIcons, RolLabels, Navbar(), GeometricBackground(), GeometricBackgroundProps, dynamic (+37 more)
 
 ### Community 3 - "cn"
-Cohesion: 0.06
-Nodes (42): Avatar(), AvatarFallback(), AvatarImage(), BreadcrumbEllipsis(), BreadcrumbItem(), BreadcrumbLink(), BreadcrumbList(), BreadcrumbPage() (+34 more)
+Cohesion: 0.07
+Nodes (35): Avatar(), AvatarFallback(), AvatarImage(), BreadcrumbEllipsis(), BreadcrumbItem(), BreadcrumbLink(), BreadcrumbList(), BreadcrumbPage() (+27 more)
 
 ### Community 4 - "sidebar.tsx"
 Cohesion: 0.06
-Nodes (40): Separator(), Sheet(), SheetContent(), SheetDescription(), SheetFooter(), SheetHeader(), SheetOverlay(), SheetTitle() (+32 more)
+Nodes (39): Sheet(), SheetContent(), SheetDescription(), SheetFooter(), SheetHeader(), SheetOverlay(), SheetTitle(), Sidebar() (+31 more)
+
+### Community 5 - "estudiante/mis-casos/MisCasosClient.tsx"
+Cohesion: 0.12
+Nodes (33): Page(), TodosLosCasosPage(), Asesor(), dynamic, MisCasosClient(), dynamic, SupportCasesPage(), dynamic (+25 more)
 
 ### Community 6 - "Servicio Docker web (Next.js)"
 Cohesion: 0.07
@@ -175,9 +181,9 @@ Nodes (42): Build args NEXT_PUBLIC_* del servicio web, Red externa supabase_defa
 Cohesion: 0.07
 Nodes (27): 1. Ya existe un `'conciliacion'`, y significa otra cosa, 2. `estaAsignado()` es el único cuello de autorización, 3. `auditoria_casos` es la excepción — no usa `estaAsignado`, 4. El JWT asume un rol por usuario, 5. Dos mecanismos que parecen reutilizables pero no lo son, 6. `notificar_usuarios_caso()` no conoce el rol nuevo, Autorización, Cambios en pantallas existentes (+19 more)
 
-### Community 8 - "estudiante/mis-casos/MisCasosClient.tsx"
+### Community 8 - "button.tsx"
 Cohesion: 0.06
-Nodes (74): AnaliticasPage(), axisStyle, fetchData(), gridStyle, PALETTE, radius, Page(), TodosLosCasosPage() (+66 more)
+Nodes (63): AnaliticasPage(), axisStyle, fetchData(), gridStyle, PALETTE, radius, LlamadoPendiente, DIAS (+55 more)
 
 ### Community 9 - "Consultorio Jurídico — UAC"
 Cohesion: 0.08
@@ -185,19 +191,19 @@ Nodes (24): Analíticas y Exportación, Arquitectura, Auditoría, Ciclo de Vida 
 
 ### Community 10 - "devDependencies"
 Cohesion: 0.05
-Nodes (37): devDependencies, pg, postgres, @snaplet/copycat, @snaplet/seed, supabase, tailwindcss, @tailwindcss/postcss (+29 more)
+Nodes (36): devDependencies, pg, postgres, @snaplet/copycat, @snaplet/seed, supabase, tailwindcss, @tailwindcss/postcss (+28 more)
 
 ### Community 11 - "compilerOptions"
 Cohesion: 0.05
 Nodes (36): components/*, dom, dom.iterable, esnext, lib/*, next-env.d.ts, .next/types/**/*.ts, node_modules (+28 more)
 
-### Community 12 - "button.tsx"
-Cohesion: 0.06
-Nodes (41): LlamadoPendiente, DIAS, EMPTY_FORM, TURNOS, geistMono, geistSans, metadata, Navbar() (+33 more)
+### Community 12 - "app/layout.tsx"
+Cohesion: 0.11
+Nodes (15): geistMono, geistSans, metadata, applyPrefs(), BotonAccesibilidad(), FontSize, getPrefs(), Footer() (+7 more)
 
 ### Community 13 - "ui/utils.ts"
 Cohesion: 0.13
-Nodes (9): HoverCardContent(), Progress(), Skeleton(), Slider(), ToggleGroup(), ToggleGroupContext, ToggleGroupItem(), Toggle() (+1 more)
+Nodes (9): HoverCardContent(), ResizableHandle(), ResizablePanelGroup(), Skeleton(), ToggleGroup(), ToggleGroupContext, ToggleGroupItem(), Toggle() (+1 more)
 
 ### Community 14 - "menubar.tsx"
 Cohesion: 0.12
@@ -220,8 +226,8 @@ Cohesion: 0.18
 Nodes (11): 13. Funciones PL/pgSQL Clave, `authorize(requested_permission app_permission) → boolean`, `custom_access_token_hook(event jsonb) → jsonb`, `enqueue_assignment_notification(p_id_caso, p_id_usuario, p_tipo, p_source) → void`, `estaAsignado(uid uuid, caso_id integer) → boolean`, `generar_llamados_atencion() → integer`, `handle_new_user() → trigger`, `notificar_usuarios_caso(p_id_caso, p_id_autor, p_tipo, p_titulo, p_mensaje) → void` (+3 more)
 
 ### Community 20 - "UserRegistrationForm.tsx"
-Cohesion: 0.10
-Nodes (29): Step1InfoEntrevista(), Step2InfoSolicitante(), Step3QuienSolicita(), Step4InfoLaboral(), Step5DatosAccionado(), Step6InfoContrato(), Step7DetallesCaso(), Step8Firmas() (+21 more)
+Cohesion: 0.20
+Nodes (15): Step1InfoEntrevista(), Step2InfoSolicitante(), Step3QuienSolicita(), Step4InfoLaboral(), Step5DatosAccionado(), Step6InfoContrato(), Step7DetallesCaso(), Step8Firmas() (+7 more)
 
 ### Community 21 - "LogoutBtn.tsx"
 Cohesion: 0.23
@@ -245,7 +251,7 @@ Nodes (9): 12.1 Campos Sociodemográficos (22 campos), 12.2 Estructura del Wizar
 
 ### Community 26 - "dependencies"
 Cohesion: 0.15
-Nodes (13): class-variance-authority, next, dependencies, class-variance-authority, next, @radix-ui/react-avatar, @radix-ui/react-dialog, @radix-ui/react-label (+5 more)
+Nodes (13): cmdk, next, dependencies, cmdk, next, @radix-ui/react-avatar, @radix-ui/react-dialog, @radix-ui/react-label (+5 more)
 
 ### Community 27 - "Descripciones detalladas de migraciones clave"
 Cohesion: 0.25
@@ -266,6 +272,10 @@ Nodes (10): FormControl(), FormDescription(), FormFieldContext, FormFieldContext
 ### Community 31 - "chart.tsx"
 Cohesion: 0.25
 Nodes (9): ChartConfig, ChartContainer(), ChartContext, ChartContextProps, ChartLegendContent(), ChartTooltipContent(), getPayloadConfigFromPayload(), THEMES (+1 more)
+
+### Community 32 - "drawer.tsx"
+Cohesion: 0.18
+Nodes (6): DrawerContent(), DrawerDescription(), DrawerFooter(), DrawerHeader(), DrawerOverlay(), DrawerTitle()
 
 ### Community 33 - "roles.ts"
 Cohesion: 0.27
@@ -338,7 +348,7 @@ Nodes (3): GET(), getUser(), PATCH()
   pnpm-workspace.yaml · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **369 isolated node(s):** `$schema`, `style`, `rsc`, `tsx`, `config` (+364 more)
+- **367 isolated node(s):** `$schema`, `style`, `rsc`, `tsx`, `config` (+362 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **50 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -349,13 +359,13 @@ _Questions this graph is uniquely positioned to answer:_
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
 - **What is the exact relationship between `Servicio Docker web (Next.js)` and `pnpm allowBuilds / onlyBuiltDependencies`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `cn()` connect `cn` to `mis-casos/[id]/page.tsx`, `asesores/page.tsx`, `PaginaNotificaciones.tsx`, `sidebar.tsx`, `estudiante/mis-casos/MisCasosClient.tsx`, `button.tsx`, `ui/utils.ts`, `menubar.tsx`, `SearchableSelector.tsx`, `UserRegistrationForm.tsx`, `LogoutBtn.tsx`, `context-menu.tsx`, `documentos-caso.tsx`, `carousel.tsx`, `form.tsx`, `chart.tsx`?**
-  _High betweenness centrality (0.184) - this node is a cross-community bridge._
-- **Why does `Button()` connect `button.tsx` to `mis-casos/[id]/page.tsx`, `asesores/page.tsx`, `PaginaNotificaciones.tsx`, `cn`, `sidebar.tsx`, `estudiante/mis-casos/MisCasosClient.tsx`, `SearchableSelector.tsx`, `UserRegistrationForm.tsx`, `LogoutBtn.tsx`, `documentos-caso.tsx`, `carousel.tsx`?**
-  _High betweenness centrality (0.028) - this node is a cross-community bridge._
-- **Why does `Card()` connect `button.tsx` to `mis-casos/[id]/page.tsx`, `asesores/page.tsx`, `PaginaNotificaciones.tsx`, `cn`, `estudiante/mis-casos/MisCasosClient.tsx`, `UserRegistrationForm.tsx`, `documentos-caso.tsx`?**
+- **Why does `cn()` connect `cn` to `drawer.tsx`, `asesores/page.tsx`, `PaginaNotificaciones.tsx`, `mis-casos/[id]/page.tsx`, `sidebar.tsx`, `estudiante/mis-casos/MisCasosClient.tsx`, `button.tsx`, `ui/utils.ts`, `menubar.tsx`, `SearchableSelector.tsx`, `UserRegistrationForm.tsx`, `LogoutBtn.tsx`, `context-menu.tsx`, `documentos-caso.tsx`, `carousel.tsx`, `form.tsx`, `chart.tsx`?**
+  _High betweenness centrality (0.178) - this node is a cross-community bridge._
+- **Why does `Button()` connect `button.tsx` to `mis-casos/[id]/page.tsx`, `asesores/page.tsx`, `PaginaNotificaciones.tsx`, `cn`, `sidebar.tsx`, `estudiante/mis-casos/MisCasosClient.tsx`, `app/layout.tsx`, `SearchableSelector.tsx`, `UserRegistrationForm.tsx`, `LogoutBtn.tsx`, `documentos-caso.tsx`, `carousel.tsx`?**
+  _High betweenness centrality (0.029) - this node is a cross-community bridge._
+- **Why does `supabaseAdmin` connect `supabase-admin.ts` to `asesores/page.tsx`, `notificaciones/route.ts`, `enviar-notificaciones/route.ts`, `completarPerfilEstudiante.ts`, `analiticas/route.ts`, `callback/route.ts`?**
   _High betweenness centrality (0.018) - this node is a cross-community bridge._
 - **What connects `$schema`, `style`, `rsc` to the rest of the system?**
-  _369 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _367 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `mis-casos/[id]/page.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.06843949701092558 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07010078387458006 - nodes in this community are weakly interconnected._

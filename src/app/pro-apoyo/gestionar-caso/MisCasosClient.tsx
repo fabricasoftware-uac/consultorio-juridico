@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -73,67 +73,93 @@ export default function SupportCasesPage() {
 
   useRealtimeCasos(refetch);
 
-  const filteredCases = (casos ?? []).filter((caso) => {
-    // Búsqueda general flexible
-    const isSearchMatch = matchesSearch(
-      searchTerm,
-      caso.usuarios?.nombre_completo,
-      caso.usuarios?.cedula,
-      caso.id_caso,
-      caso.area,
-      caso.resumen_hechos,
-    );
+  const filteredCases = useMemo(() => {
+    return (casos ?? []).filter((caso) => {
+      const usuario = Array.isArray(caso.usuarios) ? caso.usuarios[0] : caso.usuarios;
+      const estudianteActivo = caso.estudiantes_casos?.find(
+        (e: any) => !e.fecha_fin_asignacion,
+      )?.estudiante;
+      const asesorActivo = caso.asesores_casos?.find(
+        (a: any) => !a.fecha_fin_asignacion,
+      )?.asesor;
 
-    // Estado, área y estudiante
-    const matchesStatus =
-      statusFilter === "todos" || caso.estado === statusFilter;
-    const matchesArea = areaFilter === "todos" || caso.area === areaFilter;
-    const matchesStudent =
-      studentFilter === "todos" ||
-      caso.estudiantes_casos?.some(
-        (ec) => ec.estudiante.perfil.nombre_completo === studentFilter,
+      // Búsqueda general flexible
+      const isSearchMatch = matchesSearch(
+        searchTerm,
+        usuario?.nombre_completo,
+        usuario?.cedula,
+        estudianteActivo?.perfil?.nombre_completo,
+        estudianteActivo?.perfil?.cedula,
+        asesorActivo?.perfil?.nombre_completo,
+        asesorActivo?.perfil?.cedula,
+        caso.id_caso,
+        caso.area,
+        caso.resumen_hechos,
       );
 
-    // Nuevos filtros
-    const matchesClass =
-      classFilter === "todos" || caso.clasificacion === classFilter;
-    const matchesPeriodo =
-      periodoFilter === "todos" || caso.periodo === periodoFilter;
+      // Estado, área y estudiante
+      const matchesStatus =
+        statusFilter === "todos" || caso.estado === statusFilter;
+      const matchesArea = areaFilter === "todos" || caso.area === areaFilter;
+      const matchesStudent =
+        studentFilter === "todos" ||
+        caso.estudiantes_casos?.some(
+          (ec) => ec.estudiante?.perfil?.nombre_completo === studentFilter,
+        );
 
-    return (
-      isSearchMatch &&
-      matchesStatus &&
-      matchesArea &&
-      matchesStudent &&
-      matchesClass &&
-      matchesPeriodo
-    );
-  });
+      // Nuevos filtros
+      const matchesClass =
+        classFilter === "todos" || caso.clasificacion === classFilter;
+      const matchesPeriodo =
+        periodoFilter === "todos" || caso.periodo === periodoFilter;
 
-  const sortedCases = [...filteredCases].sort((a, b) => {
-    if (dateSort === "ultima_mod") {
-      const modA = a.ultima_modificacion ? new Date(a.ultima_modificacion).getTime() : 0;
-      const modB = b.ultima_modificacion ? new Date(b.ultima_modificacion).getTime() : 0;
-      return modB - modA;
-    }
-    const dateA = new Date(a.fecha_creacion).getTime();
-    const dateB = new Date(b.fecha_creacion).getTime();
-    const diff = dateB - dateA;
-    return diff !== 0
-      ? (dateSort === "recientes" ? diff : -diff)
-      : ((b.id_caso ?? 0) - (a.id_caso ?? 0));
-  });
+      return (
+        isSearchMatch &&
+        matchesStatus &&
+        matchesArea &&
+        matchesStudent &&
+        matchesClass &&
+        matchesPeriodo
+      );
+    });
+  }, [
+    casos,
+    searchTerm,
+    statusFilter,
+    areaFilter,
+    studentFilter,
+    classFilter,
+    periodoFilter,
+  ]);
 
-  const uniqueStudents = [
-    ...new Set(
-      (casos ?? []).flatMap(
-        (c) =>
-          c.estudiantes_casos
-            ?.map((ec) => ec.estudiante?.perfil?.nombre_completo)
-            .filter(Boolean) || [],
+  const sortedCases = useMemo(() => {
+    return [...filteredCases].sort((a, b) => {
+      if (dateSort === "ultima_mod") {
+        const modA = a.ultima_modificacion ? new Date(a.ultima_modificacion).getTime() : 0;
+        const modB = b.ultima_modificacion ? new Date(b.ultima_modificacion).getTime() : 0;
+        return modB - modA;
+      }
+      const dateA = new Date(a.fecha_creacion).getTime();
+      const dateB = new Date(b.fecha_creacion).getTime();
+      const diff = dateB - dateA;
+      return diff !== 0
+        ? (dateSort === "recientes" ? diff : -diff)
+        : ((b.id_caso ?? 0) - (a.id_caso ?? 0));
+    });
+  }, [filteredCases, dateSort]);
+
+  const uniqueStudents = useMemo(() => {
+    return [
+      ...new Set(
+        (casos ?? []).flatMap(
+          (c) =>
+            c.estudiantes_casos
+              ?.map((ec) => ec.estudiante?.perfil?.nombre_completo)
+              .filter(Boolean) || [],
+        ),
       ),
-    ),
-  ];
+    ];
+  }, [casos]);
 
   // Paginación
   const totalPages = Math.ceil(sortedCases.length / ITEMS_PER_PAGE);
@@ -272,29 +298,31 @@ export default function SupportCasesPage() {
 
         {/* Case List Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-          {currentCases?.map((caso) => (
-            <div
-              key={caso.id_caso}
-              onClick={() => router.push(`/pro-apoyo/gestionar-caso/${caso.id_caso}`)}
-              className="cursor-pointer"
-            >
-              <Card
-                className="p-6 border-none shadow-sm shadow-slate-200/50 hover:shadow-md hover:shadow-blue-900/5 hover:border-blue-300 transition-all duration-300 bg-white rounded-2xl group flex flex-col h-full"
+          {currentCases?.map((caso) => {
+            const usuario = Array.isArray(caso.usuarios) ? caso.usuarios[0] : caso.usuarios;
+            return (
+              <div
+                key={caso.id_caso}
+                onClick={() => router.push(`/pro-apoyo/gestionar-caso/${caso.id_caso}`)}
+                className="cursor-pointer"
               >
-              <div className="flex justify-between items-start mb-5 border-b border-slate-100 pb-4">
-                <div className="space-y-1">
-                  <div className="text-xs font-semibold text-slate-400">
-                    Caso #{caso.id_caso}
+                <Card
+                  className="p-6 border-none shadow-sm shadow-slate-200/50 hover:shadow-md hover:shadow-blue-900/5 hover:border-blue-300 transition-all duration-300 bg-white rounded-2xl group flex flex-col h-full"
+                >
+                <div className="flex justify-between items-start mb-5 border-b border-slate-100 pb-4">
+                  <div className="space-y-1">
+                    <div className="text-xs font-semibold text-slate-400">
+                      Caso #{caso.id_caso}
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                      {usuario?.nombre_completo || "Cliente Sin Nombre"}
+                    </h3>
+                    <div className="text-sm font-medium text-slate-500">
+                      {usuario?.cedula ? `C.C. ${usuario.cedula}` : "Sin documento"}
+                    </div>
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
-                    {caso.usuarios.nombre_completo}
-                  </h3>
-                  <div className="text-sm font-medium text-slate-500">
-                    {caso.usuarios.cedula}
-                  </div>
+                  <div className="shrink-0">{getStatusBadge(caso.estado)}</div>
                 </div>
-                <div className="shrink-0">{getStatusBadge(caso.estado)}</div>
-              </div>
 
               <div className="space-y-3 mb-6 flex-1">
                 <div className="space-y-1">
@@ -316,7 +344,7 @@ export default function SupportCasesPage() {
                         {
                           caso.estudiantes_casos.find(
                             (e: any) => !e.fecha_fin_asignacion,
-                          )?.estudiante?.perfil?.nombre_completo
+                          )?.estudiante?.perfil?.nombre_completo || "Sin asignar"
                         }
                       </p>
                     ) : (
@@ -334,7 +362,7 @@ export default function SupportCasesPage() {
                         {
                           caso.asesores_casos.find(
                             (a: any) => !a.fecha_fin_asignacion,
-                          )?.asesor?.perfil?.nombre_completo
+                          )?.asesor?.perfil?.nombre_completo || "Sin asignar"
                         }
                       </p>
                     ) : (
@@ -373,16 +401,17 @@ export default function SupportCasesPage() {
                 </div>
 
                 <div className="mt-auto pt-4 border-t border-slate-50" onClick={(e) => e.stopPropagation()}>
-                <button
-                  onClick={(e) => { e.stopPropagation(); router.push(`/pro-apoyo/gestionar-caso/${caso.id_caso}`); }}
-                  className="flex w-full items-center justify-center bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 font-medium px-4 py-2.5 rounded-xl transition-colors duration-200 text-sm shadow-xs cursor-pointer"
-                >
-                  Modificar & Supervisar
-                </button>
-              </div>
-            </Card>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); router.push(`/pro-apoyo/gestionar-caso/${caso.id_caso}`); }}
+                    className="flex w-full items-center justify-center bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 font-medium px-4 py-2.5 rounded-xl transition-colors duration-200 text-sm shadow-xs cursor-pointer"
+                  >
+                    Modificar & Supervisar
+                  </button>
+                </div>
+              </Card>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {filteredCases?.length === 0 && (

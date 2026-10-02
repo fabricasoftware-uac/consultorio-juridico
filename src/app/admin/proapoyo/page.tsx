@@ -117,7 +117,7 @@ export default function ProApoyoPage() {
   };
 
   const handleToggleStatus = async (pro: any) => {
-    const result = await toggleUserStatus(pro.id_perfil, pro.perfil.activo);
+    const result = await toggleUserStatus(pro.id_perfil, pro.perfil?.activo ?? false);
     if (result.success) {
       toast.success(result.message);
       fetchProfesionales();
@@ -129,10 +129,10 @@ export default function ProApoyoPage() {
   const openEdit = (pro: any) => {
     setEditingPro(pro);
     setEditForm({
-      nombre: pro.perfil.nombre_completo,
-      correo: pro.perfil.correo || "",
-      cedula: pro.perfil.cedula || "",
-      telefono: pro.perfil.telefono || "",
+      nombre: pro.perfil?.nombre_completo ?? "",
+      correo: pro.perfil?.correo || "",
+      cedula: pro.perfil?.cedula || "",
+      telefono: pro.perfil?.telefono || "",
     });
     setIsEditOpen(true);
   };
@@ -160,9 +160,9 @@ export default function ProApoyoPage() {
   const filteredProfesionales = profesionales.filter((p) =>
     matchesSearch(
       searchTerm,
-      p.perfil.nombre_completo,
-      p.perfil.cedula,
-      p.perfil.correo,
+      p.perfil?.nombre_completo,
+      p.perfil?.cedula,
+      p.perfil?.correo,
     ),
   );
 
@@ -315,25 +315,25 @@ export default function ProApoyoPage() {
                         <TableRow key={pro.id_perfil}>
                           <TableCell>
                             <div className="font-medium text-slate-900">
-                              {pro.perfil.nombre_completo}
+                              {pro.perfil?.nombre_completo || "Sin nombre"}
                             </div>
                             <div className="text-xs text-slate-500">
-                              CC: {pro.perfil.cedula}
+                              CC: {pro.perfil?.cedula || "—"}
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="text-sm">{pro.perfil.correo}</div>
+                            <div className="text-sm">{pro.perfil?.correo || "—"}</div>
                             <div className="text-xs text-slate-400">
-                              {pro.perfil.telefono}
+                              {pro.perfil?.telefono || "—"}
                             </div>
                           </TableCell>
                           <TableCell>
                             <Badge
                               variant={
-                                pro.perfil.activo ? "secondary" : "destructive"
+                                pro.perfil?.activo ? "secondary" : "destructive"
                               }
                             >
-                              {pro.perfil.activo ? "Activo" : "Inactivo"}
+                              {pro.perfil?.activo ? "Activo" : "Inactivo"}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
@@ -349,10 +349,10 @@ export default function ProApoyoPage() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className={`h-8 w-8 ${pro.perfil.activo ? "text-amber-600 hover:text-amber-700 hover:bg-amber-50" : "text-green-600 hover:text-green-700 hover:bg-green-50"}`}
+                                className={`h-8 w-8 ${pro.perfil?.activo ? "text-amber-600 hover:text-amber-700 hover:bg-amber-50" : "text-green-600 hover:text-green-700 hover:bg-green-50"}`}
                                 onClick={() => handleToggleStatus(pro)}
                               >
-                                {pro.perfil.activo ? (
+                                {pro.perfil?.activo ? (
                                   <PowerOff className="h-4 w-4" />
                                 ) : (
                                   <Power className="h-4 w-4" />

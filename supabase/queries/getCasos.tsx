@@ -36,7 +36,8 @@ export async function getCasos(): Promise<Caso[]> {
         perfil:perfiles (
           nombre_completo,
           correo,
-          telefono
+          telefono,
+          cedula
         )
       )
     ),
@@ -50,7 +51,8 @@ export async function getCasos(): Promise<Caso[]> {
         perfil:perfiles (
           nombre_completo,
           correo,
-          telefono
+          telefono,
+          cedula
         )
       )
     )

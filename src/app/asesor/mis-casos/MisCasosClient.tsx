@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -70,51 +70,76 @@ export default function Asesor() {
   useRealtimeCasos(refetch);
 
   // 1. First, filter only cases where the advisor is current active assignment
-  const advisorActiveCasos = (casos ?? []).filter((caso) => {
-    const activeAsesor =
-      caso.asesores_casos?.length
-        ? caso.asesores_casos.find(a => !a.fecha_fin_asignacion)?.asesor
-        : null;
+  const advisorActiveCasos = useMemo(() => {
+    return (casos ?? []).filter((caso) => {
+      const activeAsesor =
+        caso.asesores_casos?.length
+          ? caso.asesores_casos.find((a) => !a.fecha_fin_asignacion)?.asesor
+          : null;
 
-    return activeAsesor?.id_perfil === currentUserId;
-  });
+      return activeAsesor?.id_perfil === currentUserId;
+    });
+  }, [casos, currentUserId]);
 
   // 2. Then apply UI filters (search, status, area)
-  const filteredCases = advisorActiveCasos.filter((caso) => {
-    const isSearchMatch = matchesSearch(
-      searchTerm,
-      caso.usuarios?.nombre_completo,
-      caso.usuarios?.cedula,
-      caso.id_caso,
-      caso.area,
-      caso.resumen_hechos,
-    );
+  const filteredCases = useMemo(() => {
+    return advisorActiveCasos.filter((caso) => {
+      const usuario = Array.isArray(caso.usuarios) ? caso.usuarios[0] : caso.usuarios;
+      const estudianteActivo = caso.estudiantes_casos?.find(
+        (e: any) => !e.fecha_fin_asignacion,
+      )?.estudiante;
+      const asesorActivo = caso.asesores_casos?.find(
+        (a: any) => !a.fecha_fin_asignacion,
+      )?.asesor;
 
-    const matchesStatus =
-      statusFilter === "todos" || caso.estado === statusFilter;
-    const matchesArea =
-      areaFilter === "todos" || caso.area === areaFilter;
-    const matchesClass =
-      classFilter === "todos" || caso.clasificacion === classFilter;
-    const matchesPeriodo =
-      periodoFilter === "todos" || caso.periodo === periodoFilter;
+      const isSearchMatch = matchesSearch(
+        searchTerm,
+        usuario?.nombre_completo,
+        usuario?.cedula,
+        estudianteActivo?.perfil?.nombre_completo,
+        estudianteActivo?.perfil?.cedula,
+        asesorActivo?.perfil?.nombre_completo,
+        asesorActivo?.perfil?.cedula,
+        caso.id_caso,
+        caso.area,
+        caso.resumen_hechos,
+      );
 
-    return isSearchMatch && matchesStatus && matchesArea && matchesClass && matchesPeriodo;
-  });
+      const matchesStatus =
+        statusFilter === "todos" || caso.estado === statusFilter;
+      const matchesArea =
+        areaFilter === "todos" || caso.area === areaFilter;
+      const matchesClass =
+        classFilter === "todos" || caso.clasificacion === classFilter;
+      const matchesPeriodo =
+        periodoFilter === "todos" || caso.periodo === periodoFilter;
 
-  const sortedCases = [...filteredCases].sort((a, b) => {
-    if (dateSort === "ultima_mod") {
-      const modA = a.ultima_modificacion ? new Date(a.ultima_modificacion).getTime() : 0;
-      const modB = b.ultima_modificacion ? new Date(b.ultima_modificacion).getTime() : 0;
-      return modB - modA;
-    }
-    const dateA = new Date(a.fecha_creacion).getTime();
-    const dateB = new Date(b.fecha_creacion).getTime();
-    const diff = dateB - dateA;
-    return diff !== 0
-      ? (dateSort === "recientes" ? diff : -diff)
-      : ((b.id_caso ?? 0) - (a.id_caso ?? 0));
-  });
+      return isSearchMatch && matchesStatus && matchesArea && matchesClass && matchesPeriodo;
+    });
+  }, [
+    advisorActiveCasos,
+    searchTerm,
+    statusFilter,
+    areaFilter,
+    classFilter,
+    periodoFilter,
+  ]);
+
+  const sortedCases = useMemo(() => {
+    return [...filteredCases].sort((a, b) => {
+      if (dateSort === "ultima_mod") {
+        const modA = a.ultima_modificacion ? new Date(a.ultima_modificacion).getTime() : 0;
+        const modB = b.ultima_modificacion ? new Date(b.ultima_modificacion).getTime() : 0;
+        return modB - modA;
+      }
+      const dateA = new Date(a.fecha_creacion).getTime();
+      const dateB = new Date(b.fecha_creacion).getTime();
+      const diff = dateB - dateA;
+      return diff !== 0
+        ? (dateSort === "recientes" ? diff : -diff)
+        : ((b.id_caso ?? 0) - (a.id_caso ?? 0));
+    });
+  }, [filteredCases, dateSort]);
 
   const pendingApprovalCount = advisorActiveCasos?.filter(
     (c) => c.estado === "pendiente_aprobacion",
@@ -305,31 +330,33 @@ export default function Asesor() {
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-            {currentCases?.map((caso) => (
-              <div
-                key={caso.id_caso}
-                onClick={() => router.push(`/asesor/mis-casos/${caso.id_caso}`)}
-                className="cursor-pointer"
-              >
-                <Card
-                  className="p-6 border-none shadow-sm shadow-slate-200/50 hover:shadow-md hover:shadow-blue-900/5 hover:border-blue-300 transition-all duration-300 bg-white rounded-2xl group flex flex-col h-full"
+            {currentCases?.map((caso) => {
+              const usuario = Array.isArray(caso.usuarios) ? caso.usuarios[0] : caso.usuarios;
+              return (
+                <div
+                  key={caso.id_caso}
+                  onClick={() => router.push(`/asesor/mis-casos/${caso.id_caso}`)}
+                  className="cursor-pointer"
                 >
-                <div className="flex justify-between items-start mb-5 border-b border-slate-100 pb-4">
-                  <div className="space-y-1">
-                    <div className="text-xs font-semibold text-slate-400">
-                      Caso #{caso.id_caso}
+                  <Card
+                    className="p-6 border-none shadow-sm shadow-slate-200/50 hover:shadow-md hover:shadow-blue-900/5 hover:border-blue-300 transition-all duration-300 bg-white rounded-2xl group flex flex-col h-full"
+                  >
+                  <div className="flex justify-between items-start mb-5 border-b border-slate-100 pb-4">
+                    <div className="space-y-1">
+                      <div className="text-xs font-semibold text-slate-400">
+                        Caso #{caso.id_caso}
+                      </div>
+                      <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                        {usuario?.nombre_completo || "Cliente Sin Nombre"}
+                      </h3>
+                      <div className="text-sm font-medium text-slate-500">
+                        {usuario?.cedula
+                          ? `C.C. ${usuario.cedula}`
+                          : "Sin Documento"}
+                      </div>
                     </div>
-                    <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
-                      {caso.usuarios?.nombre_completo || "Cliente Sin Nombre"}
-                    </h3>
-                    <div className="text-sm font-medium text-slate-500">
-                      {caso.usuarios?.cedula
-                        ? `C.C. ${caso.usuarios.cedula}`
-                        : "Sin Documento"}
-                    </div>
+                    <div className="shrink-0">{getStatusBadge(caso.estado)}</div>
                   </div>
-                  <div className="shrink-0">{getStatusBadge(caso.estado)}</div>
-                </div>
 
                 <div className="space-y-3 mb-6 flex-1">
                   <div className="space-y-1">
@@ -408,7 +435,8 @@ export default function Asesor() {
                 </div>
               </Card>
               </div>
-            ))}
+            );
+          })}
           </div>
         )}
 

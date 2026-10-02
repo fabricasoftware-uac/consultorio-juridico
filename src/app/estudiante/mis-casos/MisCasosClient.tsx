@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -78,54 +78,79 @@ export default function MisCasosClient() {
   useRealtimeCasos(refetch);
 
   // 1. First, filter only cases where the student is current active assignment
-  const studentActiveCasos = (casos ?? []).filter((caso) => {
-    const activeStudent =
-      caso.estudiantes_casos?.length
-        ? caso.estudiantes_casos.find(e => !e.fecha_fin_asignacion)?.estudiante
-        : null;
+  const studentActiveCasos = useMemo(() => {
+    return (casos ?? []).filter((caso) => {
+      const activeStudent =
+        caso.estudiantes_casos?.length
+          ? caso.estudiantes_casos.find((e) => !e.fecha_fin_asignacion)?.estudiante
+          : null;
 
-    return activeStudent?.id_perfil === currentUserId;
-  });
+      return activeStudent?.id_perfil === currentUserId;
+    });
+  }, [casos, currentUserId]);
 
   // 2. Then apply UI filters (search, status, area)
-  const filteredCases = studentActiveCasos.filter((caso) => {
-    // Búsqueda general flexible
-    const isSearchMatch = matchesSearch(
-      searchTerm,
-      caso.usuarios?.nombre_completo,
-      caso.usuarios?.cedula,
-      caso.id_caso,
-      caso.area,
-      caso.resumen_hechos,
-    );
+  const filteredCases = useMemo(() => {
+    return studentActiveCasos.filter((caso) => {
+      const usuario = Array.isArray(caso.usuarios) ? caso.usuarios[0] : caso.usuarios;
+      const estudianteActivo = caso.estudiantes_casos?.find(
+        (e: any) => !e.fecha_fin_asignacion,
+      )?.estudiante;
+      const asesorActivo = caso.asesores_casos?.find(
+        (a: any) => !a.fecha_fin_asignacion,
+      )?.asesor;
 
-    // Estado, área
-    const matchesStatus =
-      statusFilter === "todos" || caso.estado === statusFilter;
-    const matchesArea = areaFilter === "todos" || caso.area === areaFilter;
+      // Búsqueda general flexible
+      const isSearchMatch = matchesSearch(
+        searchTerm,
+        usuario?.nombre_completo,
+        usuario?.cedula,
+        estudianteActivo?.perfil?.nombre_completo,
+        estudianteActivo?.perfil?.cedula,
+        asesorActivo?.perfil?.nombre_completo,
+        asesorActivo?.perfil?.cedula,
+        caso.id_caso,
+        caso.area,
+        caso.resumen_hechos,
+      );
 
-    // Filters de fecha y clasificación
-    const matchesClass =
-      classFilter === "todos" || caso.clasificacion === classFilter;
-    const matchesPeriodo =
-      periodoFilter === "todos" || caso.periodo === periodoFilter;
+      // Estado, área
+      const matchesStatus =
+        statusFilter === "todos" || caso.estado === statusFilter;
+      const matchesArea = areaFilter === "todos" || caso.area === areaFilter;
 
-    return isSearchMatch && matchesStatus && matchesArea && matchesClass && matchesPeriodo;
-  });
+      // Filters de fecha y clasificación
+      const matchesClass =
+        classFilter === "todos" || caso.clasificacion === classFilter;
+      const matchesPeriodo =
+        periodoFilter === "todos" || caso.periodo === periodoFilter;
 
-  const sortedCases = [...filteredCases].sort((a, b) => {
-    if (dateSort === "ultima_mod") {
-      const modA = a.ultima_modificacion ? new Date(a.ultima_modificacion).getTime() : 0;
-      const modB = b.ultima_modificacion ? new Date(b.ultima_modificacion).getTime() : 0;
-      return modB - modA;
-    }
-    const dateA = new Date(a.fecha_creacion).getTime();
-    const dateB = new Date(b.fecha_creacion).getTime();
-    const diff = dateB - dateA;
-    return diff !== 0
-      ? (dateSort === "recientes" ? diff : -diff)
-      : ((b.id_caso ?? 0) - (a.id_caso ?? 0));
-  });
+      return isSearchMatch && matchesStatus && matchesArea && matchesClass && matchesPeriodo;
+    });
+  }, [
+    studentActiveCasos,
+    searchTerm,
+    statusFilter,
+    areaFilter,
+    classFilter,
+    periodoFilter,
+  ]);
+
+  const sortedCases = useMemo(() => {
+    return [...filteredCases].sort((a, b) => {
+      if (dateSort === "ultima_mod") {
+        const modA = a.ultima_modificacion ? new Date(a.ultima_modificacion).getTime() : 0;
+        const modB = b.ultima_modificacion ? new Date(b.ultima_modificacion).getTime() : 0;
+        return modB - modA;
+      }
+      const dateA = new Date(a.fecha_creacion).getTime();
+      const dateB = new Date(b.fecha_creacion).getTime();
+      const diff = dateB - dateA;
+      return diff !== 0
+        ? (dateSort === "recientes" ? diff : -diff)
+        : ((b.id_caso ?? 0) - (a.id_caso ?? 0));
+    });
+  }, [filteredCases, dateSort]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 9;
@@ -271,30 +296,32 @@ export default function MisCasosClient() {
 
         {/* Case List Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {currentCases.map((caso) => (
-          <div
-            key={caso.id_caso}
-            onClick={() => router.push(`/estudiante/mis-casos/${caso.id_caso}`)}
-            className="cursor-pointer"
-          >
-            <Card
-              className="p-6 border-none shadow-sm shadow-slate-200/50 hover:shadow-md hover:shadow-blue-900/5 hover:border-blue-300 transition-all duration-300 bg-white rounded-2xl group flex flex-col h-full"
-            >
-              <div className="flex justify-between items-start mb-6 border-b border-slate-100 pb-4">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
-                    {caso.usuarios?.nombre_completo || "Cliente Sin Nombre"}
-                  </h3>
-                  <div className="text-sm font-medium text-slate-500 mt-1">
-                    {caso.usuarios?.cedula
-                      ? `C.C. ${caso.usuarios.cedula}`
-                      : "Sin Documento"}
-                    <span className="mx-2 text-slate-300">•</span>
-                    Caso <span className="text-slate-700">#{caso.id_caso}</span>
-                  </div>
-                </div>
-                <div className="shrink-0 flex flex-col items-end gap-1.5">
-                  {getStatusBadge(caso.estado)}
+          {currentCases.map((caso) => {
+            const usuario = Array.isArray(caso.usuarios) ? caso.usuarios[0] : caso.usuarios;
+            return (
+              <div
+                key={caso.id_caso}
+                onClick={() => router.push(`/estudiante/mis-casos/${caso.id_caso}`)}
+                className="cursor-pointer"
+              >
+                <Card
+                  className="p-6 border-none shadow-sm shadow-slate-200/50 hover:shadow-md hover:shadow-blue-900/5 hover:border-blue-300 transition-all duration-300 bg-white rounded-2xl group flex flex-col h-full"
+                >
+                  <div className="flex justify-between items-start mb-6 border-b border-slate-100 pb-4">
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                        {usuario?.nombre_completo || "Cliente Sin Nombre"}
+                      </h3>
+                      <div className="text-sm font-medium text-slate-500 mt-1">
+                        {usuario?.cedula
+                          ? `C.C. ${usuario.cedula}`
+                          : "Sin Documento"}
+                        <span className="mx-2 text-slate-300">•</span>
+                        Caso <span className="text-slate-700">#{caso.id_caso}</span>
+                      </div>
+                    </div>
+                    <div className="shrink-0 flex flex-col items-end gap-1.5">
+                      {getStatusBadge(caso.estado)}
                   {(caso.documentos_caso?.[0]?.count ?? 0) === 0 &&
                     caso.estado !== "cerrado" &&
                     caso.estado !== "archivado" && (
@@ -382,7 +409,8 @@ export default function MisCasosClient() {
               </div>
             </Card>
           </div>
-          ))}
+          );
+        })}
         </div>
 
         {filteredCases.length === 0 && (

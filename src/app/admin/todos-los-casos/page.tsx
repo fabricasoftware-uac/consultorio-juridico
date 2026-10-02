@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -55,33 +55,52 @@ export default function TodosLosCasosPage() {
     });
   }, []);
 
-  const periodos = [...new Set(casos.map((c) => c.periodo).filter(Boolean))].sort().reverse();
+  const periodos = useMemo(
+    () => [...new Set(casos.map((c) => c.periodo).filter(Boolean))].sort().reverse(),
+    [casos],
+  );
 
-  const filtrados = casos.filter((c) => {
-    const matchSearch = matchesSearch(
-      searchTerm,
-      c.usuarios?.nombre_completo,
-      c.usuarios?.cedula,
-      c.id_caso,
-      c.area,
-      c.resumen_hechos,
-    );
-    const matchStatus = statusFilter === "todos" || c.estado === statusFilter;
-    const matchArea = areaFilter === "todos" || c.area === areaFilter;
-    const matchPeriodo = periodoFilter === "todos" || c.periodo === periodoFilter;
-    return matchSearch && matchStatus && matchArea && matchPeriodo;
-  });
+  const filtrados = useMemo(() => {
+    return casos.filter((c) => {
+      const usuario = Array.isArray(c.usuarios) ? c.usuarios[0] : c.usuarios;
+      const estudianteActivo = c.estudiantes_casos?.find(
+        (e) => !e.fecha_fin_asignacion,
+      )?.estudiante;
+      const asesorActivo = c.asesores_casos?.find(
+        (a) => !a.fecha_fin_asignacion,
+      )?.asesor;
 
-  const sorted = [...filtrados].sort((a, b) => {
-    if (dateSort === "ultima_mod") {
-      const modA = a.ultima_modificacion ? new Date(a.ultima_modificacion).getTime() : 0;
-      const modB = b.ultima_modificacion ? new Date(b.ultima_modificacion).getTime() : 0;
-      return modB - modA;
-    }
-    const dateA = new Date(a.fecha_creacion).getTime();
-    const dateB = new Date(b.fecha_creacion).getTime();
-    return dateSort === "recientes" ? dateB - dateA : dateA - dateB;
-  });
+      const matchSearch = matchesSearch(
+        searchTerm,
+        usuario?.nombre_completo,
+        usuario?.cedula,
+        estudianteActivo?.perfil?.nombre_completo,
+        estudianteActivo?.perfil?.cedula,
+        asesorActivo?.perfil?.nombre_completo,
+        asesorActivo?.perfil?.cedula,
+        c.id_caso,
+        c.area,
+        c.resumen_hechos,
+      );
+      const matchStatus = statusFilter === "todos" || c.estado === statusFilter;
+      const matchArea = areaFilter === "todos" || c.area === areaFilter;
+      const matchPeriodo = periodoFilter === "todos" || c.periodo === periodoFilter;
+      return matchSearch && matchStatus && matchArea && matchPeriodo;
+    });
+  }, [casos, searchTerm, statusFilter, areaFilter, periodoFilter]);
+
+  const sorted = useMemo(() => {
+    return [...filtrados].sort((a, b) => {
+      if (dateSort === "ultima_mod") {
+        const modA = a.ultima_modificacion ? new Date(a.ultima_modificacion).getTime() : 0;
+        const modB = b.ultima_modificacion ? new Date(b.ultima_modificacion).getTime() : 0;
+        return modB - modA;
+      }
+      const dateA = new Date(a.fecha_creacion).getTime();
+      const dateB = new Date(b.fecha_creacion).getTime();
+      return dateSort === "recientes" ? dateB - dateA : dateA - dateB;
+    });
+  }, [filtrados, dateSort]);
 
   const totalPages = Math.ceil(sorted.length / ITEMS_PER_PAGE);
   const paginados = sorted.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -215,27 +234,33 @@ export default function TodosLosCasosPage() {
                 </tr>
               </thead>
               <tbody>
-                {paginados.map((c) => (
-                  <tr key={c.id_caso} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
-                    <td className="p-3 font-mono text-xs text-slate-500">#{c.id_caso}</td>
-                    <td className="p-3 font-medium text-slate-800">{c.usuarios?.nombre_completo || "N/A"}</td>
-                    <td className="p-3 text-slate-600 hidden md:table-cell">{c.usuarios?.cedula || "—"}</td>
-                    <td className="p-3 text-slate-600 text-xs">{formatArea(c.area)}</td>
-                    <td className="p-3">{getStatusBadge(c.estado)}</td>
-                    <td className="p-3 text-slate-600 text-xs hidden lg:table-cell">
-                      {c.estudiantes_casos?.find(e => !e.fecha_fin_asignacion)?.estudiante?.perfil?.nombre_completo || "—"}
-                    </td>
-                    <td className="p-3 text-slate-500 text-xs hidden lg:table-cell">{c.periodo || "—"}</td>
-                    <td className="p-3 text-right">
-                      <Link href={`/admin/todos-los-casos/${c.id_caso}`}>
-                        <Button variant="ghost" size="sm" className="text-xs text-blue-600 h-7">
-                          <ExternalLink className="w-3 h-3 mr-1" />
-                          Ver
-                        </Button>
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
+                {paginados.map((c) => {
+                  const usuario = Array.isArray(c.usuarios) ? c.usuarios[0] : c.usuarios;
+                  const estudianteActivo = c.estudiantes_casos?.find(
+                    (e) => !e.fecha_fin_asignacion,
+                  )?.estudiante;
+                  return (
+                    <tr key={c.id_caso} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                      <td className="p-3 font-mono text-xs text-slate-500">#{c.id_caso}</td>
+                      <td className="p-3 font-medium text-slate-800">{usuario?.nombre_completo || "N/A"}</td>
+                      <td className="p-3 text-slate-600 hidden md:table-cell">{usuario?.cedula || "—"}</td>
+                      <td className="p-3 text-slate-600 text-xs">{formatArea(c.area)}</td>
+                      <td className="p-3">{getStatusBadge(c.estado)}</td>
+                      <td className="p-3 text-slate-600 text-xs hidden lg:table-cell">
+                        {estudianteActivo?.perfil?.nombre_completo || "—"}
+                      </td>
+                      <td className="p-3 text-slate-500 text-xs hidden lg:table-cell">{c.periodo || "—"}</td>
+                      <td className="p-3 text-right">
+                        <Link href={`/admin/todos-los-casos/${c.id_caso}`}>
+                          <Button variant="ghost" size="sm" className="text-xs text-blue-600 h-7">
+                            <ExternalLink className="w-3 h-3 mr-1" />
+                            Ver
+                          </Button>
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

@@ -155,7 +155,7 @@ export default function AsesoresPage() {
   const handleToggleStatus = async (asesor: Asesor) => {
     const result = await toggleUserStatus(
       asesor.id_perfil,
-      asesor.perfil.activo,
+      asesor.perfil?.activo ?? false,
     );
     if (result.success) {
       toast.success(result.message);
@@ -168,10 +168,10 @@ export default function AsesoresPage() {
   const openEdit = (asesor: Asesor) => {
     setEditingAsesor(asesor);
     setEditForm({
-      nombre: asesor.perfil.nombre_completo ?? "",
-      correo: asesor.perfil.correo || "",
-      cedula: asesor.perfil.cedula || "",
-      telefono: asesor.perfil.telefono || "",
+      nombre: asesor.perfil?.nombre_completo ?? "",
+      correo: asesor.perfil?.correo || "",
+      cedula: asesor.perfil?.cedula || "",
+      telefono: asesor.perfil?.telefono || "",
       area: asesor.area,
       horarios: [],
     });
@@ -245,9 +245,9 @@ export default function AsesoresPage() {
   const filteredAsesores = asesores.filter((a) =>
     matchesSearch(
       searchTerm,
-      a.perfil.nombre_completo,
-      a.perfil.cedula,
-      a.perfil.correo,
+      a.perfil?.nombre_completo,
+      a.perfil?.cedula,
+      a.perfil?.correo,
     ),
   );
 
@@ -431,10 +431,10 @@ export default function AsesoresPage() {
                         <TableRow key={asesor.id_perfil}>
                           <TableCell>
                             <div className="font-medium text-slate-900">
-                              {asesor.perfil.nombre_completo}
+                              {asesor.perfil?.nombre_completo || "Sin nombre"}
                             </div>
                             <div className="text-xs text-slate-500">
-                              CC: {asesor.perfil.cedula}
+                              CC: {asesor.perfil?.cedula || "—"}
                             </div>
                           </TableCell>
                           <TableCell>
@@ -445,10 +445,10 @@ export default function AsesoresPage() {
                           <TableCell>
                             <Badge
                               variant={
-                                asesor.perfil.activo ? "default" : "destructive"
+                                asesor.perfil?.activo ? "default" : "destructive"
                               }
                             >
-                              {asesor.perfil.activo ? "Activo" : "Inactivo"}
+                              {asesor.perfil?.activo ? "Activo" : "Inactivo"}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
@@ -473,10 +473,10 @@ export default function AsesoresPage() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className={`h-8 w-8 ${asesor.perfil.activo ? "text-amber-600 hover:text-amber-700 hover:bg-amber-50" : "text-green-600 hover:text-green-700 hover:bg-green-50"}`}
+                                className={`h-8 w-8 ${asesor.perfil?.activo ? "text-amber-600 hover:text-amber-700 hover:bg-amber-50" : "text-green-600 hover:text-green-700 hover:bg-green-50"}`}
                                 onClick={() => handleToggleStatus(asesor)}
                               >
-                                {asesor.perfil.activo ? (
+                                {asesor.perfil?.activo ? (
                                   <PowerOff className="h-4 w-4" />
                                 ) : (
                                   <Power className="h-4 w-4" />
@@ -583,7 +583,7 @@ export default function AsesoresPage() {
           <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                Editar Horario: {scheduleAsesor?.perfil.nombre_completo}
+                Editar Horario: {scheduleAsesor?.perfil?.nombre_completo || "Asesor"}
               </DialogTitle>
             </DialogHeader>
             <div className="py-4">

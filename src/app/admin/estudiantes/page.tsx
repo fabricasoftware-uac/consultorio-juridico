@@ -169,7 +169,7 @@ export default function EstudiantesPage() {
   const handleToggleStatus = async (student: Estudiante) => {
     const result = await toggleUserStatus(
       student.id_perfil,
-      student.perfil.activo,
+      student.perfil?.activo ?? false,
     );
     if (result.success) {
       toast.success(result.message);
@@ -182,10 +182,10 @@ export default function EstudiantesPage() {
   const openEdit = (student: Estudiante) => {
     setEditingStudent(student);
     setEditForm({
-      nombre: student.perfil.nombre_completo ?? "",
-      correo: student.perfil.correo || "",
-      cedula: student.perfil.cedula || "",
-      telefono: student.perfil.telefono || "",
+      nombre: student.perfil?.nombre_completo ?? "",
+      correo: student.perfil?.correo || "",
+      cedula: student.perfil?.cedula || "",
+      telefono: student.perfil?.telefono || "",
       // semestre es NULL mientras el estudiante no complete su perfil.
       semestre: student.semestre?.toString() ?? "",
       jornada: student.jornada,
@@ -219,9 +219,9 @@ export default function EstudiantesPage() {
   const filteredEstudiantes = estudiantes.filter((e) => {
     const coincideBusqueda = matchesSearch(
       searchTerm,
-      e.perfil.nombre_completo,
-      e.perfil.cedula,
-      e.perfil.correo,
+      e.perfil?.nombre_completo,
+      e.perfil?.cedula,
+      e.perfil?.correo,
       e.jornada,
       e.semestre?.toString(),
     );
@@ -236,7 +236,7 @@ export default function EstudiantesPage() {
 
     const coincideEstado =
       filtroEstado === "todos" ||
-      (filtroEstado === "activos" ? e.perfil.activo : !e.perfil.activo);
+      (filtroEstado === "activos" ? (e.perfil?.activo ?? false) : !(e.perfil?.activo ?? false));
 
     return (
       coincideBusqueda && coincideJornada && coincideSemestre && coincideEstado
@@ -537,15 +537,15 @@ export default function EstudiantesPage() {
                             <div
                               className={cn(
                                 "font-medium",
-                                student.perfil.nombre_completo
+                                student.perfil?.nombre_completo
                                   ? "text-slate-900"
                                   : "text-slate-400 italic",
                               )}
                             >
-                              {nombreMostrado(student.perfil.nombre_completo)}
+                              {nombreMostrado(student.perfil?.nombre_completo || "Sin nombre")}
                             </div>
                             <div className="text-xs text-slate-500">
-                              {student.perfil.cedula
+                              {student.perfil?.cedula
                                 ? `CC: ${student.perfil.cedula}`
                                 : "Sin documento"}
                             </div>
@@ -572,12 +572,12 @@ export default function EstudiantesPage() {
                           <TableCell>
                             <Badge
                               variant={
-                                student.perfil.activo
+                                student.perfil?.activo
                                   ? "default"
                                   : "destructive"
                               }
                             >
-                              {student.perfil.activo ? "Activo" : "Inactivo"}
+                              {student.perfil?.activo ? "Activo" : "Inactivo"}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
@@ -598,10 +598,10 @@ export default function EstudiantesPage() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className={`h-8 w-8 ${student.perfil.activo ? "text-amber-600 hover:text-amber-700 hover:bg-amber-50" : "text-green-600 hover:text-green-700 hover:bg-green-50"}`}
+                                className={`h-8 w-8 ${student.perfil?.activo ? "text-amber-600 hover:text-amber-700 hover:bg-amber-50" : "text-green-600 hover:text-green-700 hover:bg-green-50"}`}
                                 onClick={() => handleToggleStatus(student)}
                               >
-                                {student.perfil.activo ? (
+                                {student.perfil?.activo ? (
                                   <PowerOff className="h-4 w-4" />
                                 ) : (
                                   <Power className="h-4 w-4" />

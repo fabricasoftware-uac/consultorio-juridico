@@ -11,6 +11,7 @@ export async function getEstudiantes(
     turno,
     dia,
     perfil:perfiles!${soloActivos ? "inner" : "estudiantes_id_perfil_fkey"} (
+      id,
       nombre_completo,
       correo,
       telefono,
@@ -20,7 +21,7 @@ export async function getEstudiantes(
   `);
 
   if (soloActivos) {
-    query = query.eq("perfiles.activo", true);
+    query = query.eq("perfil.activo", true);
   }
 
   const { data, error } = await query;

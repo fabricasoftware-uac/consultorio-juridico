@@ -116,11 +116,25 @@ export function AsignacionCaso({
   const atiendeHoy = (e: Estudiante) =>
     (e.horarios ?? []).some((h) => mismoDia(h.dia, diaActual));
 
-  const estudiantesFiltrados = mostrarTodos
+  const hayEstudiantesHoy =
+    estudiantesDisponibles.length > 0 && estudiantesDisponibles.some(atiendeHoy);
+
+  // Fallback automático: si no hay estudiantes con turno hoy, mostramos todos para no bloquear al usuario
+  const mostrarTodosEfectivo = mostrarTodos || !hayEstudiantesHoy;
+
+  const estudiantesFiltrados = mostrarTodosEfectivo
     ? estudiantesDisponibles
     : estudiantesDisponibles.filter(atiendeHoy);
 
-  const hayEstudiantesHoy = estudiantesDisponibles.some(atiendeHoy);
+  // Si al cargar o cambiar el día no hay estudiantes hoy, activar mostrarTodos
+  useEffect(() => {
+    if (
+      estudiantesDisponibles.length > 0 &&
+      !estudiantesDisponibles.some(atiendeHoy)
+    ) {
+      setMostrarTodos(true);
+    }
+  }, [estudiantesDisponibles, diaActual]);
 
   const handleRegistrarCaso = () => {
     if (!estudianteId) {
@@ -244,8 +258,9 @@ export function AsignacionCaso({
                   Asignar a un estudiante
                 </h3>
                 <p className="text-sm text-slate-500">
-                  Seleccione el practicante encargado del caso para hoy{" "}
-                  {diaActual}
+                  {!hayEstudiantesHoy && estudiantesDisponibles.length > 0
+                    ? `No hay turnos registrados para hoy (${diaActual}). Mostrando todos los practicantes disponibles.`
+                    : `Seleccione el practicante encargado del caso para hoy ${diaActual}`}
                 </p>
               </div>
             </div>
@@ -253,38 +268,56 @@ export function AsignacionCaso({
             <div className="md:pl-18 w-full">
               <div className="space-y-4 max-w-full">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <Label
-                    htmlFor="estudiante"
-                    className="text-slate-700 font-medium ml-1"
-                  >
-                    Seleccionar estudiante *
-                  </Label>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setMostrarTodos(!mostrarTodos)}
-                    className="text-[11px] h-7 text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-bold uppercase tracking-wider"
-                  >
-                    {mostrarTodos
-                      ? `Ver solo los de hoy (${diaActual})`
-                      : `Ver todos (${estudiantesDisponibles.length})`}
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Label
+                      htmlFor="estudiante"
+                      className="text-slate-700 font-medium ml-1"
+                    >
+                      Seleccionar estudiante *
+                    </Label>
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        "text-[10px] font-medium py-0.5 px-2",
+                        !mostrarTodosEfectivo
+                          ? "bg-blue-50 text-blue-700 border border-blue-200"
+                          : "bg-slate-100 text-slate-700 border border-slate-200",
+                      )}
+                    >
+                      {!mostrarTodosEfectivo
+                        ? `Turno de hoy (${diaActual})`
+                        : !hayEstudiantesHoy
+                          ? "Todos (sin turnos hoy)"
+                          : `Todos (${estudiantesDisponibles.length})`}
+                    </Badge>
+                  </div>
+                  {hayEstudiantesHoy ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      type="button"
+                      onClick={() => setMostrarTodos(!mostrarTodosEfectivo)}
+                      className="text-[11px] h-7 text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-bold uppercase tracking-wider"
+                    >
+                      {mostrarTodosEfectivo
+                        ? `Ver solo los de hoy (${diaActual})`
+                        : `Ver todos (${estudiantesDisponibles.length})`}
+                    </Button>
+                  ) : (
+                    <span className="text-[11px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 font-medium">
+                      Sin turnos hoy ({diaActual})
+                    </span>
+                  )}
                 </div>
 
-                {!mostrarTodos && !hayEstudiantesHoy && (
+                {!hayEstudiantesHoy && estudiantesDisponibles.length > 0 && (
                   <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
                     <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
                     <p className="text-xs text-amber-800">
                       Ningún estudiante tiene turno registrado para hoy (
-                      {diaActual}).{" "}
-                      <button
-                        type="button"
-                        onClick={() => setMostrarTodos(true)}
-                        className="font-semibold underline cursor-pointer"
-                      >
-                        Ver todos los estudiantes
-                      </button>
-                      .
+                      {diaActual}). Se muestran automáticamente todos los
+                      estudiantes registrados ({estudiantesDisponibles.length})
+                      para permitir la asignación del caso.
                     </p>
                   </div>
                 )}
@@ -294,23 +327,29 @@ export function AsignacionCaso({
                     value={estudianteId}
                     onValueChange={setEstudianteId}
                     placeholder={
-                      mostrarTodos
-                        ? "Seleccione un estudiante"
-                        : `Estudiantes de hoy (${diaActual})`
+                      mostrarTodosEfectivo
+                        ? (!hayEstudiantesHoy
+                            ? "Seleccione un estudiante (todos disponibles - sin turnos hoy)"
+                            : `Seleccione un estudiante (mostrando todos: ${estudiantesDisponibles.length})`)
+                        : `Estudiantes en turno hoy (${diaActual})`
                     }
                     searchPlaceholder="Buscar por nombre o cédula..."
                     getItemValue={(e) => e.id_perfil.toString()}
-                    getItemLabel={(e) => nombreMostrado(e.perfil.nombre_completo)}
-                    getItemSearchValue={(e) => e.perfil.cedula || ""}
+                    getItemLabel={(e) =>
+                      nombreMostrado(e.perfil?.nombre_completo || "")
+                    }
+                    getItemSearchValue={(e) => e.perfil?.cedula || ""}
                     renderItem={(estudiante) => (
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full py-2 gap-2">
                         <div className="flex flex-col">
                           <span className="font-semibold text-sm text-slate-800">
-                            {nombreMostrado(estudiante.perfil.nombre_completo)}
+                            {nombreMostrado(
+                              estudiante.perfil?.nombre_completo || "",
+                            )}
                           </span>
                           <span className="text-[11px] text-slate-500 flex flex-wrap items-center gap-1.5 mt-0.5">
                             <span className="font-medium font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">
-                              CC: {estudiante.perfil.cedula ?? "—"}
+                              CC: {estudiante.perfil?.cedula ?? "—"}
                             </span>
                             {(estudiante.horarios ?? []).length === 0 ? (
                               <>
@@ -391,9 +430,9 @@ export function AsignacionCaso({
                           </p>
                           <p
                             className="text-sm font-medium text-slate-700 truncate"
-                            title={nombreMostrado(est.perfil.nombre_completo)}
+                            title={nombreMostrado(est.perfil?.nombre_completo || "")}
                           >
-                            {est.perfil.nombre_completo}
+                            {est.perfil?.nombre_completo || "Sin nombre"}
                           </p>
                         </div>
                         <div className="space-y-1">
@@ -401,7 +440,7 @@ export function AsignacionCaso({
                             Semestre
                           </p>
                           <p className="text-sm font-medium text-slate-700">
-                            {est.semestre}º Semestre
+                            {est.semestre ? `${est.semestre}º Semestre` : "Sin definir"}
                           </p>
                         </div>
                         <div className="space-y-1">
@@ -409,7 +448,9 @@ export function AsignacionCaso({
                             Día de atención
                           </p>
                           <p className="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md inline-block">
-                            {est.dia}
+                            {(est.horarios && est.horarios.length > 0)
+                              ? est.horarios.map((h) => h.dia).join(", ")
+                              : est.dia || "No registrado"}
                           </p>
                         </div>
                         <div className="space-y-1">
@@ -418,11 +459,13 @@ export function AsignacionCaso({
                           </p>
                           <p
                             className="text-sm font-medium text-slate-700 truncate"
-                            title={`${est.turno} (${est.jornada})`}
+                            title={`${(est.horarios && est.horarios.length > 0) ? est.horarios.map((h) => h.turno).join(", ") : (est.turno || "Sin turno")} (${est.jornada || "Jornada"})`}
                           >
-                            {est.turno}{" "}
+                            {(est.horarios && est.horarios.length > 0)
+                              ? est.horarios.map((h) => h.turno).join(", ")
+                              : est.turno || "Sin turno"}{" "}
                             <span className="text-slate-400 text-xs">
-                              ({est.jornada})
+                              ({est.jornada || "—"})
                             </span>
                           </p>
                         </div>
