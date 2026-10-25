@@ -55,7 +55,7 @@ interface CaseDetailShellProps {
   loading: boolean;
   error?: string | null;
   idCaso: string;
-  navbar: ReactNode;
+  navbar?: ReactNode;
   tabs: TabConfig[];
   sidebarExtra?: ReactNode;
   backHref: string;

@@ -10,8 +10,8 @@ export const ROLE_ROUTES: Record<string, string[]> = {
 
 export const ROLE_HOME: Record<string, string> = {
   admin: "/admin/inicio",
-  asesor: "/asesor/inicio",
-  estudiante: "/estudiante/inicio",
+  asesor: "/asesor/mis-casos",
+  estudiante: "/estudiante/mis-casos",
   pro_apoyo: "/pro-apoyo/inicio",
 };
 

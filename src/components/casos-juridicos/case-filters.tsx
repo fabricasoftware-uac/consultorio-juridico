@@ -53,8 +53,14 @@ export interface CaseFiltersProps {
   onAreaChange: (value: string) => void;
   dateSort: string;
   onDateSortChange: (value: string) => void;
-  classFilter: string;
-  onClassChange: (value: string) => void;
+  classFilter?: string;
+  onClassChange?: (value: string) => void;
+  studentFilter?: string;
+  onStudentChange?: (value: string) => void;
+  studentsList?: string[];
+  advisorFilter?: string;
+  onAdvisorChange?: (value: string) => void;
+  advisorsList?: string[];
   onClear: () => void;
   loading?: boolean;
   searchPlaceholder?: string;
@@ -72,9 +78,15 @@ export function CaseFilters({
   onDateSortChange,
   classFilter,
   onClassChange,
+  studentFilter,
+  onStudentChange,
+  studentsList,
+  advisorFilter,
+  onAdvisorChange,
+  advisorsList,
   onClear,
   loading,
-  searchPlaceholder = "Cliente, documento, área...",
+  searchPlaceholder = "Solicitante, documento o N° caso...",
   children,
 }: CaseFiltersProps) {
   return (
@@ -140,6 +152,86 @@ export function CaseFilters({
           </Select>
         </div>
 
+        {studentsList && onStudentChange && (
+          <div className="w-full lg:w-48 space-y-1.5">
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Estudiante
+            </label>
+            <Select
+              value={studentFilter || "todos"}
+              onValueChange={onStudentChange}
+              disabled={loading}
+            >
+              <SelectTrigger className="bg-slate-50 border-transparent focus:bg-white transition-colors rounded-xl truncate">
+                <SelectValue placeholder="Todos los estudiantes" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos los estudiantes</SelectItem>
+                {[...new Set(studentsList)]
+                  .filter(Boolean)
+                  .sort((a, b) => a.localeCompare(b))
+                  .map((student) => (
+                    <SelectItem key={student} value={student}>
+                      {student}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {advisorsList && onAdvisorChange && (
+          <div className="w-full lg:w-48 space-y-1.5">
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Asesor
+            </label>
+            <Select
+              value={advisorFilter || "todos"}
+              onValueChange={onAdvisorChange}
+              disabled={loading}
+            >
+              <SelectTrigger className="bg-slate-50 border-transparent focus:bg-white transition-colors rounded-xl truncate">
+                <SelectValue placeholder="Todos los asesores" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos los asesores</SelectItem>
+                {[...new Set(advisorsList)]
+                  .filter(Boolean)
+                  .sort((a, b) => a.localeCompare(b))
+                  .map((advisor) => (
+                    <SelectItem key={advisor} value={advisor}>
+                      {advisor}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {classFilter !== undefined && onClassChange && (
+          <div className="w-full lg:w-48 space-y-1.5">
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Clasificación
+            </label>
+            <Select
+              value={classFilter}
+              onValueChange={onClassChange}
+              disabled={loading}
+            >
+              <SelectTrigger className="bg-slate-50 border-transparent focus:bg-white transition-colors rounded-xl">
+                <SelectValue placeholder="Clasificación" />
+              </SelectTrigger>
+              <SelectContent>
+                {CLASS_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         <div className="w-full lg:w-48 space-y-1.5">
           <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
             Ordenar por
@@ -154,28 +246,6 @@ export function CaseFilters({
             </SelectTrigger>
             <SelectContent>
               {SORT_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value}>
-                  {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="w-full lg:w-48 space-y-1.5">
-          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-            Clasificación
-          </label>
-          <Select
-            value={classFilter}
-            onValueChange={onClassChange}
-            disabled={loading}
-          >
-            <SelectTrigger className="bg-slate-50 border-transparent focus:bg-white transition-colors rounded-xl">
-              <SelectValue placeholder="Clasificación" />
-            </SelectTrigger>
-            <SelectContent>
-              {CLASS_OPTIONS.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value}>
                   {opt.label}
                 </SelectItem>

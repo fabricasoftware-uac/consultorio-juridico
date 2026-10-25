@@ -225,7 +225,7 @@ function buildEmailHtml({
         <td style="padding:8px;background:#f8fafc;border:1px solid #e2e8f0;font-size:13px;font-weight:600;">#${idCaso}</td>
       </tr>
       <tr>
-        <td style="padding:8px;border:1px solid #e2e8f0;font-size:13px;color:#64748b;">Cliente</td>
+        <td style="padding:8px;border:1px solid #e2e8f0;font-size:13px;color:#64748b;">Solicitante</td>
         <td style="padding:8px;border:1px solid #e2e8f0;font-size:13px;font-weight:600;">${cliente}</td>
       </tr>
       <tr>

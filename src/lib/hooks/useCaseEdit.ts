@@ -77,7 +77,7 @@ export function useCaseEdit(idCaso: string, onRefresh: () => Promise<void>) {
         .eq("id_usuario", editedClientData.id_usuario);
       if (error) throw error;
       await onRefresh();
-      toast.success("Información del cliente actualizada");
+      toast.success("Información del solicitante actualizada");
     } catch (err) {
       console.error(err);
       toast.error("Error al guardar los datos del usuario");

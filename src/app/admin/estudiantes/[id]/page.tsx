@@ -5,7 +5,6 @@ import React from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Navbar } from "../../components/NavbarAdmin";
 import { Spinner } from "@/components/ui/spinner";
 import { getStatusBadge } from "@/components/ui/status-badge";
 import { formatArea, nombreMostrado } from "@/lib/utils";
@@ -38,20 +37,18 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   }, [id]);
 
   if (loading) return (
-    <div className="min-h-screen flex flex-col"><Navbar /><div className="flex-1 flex items-center justify-center"><Spinner className="h-10 w-10 text-blue-600" /></div></div>
+    <div className="flex-1 flex items-center justify-center py-20"><Spinner className="h-10 w-10 text-blue-600" /></div>
   );
 
   if (!estudiante) return (
-    <div className="min-h-screen flex flex-col"><Navbar /><div className="flex-1 flex items-center justify-center"><p className="text-slate-500">Estudiante no encontrado</p></div></div>
+    <div className="flex-1 flex items-center justify-center py-20"><p className="text-slate-500">Estudiante no encontrado</p></div>
   );
 
   const activos = casos.filter((c: any) => c.casos && !["cerrado","archivado"].includes(c.casos.estado));
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Navbar />
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8">
-        <Link href="/admin/estudiantes" className="flex items-center text-sm text-blue-600 hover:underline mb-6">
+    <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 py-8">
+      <Link href="/admin/estudiantes" className="flex items-center text-sm text-blue-600 hover:underline mb-6">
           <ArrowLeft className="w-4 h-4 mr-2" />Volver a estudiantes
         </Link>
 
@@ -116,7 +113,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                 <thead>
                   <tr className="border-b bg-slate-50/50">
                     <th className="text-left p-3 text-[11px] font-bold text-slate-500 uppercase">#</th>
-                    <th className="text-left p-3 text-[11px] font-bold text-slate-500 uppercase">Cliente</th>
+                    <th className="text-left p-3 text-[11px] font-bold text-slate-500 uppercase">Solicitante</th>
                     <th className="text-left p-3 text-[11px] font-bold text-slate-500 uppercase hidden md:table-cell">Área</th>
                     <th className="text-left p-3 text-[11px] font-bold text-slate-500 uppercase">Estado</th>
                     <th className="text-left p-3 text-[11px] font-bold text-slate-500 uppercase hidden md:table-cell">Período</th>
@@ -145,7 +142,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             </div>
           )}
         </Card>
-      </main>
     </div>
   );
 }

@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { toast } from "sonner";
-import { HorariosEditor } from "@/components/HorariosEditor";
-import { Navbar } from "../components/NavbarAdmin";
 import { registerAsesor } from "../actions/registerUser";
 import {
   toggleUserStatus,
@@ -21,8 +19,6 @@ import {
   PowerOff,
   Search,
   Calendar,
-  X,
-  Plus,
 } from "lucide-react";
 
 import {
@@ -71,7 +67,6 @@ interface AsesorForm {
   cedula: string;
   telefono: string;
   area: AreaEnum | "";
-  horarios: { turno: string; dia: string }[];
 }
 
 const EMPTY_FORM: AsesorForm = {
@@ -80,7 +75,6 @@ const EMPTY_FORM: AsesorForm = {
   cedula: "",
   telefono: "",
   area: "",
-  horarios: [],
 };
 
 export default function AsesoresPage() {
@@ -139,7 +133,6 @@ export default function AsesoresPage() {
         cedula: form.cedula,
         telefono: form.telefono,
         area: form.area as AreaEnum,
-        horarios: form.horarios,
       });
 
       if (result.success) {
@@ -173,7 +166,6 @@ export default function AsesoresPage() {
       cedula: asesor.perfil?.cedula || "",
       telefono: asesor.perfil?.telefono || "",
       area: asesor.area,
-      horarios: [],
     });
     setIsEditOpen(true);
   };
@@ -252,10 +244,8 @@ export default function AsesoresPage() {
   );
 
   return (
-    <div className="flex flex-col min-h-screen bg-linear-to-br from-slate-50 to-slate-100">
-      <Navbar />
-      <main className="grow container mx-auto px-4 py-8 max-w-6xl">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column: Register Form */}
           <div className="lg:col-span-1">
             <div className="mb-6 flex items-center gap-3">
@@ -332,22 +322,6 @@ export default function AsesoresPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-bold">Horarios</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {form.horarios.map((h, i) => (
-                        <Badge key={i} variant="secondary" className="gap-1 pr-1">
-                          {h.dia?.substring(0,3)} {h.turno}
-                          <button onClick={() => {
-                            const next = [...form.horarios]; next.splice(i, 1);
-                            setForm({...form, horarios: next});
-                          }} className="hover:bg-slate-200 rounded-full p-0.5"><X className="w-3 h-3" /></button>
-                        </Badge>
-                      ))}
-                      {form.horarios.length === 0 && <span className="text-xs text-slate-400">Sin horarios</span>}
-                    </div>
-                    <HorarioAdder onAdd={(h) => setForm({...form, horarios: [...form.horarios, h]})} />
-                  </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs">Area</Label>
                     <Select value={form.area} onValueChange={set("area")}>
@@ -557,8 +531,6 @@ export default function AsesoresPage() {
               </div>
             </div>
 
-            {editingAsesor && <HorariosEditor idPerfil={editingAsesor.id_perfil} />}
-
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsEditOpen(false)}>
                 Cancelar
@@ -610,28 +582,6 @@ export default function AsesoresPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </main>
-    </div>
-  );
-}
-
-function HorarioAdder({ onAdd }: { onAdd: (h: {turno:string,dia:string}) => void }) {
-  const [dia, setDia] = useState(""); const [turno, setTurno] = useState("");
-  const DIAS = ["Lunes","Martes","Miercoles","Jueves","Viernes","Sabado"];
-  return (
-    <div className="flex gap-2 items-center mt-2">
-      <Select value={dia} onValueChange={setDia}>
-        <SelectTrigger className="h-8 text-xs w-24"><SelectValue placeholder="Dia" /></SelectTrigger>
-        <SelectContent>{DIAS.map(d=><SelectItem key={d} value={d}>{d.substring(0,3)}</SelectItem>)}</SelectContent>
-      </Select>
-      <Select value={turno} onValueChange={setTurno}>
-        <SelectTrigger className="h-8 text-xs w-24"><SelectValue placeholder="Turno" /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="9-11">9-11</SelectItem><SelectItem value="2-4">2-4</SelectItem><SelectItem value="4-6">4-6</SelectItem>
-        </SelectContent>
-      </Select>
-      <Input placeholder="Otro..." value={turno} onChange={e=>setTurno(e.target.value)} className="h-8 text-xs w-20" />
-      <Button size="sm" variant="outline" className="h-8" onClick={()=>{if(dia&&turno){onAdd({dia,turno});setTurno("")}}} disabled={!dia||!turno}><Plus className="w-3.5 h-3.5" /></Button>
     </div>
   );
 }

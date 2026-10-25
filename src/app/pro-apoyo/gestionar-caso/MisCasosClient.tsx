@@ -49,6 +49,7 @@ export default function SupportCasesPage() {
   const [areaFilter, setAreaFilter] = useState("todos");
   const [periodoFilter, setPeriodoFilter] = useState("todos");
   const [studentFilter, setStudentFilter] = useState("todos");
+  const [advisorFilter, setAdvisorFilter] = useState("todos");
   const [dateSort, setDateSort] = useState("ultima_mod");
   const [classFilter, setClassFilter] = useState("todos");
   const [casos, setCasos] = useState<Caso[] | null>(null);
@@ -76,35 +77,32 @@ export default function SupportCasesPage() {
   const filteredCases = useMemo(() => {
     return (casos ?? []).filter((caso) => {
       const usuario = Array.isArray(caso.usuarios) ? caso.usuarios[0] : caso.usuarios;
-      const estudianteActivo = caso.estudiantes_casos?.find(
-        (e: any) => !e.fecha_fin_asignacion,
-      )?.estudiante;
-      const asesorActivo = caso.asesores_casos?.find(
-        (a: any) => !a.fecha_fin_asignacion,
-      )?.asesor;
 
-      // Búsqueda general flexible
+      // Búsqueda limpia de texto
       const isSearchMatch = matchesSearch(
         searchTerm,
         usuario?.nombre_completo,
         usuario?.cedula,
-        estudianteActivo?.perfil?.nombre_completo,
-        estudianteActivo?.perfil?.cedula,
-        asesorActivo?.perfil?.nombre_completo,
-        asesorActivo?.perfil?.cedula,
         caso.id_caso,
-        caso.area,
-        caso.resumen_hechos,
       );
 
-      // Estado, área y estudiante
+      // Estado, área, estudiante y asesor
       const matchesStatus =
         statusFilter === "todos" || caso.estado === statusFilter;
       const matchesArea = areaFilter === "todos" || caso.area === areaFilter;
       const matchesStudent =
         studentFilter === "todos" ||
         caso.estudiantes_casos?.some(
-          (ec) => ec.estudiante?.perfil?.nombre_completo === studentFilter,
+          (ec) =>
+            !ec.fecha_fin_asignacion &&
+            ec.estudiante?.perfil?.nombre_completo === studentFilter,
+        );
+      const matchesAdvisor =
+        advisorFilter === "todos" ||
+        caso.asesores_casos?.some(
+          (ac) =>
+            !ac.fecha_fin_asignacion &&
+            ac.asesor?.perfil?.nombre_completo === advisorFilter,
         );
 
       // Nuevos filtros
@@ -118,6 +116,7 @@ export default function SupportCasesPage() {
         matchesStatus &&
         matchesArea &&
         matchesStudent &&
+        matchesAdvisor &&
         matchesClass &&
         matchesPeriodo
       );
@@ -128,6 +127,7 @@ export default function SupportCasesPage() {
     statusFilter,
     areaFilter,
     studentFilter,
+    advisorFilter,
     classFilter,
     periodoFilter,
   ]);
@@ -149,17 +149,39 @@ export default function SupportCasesPage() {
   }, [filteredCases, dateSort]);
 
   const uniqueStudents = useMemo(() => {
-    return [
-      ...new Set(
-        (casos ?? []).flatMap(
-          (c) =>
-            c.estudiantes_casos
-              ?.map((ec) => ec.estudiante?.perfil?.nombre_completo)
-              .filter(Boolean) || [],
-        ),
-      ),
-    ];
+    const names = (casos ?? []).flatMap(
+      (c) =>
+        c.estudiantes_casos
+          ?.filter((ec) => !ec.fecha_fin_asignacion)
+          .map((ec) => ec.estudiante?.perfil?.nombre_completo)
+          .filter(Boolean) as string[] || [],
+    );
+    return Array.from(new Set(names)).sort((a, b) => a.localeCompare(b));
   }, [casos]);
+
+  const uniqueAdvisors = useMemo(() => {
+    const names = (casos ?? []).flatMap(
+      (c) =>
+        c.asesores_casos
+          ?.filter((ac) => !ac.fecha_fin_asignacion)
+          .map((ac) => ac.asesor?.perfil?.nombre_completo)
+          .filter(Boolean) as string[] || [],
+    );
+    return Array.from(new Set(names)).sort((a, b) => a.localeCompare(b));
+  }, [casos]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    searchTerm,
+    statusFilter,
+    areaFilter,
+    studentFilter,
+    advisorFilter,
+    classFilter,
+    periodoFilter,
+    dateSort,
+  ]);
 
   // Paginación
   const totalPages = Math.ceil(sortedCases.length / ITEMS_PER_PAGE);
@@ -262,18 +284,24 @@ export default function SupportCasesPage() {
           onStatusChange={setStatusFilter}
           areaFilter={areaFilter}
           onAreaChange={setAreaFilter}
+          studentFilter={studentFilter}
+          onStudentChange={setStudentFilter}
+          studentsList={uniqueStudents}
+          advisorFilter={advisorFilter}
+          onAdvisorChange={setAdvisorFilter}
+          advisorsList={uniqueAdvisors}
           dateSort={dateSort}
           onDateSortChange={setDateSort}
           classFilter={classFilter}
           onClassChange={setClassFilter}
           loading={loading}
-          searchPlaceholder="Cliente, documento, descripción..."
           onClear={() => {
             setSearchTerm("");
             setStatusFilter("todos");
             setAreaFilter("todos");
             setPeriodoFilter("todos");
             setStudentFilter("todos");
+            setAdvisorFilter("todos");
             setDateSort("ultima_mod");
             setClassFilter("todos");
           }}
@@ -315,7 +343,7 @@ export default function SupportCasesPage() {
                       Caso #{caso.id_caso}
                     </div>
                     <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
-                      {usuario?.nombre_completo || "Cliente Sin Nombre"}
+                      {usuario?.nombre_completo || "Solicitante Sin Nombre"}
                     </h3>
                     <div className="text-sm font-medium text-slate-500">
                       {usuario?.cedula ? `C.C. ${usuario.cedula}` : "Sin documento"}
@@ -431,7 +459,9 @@ export default function SupportCasesPage() {
                 setSearchTerm("");
                 setStatusFilter("todos");
                 setAreaFilter("todos");
+                setPeriodoFilter("todos");
                 setStudentFilter("todos");
+                setAdvisorFilter("todos");
                 setDateSort("ultima_mod");
                 setClassFilter("todos");
               }}

@@ -5,7 +5,6 @@ import { useEffect, useState, useCallback } from "react";
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Navbar } from "../../components/NavbarAdmin";
 import { Caso, Demandado } from "app/types/database";
 import { getCasoById } from "../../../../../supabase/queries/getCasoById";
 import { getDemandadoByCasoId } from "../../../../../supabase/queries/getDemandadoByCasoId";
@@ -23,6 +22,7 @@ import { AdminReasignarEquipo } from "@/components/casos-juridicos/reasignar-equ
 import { BotonesCerrarArchivar } from "@/components/casos-juridicos/botones-cerrar-archivar";
 import { BotonesEntrevista } from "@/components/casos-juridicos/botones-entrevista";
 import { HistorialCorrecciones } from "@/components/casos-juridicos/historial-correcciones";
+import { ModalCambiarEstadoAdmin } from "@/components/casos-juridicos/modal-cambiar-estado-admin";
 import { useRealtimeCaso } from "@/lib/hooks/useRealtimeCaso";
 import { useCaseEdit } from "@/lib/hooks/useCaseEdit";
 import { Users, ClipboardList, FileText } from "lucide-react";
@@ -158,7 +158,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       caso={caso}
       loading={loading}
       idCaso={id}
-      navbar={<Navbar />}
       backHref="/admin/todos-los-casos"
       backLabel="Volver a todos los casos"
       statusBadge={caso ? getStatusBadge(caso.estado) : null}
@@ -166,6 +165,11 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       headerActions={
         caso && (
           <div className="flex flex-col gap-2 lg:min-w-[260px]">
+            <ModalCambiarEstadoAdmin
+              idCaso={id}
+              estadoActual={caso.estado}
+              onSuccess={refetch}
+            />
             <BotonesEntrevista idCaso={id} caso={caso} demandado={demandado} />
             <BotonesCerrarArchivar
               idCaso={id}

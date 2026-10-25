@@ -5,7 +5,6 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { HorariosEditor } from "@/components/HorariosEditor";
 import { HorarioAdder } from "@/components/HorarioAdder";
-import { Navbar } from "../components/NavbarAdmin";
 import { registerEstudiante } from "../actions/registerUser";
 import {
   toggleUserStatus,
@@ -267,10 +266,8 @@ export default function EstudiantesPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-linear-to-br from-slate-50 to-slate-100">
-      <Navbar />
-      <main className="grow container mx-auto px-4 py-8 max-w-6xl">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column: Register Form */}
           <div className="lg:col-span-1">
             <div className="mb-6 flex items-center gap-3">
@@ -755,7 +752,6 @@ export default function EstudiantesPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </main>
     </div>
   );
 }

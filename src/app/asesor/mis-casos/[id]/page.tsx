@@ -239,7 +239,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         throw errorCaso;
       }
       await traerDatos();
-      toast.success("Información del cliente actualizada");
+      toast.success("Información del solicitante actualizada");
     } catch (err) {
       console.error(err);
       setError("Error al guardar los datos del usuario");

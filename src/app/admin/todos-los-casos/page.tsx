@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -12,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import {
   Pagination,
   PaginationContent,
@@ -21,7 +19,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Navbar } from "../components/NavbarAdmin";
 import { Caso } from "app/types/database";
 import { getCasos } from "../../../../supabase/queries/getCasos";
 import { getStatusBadge } from "@/components/ui/status-badge";
@@ -29,13 +26,8 @@ import { formatArea } from "@/lib/utils";
 import { formatDate } from "@/lib/format-date";
 import { Spinner } from "@/components/ui/spinner";
 import { matchesSearch } from "@/lib/search";
-import {
-  ArrowLeft,
-  Search,
-  FilterX,
-  FileText,
-  ExternalLink,
-} from "lucide-react";
+import { CaseFilters } from "@/components/casos-juridicos/case-filters";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 
 export default function TodosLosCasosPage() {
   const [casos, setCasos] = useState<Caso[]>([]);
@@ -44,6 +36,8 @@ export default function TodosLosCasosPage() {
   const [statusFilter, setStatusFilter] = useState("todos");
   const [areaFilter, setAreaFilter] = useState("todos");
   const [periodoFilter, setPeriodoFilter] = useState("todos");
+  const [studentFilter, setStudentFilter] = useState("todos");
+  const [advisorFilter, setAdvisorFilter] = useState("todos");
   const [dateSort, setDateSort] = useState("ultima_mod");
   const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 20;
@@ -60,34 +54,74 @@ export default function TodosLosCasosPage() {
     [casos],
   );
 
+  const uniqueStudents = useMemo(() => {
+    const names = casos.flatMap(
+      (c) =>
+        c.estudiantes_casos
+          ?.filter((ec) => !ec.fecha_fin_asignacion)
+          .map((ec) => ec.estudiante?.perfil?.nombre_completo)
+          .filter(Boolean) as string[] || [],
+    );
+    return Array.from(new Set(names)).sort((a, b) => a.localeCompare(b));
+  }, [casos]);
+
+  const uniqueAdvisors = useMemo(() => {
+    const names = casos.flatMap(
+      (c) =>
+        c.asesores_casos
+          ?.filter((ac) => !ac.fecha_fin_asignacion)
+          .map((ac) => ac.asesor?.perfil?.nombre_completo)
+          .filter(Boolean) as string[] || [],
+    );
+    return Array.from(new Set(names)).sort((a, b) => a.localeCompare(b));
+  }, [casos]);
+
   const filtrados = useMemo(() => {
     return casos.filter((c) => {
       const usuario = Array.isArray(c.usuarios) ? c.usuarios[0] : c.usuarios;
-      const estudianteActivo = c.estudiantes_casos?.find(
-        (e) => !e.fecha_fin_asignacion,
-      )?.estudiante;
-      const asesorActivo = c.asesores_casos?.find(
-        (a) => !a.fecha_fin_asignacion,
-      )?.asesor;
 
       const matchSearch = matchesSearch(
         searchTerm,
         usuario?.nombre_completo,
         usuario?.cedula,
-        estudianteActivo?.perfil?.nombre_completo,
-        estudianteActivo?.perfil?.cedula,
-        asesorActivo?.perfil?.nombre_completo,
-        asesorActivo?.perfil?.cedula,
         c.id_caso,
-        c.area,
-        c.resumen_hechos,
       );
       const matchStatus = statusFilter === "todos" || c.estado === statusFilter;
       const matchArea = areaFilter === "todos" || c.area === areaFilter;
       const matchPeriodo = periodoFilter === "todos" || c.periodo === periodoFilter;
-      return matchSearch && matchStatus && matchArea && matchPeriodo;
+      const matchStudent =
+        studentFilter === "todos" ||
+        c.estudiantes_casos?.some(
+          (ec) =>
+            !ec.fecha_fin_asignacion &&
+            ec.estudiante?.perfil?.nombre_completo === studentFilter,
+        );
+      const matchAdvisor =
+        advisorFilter === "todos" ||
+        c.asesores_casos?.some(
+          (ac) =>
+            !ac.fecha_fin_asignacion &&
+            ac.asesor?.perfil?.nombre_completo === advisorFilter,
+        );
+
+      return (
+        matchSearch &&
+        matchStatus &&
+        matchArea &&
+        matchPeriodo &&
+        matchStudent &&
+        matchAdvisor
+      );
     });
-  }, [casos, searchTerm, statusFilter, areaFilter, periodoFilter]);
+  }, [
+    casos,
+    searchTerm,
+    statusFilter,
+    areaFilter,
+    periodoFilter,
+    studentFilter,
+    advisorFilter,
+  ]);
 
   const sorted = useMemo(() => {
     return [...filtrados].sort((a, b) => {
@@ -105,31 +139,40 @@ export default function TodosLosCasosPage() {
   const totalPages = Math.ceil(sorted.length / ITEMS_PER_PAGE);
   const paginados = sorted.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
+  useEffect(() => {
+    setPage(1);
+  }, [
+    searchTerm,
+    statusFilter,
+    areaFilter,
+    periodoFilter,
+    studentFilter,
+    advisorFilter,
+    dateSort,
+  ]);
+
   const limpiar = () => {
     setSearchTerm("");
     setStatusFilter("todos");
     setAreaFilter("todos");
     setPeriodoFilter("todos");
+    setStudentFilter("todos");
+    setAdvisorFilter("todos");
     setDateSort("ultima_mod");
     setPage(1);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center">
-          <Spinner className="h-10 w-10 text-blue-600" />
-        </div>
+      <div className="flex-1 flex items-center justify-center py-20">
+        <Spinner className="h-10 w-10 text-blue-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Navbar />
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8">
-        <Link href="/admin/inicio" className="inline-flex items-center text-sm text-slate-500 hover:text-blue-600 mb-4">
+    <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 py-8">
+      <Link href="/admin/inicio" className="inline-flex items-center text-sm text-slate-500 hover:text-blue-600 mb-4">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Volver al panel
         </Link>
@@ -142,80 +185,45 @@ export default function TodosLosCasosPage() {
         </div>
 
         {/* Filters */}
-        <Card className="bg-white border-none shadow-sm p-4 mb-6 rounded-2xl">
-          <div className="flex flex-wrap gap-4 items-end">
-            <div className="flex-1 min-w-[200px] space-y-1.5">
-              <label className="text-[11px] font-semibold text-slate-500 uppercase">Buscar</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
-                <Input
-                  placeholder="Cliente, cédula, #caso..."
-                  value={searchTerm}
-                  onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
-                  className="pl-9 bg-slate-50 border-transparent focus:bg-white rounded-xl"
-                />
-              </div>
-            </div>
-
-            <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-              <SelectTrigger className="w-44 bg-slate-50 border-transparent rounded-xl">
-                <SelectValue placeholder="Estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos los estados</SelectItem>
-                <SelectItem value="en_proceso">En proceso</SelectItem>
-                <SelectItem value="pendiente_aprobacion">Pendiente aprobación</SelectItem>
-                <SelectItem value="en_correccion">En corrección</SelectItem>
-                <SelectItem value="activo">Activo</SelectItem>
-                <SelectItem value="cerrado">Cerrado</SelectItem>
-                <SelectItem value="archivado">Archivado</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={areaFilter} onValueChange={(v) => { setAreaFilter(v); setPage(1); }}>
-              <SelectTrigger className="w-44 bg-slate-50 border-transparent rounded-xl">
-                <SelectValue placeholder="Área" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todas las áreas</SelectItem>
-                <SelectItem value="laboral">Laboral</SelectItem>
-                <SelectItem value="civil_familia">Civil y Familia</SelectItem>
-                <SelectItem value="penal">Penal</SelectItem>
-                <SelectItem value="publica">Público</SelectItem>
-                <SelectItem value="otros">Otros</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={dateSort} onValueChange={(v) => { setDateSort(v); setPage(1); }}>
-              <SelectTrigger className="w-48 bg-slate-50 border-transparent rounded-xl">
-                <SelectValue placeholder="Ordenar por" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ultima_mod">Última modificación</SelectItem>
-                <SelectItem value="recientes">Más recientes (creación)</SelectItem>
-                <SelectItem value="antiguos">Más antiguos (creación)</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {periodos.length > 0 && (
-              <Select value={periodoFilter} onValueChange={(v) => { setPeriodoFilter(v); setPage(1); }}>
-                <SelectTrigger className="w-36 bg-slate-50 border-transparent rounded-xl">
+        <CaseFilters
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          statusFilter={statusFilter}
+          onStatusChange={setStatusFilter}
+          areaFilter={areaFilter}
+          onAreaChange={setAreaFilter}
+          studentFilter={studentFilter}
+          onStudentChange={setStudentFilter}
+          studentsList={uniqueStudents}
+          advisorFilter={advisorFilter}
+          onAdvisorChange={setAdvisorFilter}
+          advisorsList={uniqueAdvisors}
+          dateSort={dateSort}
+          onDateSortChange={setDateSort}
+          loading={loading}
+          onClear={limpiar}
+        >
+          {periodos.length > 0 && (
+            <div className="w-full lg:w-40 space-y-1.5">
+              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                Período
+              </label>
+              <Select value={periodoFilter} onValueChange={setPeriodoFilter}>
+                <SelectTrigger className="bg-slate-50 border-transparent focus:bg-white transition-colors rounded-xl">
                   <SelectValue placeholder="Período" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos los períodos</SelectItem>
                   {periodos.map((p) => (
-                    <SelectItem key={p} value={p!}>{p}</SelectItem>
+                    <SelectItem key={p} value={p!}>
+                      {p}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            )}
-
-            <Button variant="outline" onClick={limpiar} className="bg-white rounded-xl">
-              <FilterX className="w-4 h-4 mr-2" />Limpiar
-            </Button>
-          </div>
-        </Card>
+            </div>
+          )}
+        </CaseFilters>
 
         {/* Table */}
         <Card className="bg-white border-none shadow-sm rounded-2xl overflow-hidden">
@@ -224,7 +232,7 @@ export default function TodosLosCasosPage() {
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/50">
                   <th className="text-left p-3 text-[11px] font-bold text-slate-500 uppercase">#</th>
-                  <th className="text-left p-3 text-[11px] font-bold text-slate-500 uppercase">Cliente</th>
+                  <th className="text-left p-3 text-[11px] font-bold text-slate-500 uppercase">Solicitante</th>
                   <th className="text-left p-3 text-[11px] font-bold text-slate-500 uppercase hidden md:table-cell">Cédula</th>
                   <th className="text-left p-3 text-[11px] font-bold text-slate-500 uppercase">Área</th>
                   <th className="text-left p-3 text-[11px] font-bold text-slate-500 uppercase">Estado</th>
@@ -297,7 +305,6 @@ export default function TodosLosCasosPage() {
             </Pagination>
           </div>
         )}
-      </main>
     </div>
   );
 }

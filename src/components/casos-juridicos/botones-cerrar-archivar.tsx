@@ -84,8 +84,8 @@ export function BotonesCerrarArchivar({ idCaso, estado, clasificacion, onRefresh
       </div>
       <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-[11px] text-blue-700 leading-relaxed">
         <p className="font-semibold mb-1">¿Cuándo usar cada uno?</p>
-        <p><strong>Cerrar caso:</strong> el trámite finalizó exitosamente. El cliente recibió la asesoría, el proceso judicial concluyó o se llegó a un acuerdo.</p>
-        <p className="mt-1"><strong>Archivar:</strong> el caso no pudo continuar. El cliente no volvió, no se pudo contactar, abandonó el proceso, o no se cumplen los requisitos para continuar.</p>
+        <p><strong>Cerrar caso:</strong> el trámite finalizó exitosamente. El solicitante recibió la asesoría, el proceso judicial concluyó o se llegó a un acuerdo.</p>
+        <p className="mt-1"><strong>Archivar:</strong> el caso no pudo continuar. El solicitante no volvió, no se pudo contactar, abandonó el proceso, o no se cumplen los requisitos para continuar.</p>
       </div>
     </div>
   );

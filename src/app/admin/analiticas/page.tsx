@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Navbar } from "../components/NavbarAdmin";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -92,20 +91,15 @@ export default function AnaliticasPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center"><Spinner className="h-10 w-10 text-blue-600" /></div>
-      </div>
+      <div className="flex-1 flex items-center justify-center py-20"><Spinner className="h-10 w-10 text-blue-600" /></div>
     );
   }
 
   if (!data) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col">
-      <Navbar />
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* HEADER */}
+    <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-10">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Panel de Analíticas</h1>
@@ -341,7 +335,6 @@ export default function AnaliticasPage() {
             </div>
           </div>
         </div>
-      </main>
     </div>
   );
 }

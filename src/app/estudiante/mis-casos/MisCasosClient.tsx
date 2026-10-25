@@ -41,6 +41,7 @@ import {
   FilterX,
   FileText,
   Clock,
+  AlertTriangle,
 } from "lucide-react";
 
 export default function MisCasosClient() {
@@ -48,6 +49,7 @@ export default function MisCasosClient() {
   const [statusFilter, setStatusFilter] = useState("todos");
   const [areaFilter, setAreaFilter] = useState("todos");
   const [periodoFilter, setPeriodoFilter] = useState("todos");
+  const [advisorFilter, setAdvisorFilter] = useState("todos");
   const [dateSort, setDateSort] = useState("ultima_mod");
   const [classFilter, setClassFilter] = useState("todos");
   const [loading, setLoading] = useState(false);
@@ -89,35 +91,41 @@ export default function MisCasosClient() {
     });
   }, [casos, currentUserId]);
 
-  // 2. Then apply UI filters (search, status, area)
+  const uniqueAdvisors = useMemo(() => {
+    const names = (studentActiveCasos ?? []).flatMap(
+      (c) =>
+        c.asesores_casos
+          ?.filter((ac) => !ac.fecha_fin_asignacion)
+          .map((ac) => ac.asesor?.perfil?.nombre_completo)
+          .filter(Boolean) as string[] || [],
+    );
+    return Array.from(new Set(names)).sort((a, b) => a.localeCompare(b));
+  }, [studentActiveCasos]);
+
+  // 2. Then apply UI filters (search, status, area, advisor, class, periodo)
   const filteredCases = useMemo(() => {
     return studentActiveCasos.filter((caso) => {
       const usuario = Array.isArray(caso.usuarios) ? caso.usuarios[0] : caso.usuarios;
-      const estudianteActivo = caso.estudiantes_casos?.find(
-        (e: any) => !e.fecha_fin_asignacion,
-      )?.estudiante;
-      const asesorActivo = caso.asesores_casos?.find(
-        (a: any) => !a.fecha_fin_asignacion,
-      )?.asesor;
 
-      // Búsqueda general flexible
+      // Búsqueda limpia de texto
       const isSearchMatch = matchesSearch(
         searchTerm,
         usuario?.nombre_completo,
         usuario?.cedula,
-        estudianteActivo?.perfil?.nombre_completo,
-        estudianteActivo?.perfil?.cedula,
-        asesorActivo?.perfil?.nombre_completo,
-        asesorActivo?.perfil?.cedula,
         caso.id_caso,
-        caso.area,
-        caso.resumen_hechos,
       );
 
-      // Estado, área
+      // Estado, área y asesor
       const matchesStatus =
         statusFilter === "todos" || caso.estado === statusFilter;
       const matchesArea = areaFilter === "todos" || caso.area === areaFilter;
+      const matchesAdvisor =
+        advisorFilter === "todos" ||
+        caso.asesores_casos?.some(
+          (ac) =>
+            !ac.fecha_fin_asignacion &&
+            ac.asesor?.perfil?.nombre_completo === advisorFilter,
+        );
 
       // Filters de fecha y clasificación
       const matchesClass =
@@ -125,13 +133,21 @@ export default function MisCasosClient() {
       const matchesPeriodo =
         periodoFilter === "todos" || caso.periodo === periodoFilter;
 
-      return isSearchMatch && matchesStatus && matchesArea && matchesClass && matchesPeriodo;
+      return (
+        isSearchMatch &&
+        matchesStatus &&
+        matchesArea &&
+        matchesAdvisor &&
+        matchesClass &&
+        matchesPeriodo
+      );
     });
   }, [
     studentActiveCasos,
     searchTerm,
     statusFilter,
     areaFilter,
+    advisorFilter,
     classFilter,
     periodoFilter,
   ]);
@@ -154,6 +170,18 @@ export default function MisCasosClient() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 9;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    searchTerm,
+    statusFilter,
+    areaFilter,
+    advisorFilter,
+    classFilter,
+    periodoFilter,
+    dateSort,
+  ]);
   // Paginación
   const totalPages = Math.ceil(sortedCases.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -199,51 +227,91 @@ export default function MisCasosClient() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card className="bg-white border-none shadow-sm shadow-slate-200/50 p-6 flex flex-col justify-center rounded-2xl">
-            <div className="flex items-center gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <Card className="bg-white border-none shadow-sm shadow-slate-200/50 p-5 rounded-2xl flex flex-col justify-between">
+            <div className="flex items-center gap-3">
               <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
-                <FileText className="w-6 h-6" />
+                <FileText className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-500">
-                  Total casos
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  Total Casos Asignados
                 </p>
-                <p className="text-2xl font-bold text-slate-900">
+                <p className="text-2xl font-bold text-slate-900 mt-0.5">
                   {studentActiveCasos.length}
                 </p>
               </div>
             </div>
           </Card>
 
-          <Card className="bg-white border-none shadow-sm shadow-slate-200/50 p-6 flex flex-col justify-center rounded-2xl">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-yellow-50 text-yellow-600 rounded-xl">
-                <Clock className="w-6 h-6" />
+          <Card className="bg-white border-none shadow-sm shadow-slate-200/50 p-5 rounded-2xl flex flex-col justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-sky-50 text-sky-600 rounded-xl">
+                <Clock className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-500">
-                  Pendientes de aprobación
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  En Proceso
                 </p>
-                <p className="text-2xl font-bold text-slate-900">
+                <p className="text-2xl font-bold text-slate-900 mt-0.5">
                   {
-                    studentActiveCasos.filter(
-                      (c) => c.estado === "pendiente_aprobacion",
-                    ).length
+                    studentActiveCasos.filter((c) => c.estado === "en_proceso")
+                      .length
                   }
                 </p>
               </div>
             </div>
           </Card>
 
-          <Card className="bg-white border-none shadow-sm shadow-slate-200/50 p-6 flex flex-col justify-center rounded-2xl">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-green-50 text-green-600 rounded-xl">
-                <Check className="w-6 h-6" />
+          <Card
+            className={`border-none shadow-sm shadow-slate-200/50 p-5 rounded-2xl flex flex-col justify-between transition-all ${
+              studentActiveCasos.some((c) => c.estado === "en_correccion")
+                ? "bg-amber-50/70 border border-amber-200/80 ring-1 ring-amber-300"
+                : "bg-white"
+            }`}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`p-3 rounded-xl ${
+                    studentActiveCasos.some((c) => c.estado === "en_correccion")
+                      ? "bg-amber-100 text-amber-700"
+                      : "bg-slate-50 text-slate-500"
+                  }`}
+                >
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                    En Corrección
+                  </p>
+                  <p className="text-2xl font-bold text-slate-900 mt-0.5">
+                    {
+                      studentActiveCasos.filter(
+                        (c) => c.estado === "en_correccion",
+                      ).length
+                    }
+                  </p>
+                </div>
+              </div>
+              {studentActiveCasos.some((c) => c.estado === "en_correccion") && (
+                <Badge className="bg-amber-500 text-white border-transparent text-[10px] font-bold px-2 py-0.5">
+                  ¡Atención requerida!
+                </Badge>
+              )}
+            </div>
+          </Card>
+
+          <Card className="bg-white border-none shadow-sm shadow-slate-200/50 p-5 rounded-2xl flex flex-col justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                <Check className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-500">Aprobados</p>
-                <p className="text-2xl font-bold text-slate-900">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  Activos
+                </p>
+                <p className="text-2xl font-bold text-slate-900 mt-0.5">
                   {
                     studentActiveCasos.filter((c) => c.estado === "activo")
                       .length
@@ -262,6 +330,9 @@ export default function MisCasosClient() {
           onStatusChange={setStatusFilter}
           areaFilter={areaFilter}
           onAreaChange={setAreaFilter}
+          advisorFilter={advisorFilter}
+          onAdvisorChange={setAdvisorFilter}
+          advisorsList={uniqueAdvisors}
           dateSort={dateSort}
           onDateSortChange={setDateSort}
           classFilter={classFilter}
@@ -272,6 +343,7 @@ export default function MisCasosClient() {
             setStatusFilter("todos");
             setAreaFilter("todos");
             setPeriodoFilter("todos");
+            setAdvisorFilter("todos");
             setDateSort("ultima_mod");
             setClassFilter("todos");
           }}
@@ -310,7 +382,7 @@ export default function MisCasosClient() {
                   <div className="flex justify-between items-start mb-6 border-b border-slate-100 pb-4">
                     <div>
                       <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
-                        {usuario?.nombre_completo || "Cliente Sin Nombre"}
+                        {usuario?.nombre_completo || "Solicitante Sin Nombre"}
                       </h3>
                       <div className="text-sm font-medium text-slate-500 mt-1">
                         {usuario?.cedula
@@ -430,6 +502,8 @@ export default function MisCasosClient() {
                 setSearchTerm("");
                 setStatusFilter("todos");
                 setAreaFilter("todos");
+                setPeriodoFilter("todos");
+                setAdvisorFilter("todos");
                 setDateSort("ultima_mod");
                 setClassFilter("todos");
               }}

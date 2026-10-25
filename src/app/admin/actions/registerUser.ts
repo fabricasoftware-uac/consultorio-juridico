@@ -98,7 +98,7 @@ export interface RegisterAsesorInput {
   cedula: string;
   telefono: string;
   area: "no_asignada" | "laboral" | "civil_familia" | "penal" | "publica" | "conciliacion" | "privado" | "otros";
-  horarios: { turno: string; dia: string }[];
+  horarios?: { turno: string; dia: string }[];
 }
 
 export async function registerAsesor(
@@ -150,8 +150,8 @@ export async function registerAsesor(
     };
   }
 
-  // Guardar horarios
-  if (input.horarios.length > 0) {
+  // Guardar horarios si se proporcionaron
+  if (input.horarios && input.horarios.length > 0) {
     await supabaseAdmin.from("horarios").insert(
       input.horarios.map((h) => ({ id_perfil: userId, turno: h.turno, dia: h.dia })),
     );

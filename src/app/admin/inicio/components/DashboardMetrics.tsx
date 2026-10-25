@@ -89,7 +89,7 @@ export function DashboardMetrics() {
           "Estado",
           "Area",
           "Fecha Creacion",
-          "Cliente",
+          "Solicitante",
         ];
         csvContent += caseHeaders.join(",") + "\n";
         casesData.forEach((c) => {

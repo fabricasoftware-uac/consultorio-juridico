@@ -59,3 +59,121 @@ export function mismoDia(
   const na = norm(a);
   return na !== "" && na === norm(b);
 }
+
+// --- Sincronización de horarios ---
+export interface HorarioDiaInfo {
+  activo?: boolean;
+  turno?: string;
+}
+export type HorarioSemanaInput = Record<string, HorarioDiaInfo>;
+
+export interface FilaHorario {
+  id_perfil: string;
+  dia: string;
+  turno: string;
+}
+
+/**
+ * Convierte un objeto HorarioSemana en un arreglo de filas para la tabla public.horarios.
+ * Filtra únicamente los días marcados como activos y con un turno definido,
+ * capitalizando el nombre del día para mantener consistencia relacional.
+ */
+export function horarioSemanaAFilas(
+  idPerfil: string,
+  horario: HorarioSemanaInput | null | undefined,
+): FilaHorario[] {
+  const filas: FilaHorario[] = [];
+  if (!horario || typeof horario !== "object") return filas;
+
+  for (const [dia, info] of Object.entries(horario)) {
+    if (info && info.activo && info.turno) {
+      const diaCapitalizado = dia.charAt(0).toUpperCase() + dia.slice(1);
+      filas.push({
+        id_perfil: idPerfil,
+        dia: diaCapitalizado,
+        turno: info.turno,
+      });
+    }
+  }
+  return filas;
+}
+
+// --- Cambio de estado de casos por Admin ---
+export const ESTADOS_VALIDOS_CASO = [
+  "en_proceso",
+  "pendiente_aprobacion",
+  "en_correccion",
+  "activo",
+  "cerrado",
+  "archivado",
+] as const;
+
+export type EstadoCaso = (typeof ESTADOS_VALIDOS_CASO)[number];
+
+export interface ValidacionCambioEstadoResult {
+  valido: boolean;
+  error?: string;
+}
+
+/**
+ * Valida los parámetros requeridos para el cambio de estado administrativo de un caso.
+ * Exige identificador de caso válido, nuevo estado permitido y motivo/justificación obligatoria.
+ */
+export function validarCambioEstadoAdmin(params: {
+  idCaso: number | string | null | undefined;
+  nuevoEstado: string | null | undefined;
+  motivo: string | null | undefined;
+}): ValidacionCambioEstadoResult {
+  const numId = Number(params.idCaso);
+  if (!params.idCaso || isNaN(numId) || numId <= 0) {
+    return { valido: false, error: "Identificador de caso inválido." };
+  }
+
+  if (!params.motivo || !params.motivo.trim()) {
+    return {
+      valido: false,
+      error: "Debe ingresar un motivo o justificación para el cambio de estado.",
+    };
+  }
+
+  if (!ESTADOS_VALIDOS_CASO.includes(params.nuevoEstado as EstadoCaso)) {
+    return {
+      valido: false,
+      error: `El estado "${params.nuevoEstado}" no es válido.`,
+    };
+  }
+
+  return { valido: true };
+}
+
+export interface PlazosCambioEstado {
+  fecha_vencimiento_estudiante?: string | null;
+  fecha_vencimiento_asesor?: string | null;
+  fecha_cierre?: string | null;
+}
+
+/**
+ * Calcula los plazos y fechas resultantes según la transición de estado del caso:
+ * - 'en_correccion': asigna 3 días hábiles al estudiante y limpia vencimiento de asesor.
+ * - 'activo': limpia vencimiento de asesor.
+ * - 'cerrado' / 'archivado': fija fecha de cierre actual y limpia vencimientos pendientes.
+ */
+export function calcularPlazosCambioEstado(
+  nuevoEstado: EstadoCaso | string,
+  fechaBase: Date = new Date(),
+): PlazosCambioEstado {
+  const plazos: PlazosCambioEstado = {};
+
+  if (nuevoEstado === "en_correccion") {
+    plazos.fecha_vencimiento_estudiante = sumarDiasHabiles(fechaBase, 3).toISOString();
+    plazos.fecha_vencimiento_asesor = null;
+  } else if (nuevoEstado === "activo") {
+    plazos.fecha_vencimiento_asesor = null;
+  } else if (nuevoEstado === "cerrado" || nuevoEstado === "archivado") {
+    plazos.fecha_cierre = fechaBase.toISOString();
+    plazos.fecha_vencimiento_estudiante = null;
+    plazos.fecha_vencimiento_asesor = null;
+  }
+
+  return plazos;
+}

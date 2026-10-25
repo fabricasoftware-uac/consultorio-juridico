@@ -2,6 +2,8 @@
 
 import { supabaseAdmin } from "@/lib/supabase/supabase-admin";
 import { revalidatePath } from "next/cache";
+import type { HorarioSemana } from "@/components/ScheduleEditor";
+import { horarioSemanaAFilas } from "@/lib/utils";
 
 type ActionResult =
   | { success: true; message: string }
@@ -152,7 +154,7 @@ export async function updateProApoyo(
 
 export async function updateAsesorHorario(
   userId: string,
-  horario: any,
+  horario: HorarioSemana,
 ): Promise<ActionResult> {
   const { error: aseError } = await supabaseAdmin
     .from("asesores")
@@ -164,6 +166,31 @@ export async function updateAsesorHorario(
       success: false,
       error: "Error al actualizar el horario del asesor.",
     };
+
+  // Sincronizar la tabla relacional public.horarios
+  const { error: delError } = await supabaseAdmin
+    .from("horarios")
+    .delete()
+    .eq("id_perfil", userId);
+
+  if (delError) {
+    console.error("Error al limpiar horarios anteriores:", delError);
+  }
+
+  const filasAInsertar = horarioSemanaAFilas(userId, horario);
+
+  if (filasAInsertar.length > 0) {
+    const { error: insError } = await supabaseAdmin
+      .from("horarios")
+      .insert(filasAInsertar);
+    if (insError) {
+      console.error("Error al sincronizar filas en public.horarios:", insError);
+      return {
+        success: false,
+        error: "Se guardó el horario pero hubo un error al sincronizar la tabla de asignación.",
+      };
+    }
+  }
 
   revalidatePath("/admin/asesores");
   return { success: true, message: "Horario actualizado exitosamente." };

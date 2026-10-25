@@ -80,7 +80,7 @@ export function ActividadesCaso({ idCaso }: Props) {
       )}
 
       <div className="space-y-2">
-        <Input value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Título de la actividad (ej: Solicité cédula al cliente)" className="text-sm" />
+        <Input value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Título de la actividad (ej: Solicité cédula al solicitante)" className="text-sm" />
         <div className="flex gap-2">
           <Textarea value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Descripción (opcional)..." rows={2} className="resize-none text-sm" />
           <Button onClick={enviar} disabled={!titulo.trim() || enviando} size="icon" className="self-end shrink-0 bg-blue-600 hover:bg-blue-700">
