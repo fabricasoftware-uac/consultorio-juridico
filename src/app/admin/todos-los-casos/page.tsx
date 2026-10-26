@@ -28,6 +28,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { matchesSearch } from "@/lib/search";
 import { CaseFilters } from "@/components/casos-juridicos/case-filters";
 import { ArrowLeft, ExternalLink } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { verificarCasoRequiereReasignacion } from "@/lib/transicion-semestral";
 
 export default function TodosLosCasosPage() {
   const [casos, setCasos] = useState<Caso[]>([]);
@@ -39,6 +41,7 @@ export default function TodosLosCasosPage() {
   const [studentFilter, setStudentFilter] = useState("todos");
   const [advisorFilter, setAdvisorFilter] = useState("todos");
   const [dateSort, setDateSort] = useState("ultima_mod");
+  const [reasignacionFilter, setReasignacionFilter] = useState(false);
   const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 20;
 
@@ -104,13 +107,18 @@ export default function TodosLosCasosPage() {
             ac.asesor?.perfil?.nombre_completo === advisorFilter,
         );
 
+      const matchReasignacion =
+        !reasignacionFilter ||
+        verificarCasoRequiereReasignacion(c).requiereReasignacion;
+
       return (
         matchSearch &&
         matchStatus &&
         matchArea &&
         matchPeriodo &&
         matchStudent &&
-        matchAdvisor
+        matchAdvisor &&
+        matchReasignacion
       );
     });
   }, [
@@ -121,7 +129,14 @@ export default function TodosLosCasosPage() {
     periodoFilter,
     studentFilter,
     advisorFilter,
+    reasignacionFilter,
   ]);
+
+  const conteoReasignacion = useMemo(() => {
+    return casos.filter(
+      (c) => verificarCasoRequiereReasignacion(c).requiereReasignacion,
+    ).length;
+  }, [casos]);
 
   const sorted = useMemo(() => {
     return [...filtrados].sort((a, b) => {
@@ -149,6 +164,7 @@ export default function TodosLosCasosPage() {
     studentFilter,
     advisorFilter,
     dateSort,
+    reasignacionFilter,
   ]);
 
   const limpiar = () => {
@@ -159,6 +175,7 @@ export default function TodosLosCasosPage() {
     setStudentFilter("todos");
     setAdvisorFilter("todos");
     setDateSort("ultima_mod");
+    setReasignacionFilter(false);
     setPage(1);
   };
 
@@ -200,6 +217,9 @@ export default function TodosLosCasosPage() {
           advisorsList={uniqueAdvisors}
           dateSort={dateSort}
           onDateSortChange={setDateSort}
+          reasignacionFilter={reasignacionFilter}
+          onReasignacionChange={setReasignacionFilter}
+          conteoReasignacion={conteoReasignacion}
           loading={loading}
           onClear={limpiar}
         >
@@ -247,6 +267,7 @@ export default function TodosLosCasosPage() {
                   const estudianteActivo = c.estudiantes_casos?.find(
                     (e) => !e.fecha_fin_asignacion,
                   )?.estudiante;
+                  const reasignacionInfo = verificarCasoRequiereReasignacion(c);
                   return (
                     <tr key={c.id_caso} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
                       <td className="p-3 font-mono text-xs text-slate-500">#{c.id_caso}</td>
@@ -255,7 +276,17 @@ export default function TodosLosCasosPage() {
                       <td className="p-3 text-slate-600 text-xs">{formatArea(c.area)}</td>
                       <td className="p-3">{getStatusBadge(c.estado)}</td>
                       <td className="p-3 text-slate-600 text-xs hidden lg:table-cell">
-                        {estudianteActivo?.perfil?.nombre_completo || "—"}
+                        <div className="space-y-1">
+                          <div>{estudianteActivo?.perfil?.nombre_completo || "—"}</div>
+                          {reasignacionInfo.requiereReasignacion && (
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] font-semibold bg-amber-50 text-amber-800 border-amber-300 whitespace-nowrap block w-fit"
+                            >
+                              ⚠️ Practicante Inactivo (Requiere Reasignación)
+                            </Badge>
+                          )}
+                        </div>
                       </td>
                       <td className="p-3 text-slate-500 text-xs hidden lg:table-cell">{c.periodo || "—"}</td>
                       <td className="p-3 text-right">

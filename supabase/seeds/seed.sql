@@ -25,6 +25,10 @@ INSERT INTO public.estudiantes (id_perfil, semestre, jornada, turno)
 VALUES
 ((SELECT id FROM perfiles WHERE correo = 'estudiante@ejemplo.com'), 8, 'diurna', '9-11');
 
+INSERT INTO public.horarios (id_perfil, dia, turno)
+VALUES
+((SELECT id FROM perfiles WHERE correo = 'estudiante@ejemplo.com'), 'Lunes', '9-11');
+
 INSERT INTO public.asesores (id_perfil, turno, area)
 VALUES
 ((SELECT id FROM perfiles WHERE correo = 'asesor@ejemplo.com'), '4-6', 'laboral');

@@ -43,6 +43,20 @@ export async function cambiarEstadoCasoAdmin(
       };
     }
 
+    // Verificar que el usuario tenga rol de administrador
+    const { data: rolData } = await supabaseAdmin
+      .from("perfiles_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (rolData?.role !== "admin") {
+      return {
+        success: false,
+        error: "No tienes permisos de administrador para cambiar el estado de este caso.",
+      };
+    }
+
     // Obtener caso actual
     const { data: casoActual, error: casoError } = await supabaseAdmin
       .from("casos")
@@ -100,6 +114,12 @@ export async function cambiarEstadoCasoAdmin(
 
     revalidatePath("/admin/todos-los-casos");
     revalidatePath(`/admin/todos-los-casos/${idCaso}`);
+    revalidatePath("/pro-apoyo/gestionar-caso");
+    revalidatePath(`/pro-apoyo/gestionar-caso/${idCaso}`);
+    revalidatePath("/asesor/mis-casos");
+    revalidatePath(`/asesor/mis-casos/${idCaso}`);
+    revalidatePath("/estudiante/mis-casos");
+    revalidatePath(`/estudiante/mis-casos/${idCaso}`);
 
     return {
       success: true,

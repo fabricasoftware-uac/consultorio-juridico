@@ -110,13 +110,13 @@ export async function updateAsesor(
   if (perfilError)
     return { success: false, error: "Error al actualizar el perfil." };
 
+  const aseUpdateData: Record<string, any> = { area: data.area };
+  if (data.turno !== undefined) aseUpdateData.turno = data.turno;
+  if (data.dia !== undefined) aseUpdateData.dia = data.dia;
+
   const { error: aseError } = await supabaseAdmin
     .from("asesores")
-    .update({
-      turno: data.turno,
-      area: data.area,
-      dia: data.dia,
-    })
+    .update(aseUpdateData)
     .eq("id_perfil", userId);
 
   if (aseError)

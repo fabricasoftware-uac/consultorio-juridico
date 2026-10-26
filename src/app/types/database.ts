@@ -103,6 +103,7 @@ export type Perfil = {
   cedula?: string | null;
   telefono?: string | null;
   activo: boolean;
+  horarios?: { dia: string; turno: string }[];
 };
 
 // --- ESTUDIANTES -----------------------------------------------
@@ -120,6 +121,15 @@ export type Estudiante = {
   total_casos?: number;
   /** Días y turnos reales, desde la tabla `horarios`. */
   horarios?: { dia: string; turno: string }[];
+  ultimo_periodo_actualizado?: string | null;
+};
+
+// --- CONFIGURACIÓN DEL SISTEMA ---------------------------------
+export type ConfiguracionSistema = {
+  clave: string;
+  valor: string;
+  descripcion?: string | null;
+  updated_at?: string | null;
 };
 
 // --- ASESORES --------------------------------------------------

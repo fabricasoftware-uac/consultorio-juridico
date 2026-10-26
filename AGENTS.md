@@ -12,13 +12,16 @@ pnpm dev              # next dev --turbopack
 pnpm build            # next build
 pnpm start            # next start
 pnpm lint             # eslint (no config file — uses Next.js defaults)
+pnpm typecheck        # tsc --noEmit (strict typecheck)
+pnpm test:qa          # suite completa de pruebas unitarias y de integración (75 tests)
 pnpm supabase start   # Docker containers for local Supabase
 pnpm supabase db reset  # drop + re-apply all migrations
 pnpm supabase migration new <name>  # create new migration
 npx tsx scripts/seed.ts  # seed DB with 4 test users (pw: "testuser")
+graphify update .     # actualizar grafo de arquitectura (AST)
 ```
 
-No test framework, no typecheck script, no formatter config.
+Suite de QA automatizada en `scripts/test-qa-suite.ts` con 75 pruebas que cubren búsqueda independiente, plazos, transición semestral, RLS, horarios y roles.
 
 ## Setup order
 1. `pnpm install`
@@ -72,12 +75,13 @@ src/
   lib/         # Supabase clients, utils
   middleware.ts # Session + RBAC
 supabase/
-  migrations/  # 20 SQL migrations
+  migrations/  # 73 SQL migrations (incluye llamados, auditoría, transición semestral)
   queries/     # TS query helpers
-  seeds/       # SQL seed (unused; actual seed is scripts/seed.ts)
+  seeds/       # SQL seed
   config.toml  # Local Supabase config (port 54321 API, 54322 DB, 54323 Studio)
 scripts/
   seed.ts      # Snaplet Seed: creates 4 test users via supabaseAdmin.auth.signUp()
+  test-qa-suite.ts # Suite de 75 pruebas unitarias y de integración QA
 ```
 
 ### Key details

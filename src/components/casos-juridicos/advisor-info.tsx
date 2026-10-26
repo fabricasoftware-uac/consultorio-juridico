@@ -58,8 +58,15 @@ export const AdvisorInfo = ({
               className="capitalize"
             />
             <InfoField
-              label="Turno"
-              value={advisor.turno || "N/A"}
+              label="Turno / Horario"
+              value={
+                advisor.horario
+                  ? Object.entries(advisor.horario)
+                      .filter(([_, v]: any) => v?.activo && v?.turno)
+                      .map(([d, v]: any) => `${d.substring(0, 3)} ${v.turno}`)
+                      .join(", ") || advisor.turno || "N/A"
+                  : advisor.turno || "N/A"
+              }
               icon={Clock}
             />
             <InfoField

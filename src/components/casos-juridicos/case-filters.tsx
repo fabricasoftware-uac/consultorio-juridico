@@ -10,7 +10,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Search, FilterX } from "lucide-react";
+import { Search, FilterX, AlertTriangle } from "lucide-react";
+import { cn } from "@/components/ui/utils";
 
 const AREA_OPTIONS = [
   { value: "todos", label: "Todas las áreas" },
@@ -64,6 +65,9 @@ export interface CaseFiltersProps {
   onClear: () => void;
   loading?: boolean;
   searchPlaceholder?: string;
+  reasignacionFilter?: boolean;
+  onReasignacionChange?: (checked: boolean) => void;
+  conteoReasignacion?: number;
   children?: React.ReactNode;
 }
 
@@ -84,6 +88,9 @@ export function CaseFilters({
   advisorFilter,
   onAdvisorChange,
   advisorsList,
+  reasignacionFilter,
+  onReasignacionChange,
+  conteoReasignacion,
   onClear,
   loading,
   searchPlaceholder = "Solicitante, documento o N° caso...",
@@ -255,6 +262,37 @@ export function CaseFilters({
         </div>
 
         {children}
+
+        {onReasignacionChange && (
+          <Button
+            type="button"
+            variant={reasignacionFilter ? "default" : "outline"}
+            onClick={() => onReasignacionChange(!reasignacionFilter)}
+            disabled={loading}
+            className={cn(
+              "w-full lg:w-auto shrink-0 rounded-xl h-10 text-xs font-semibold transition-all flex items-center justify-center gap-2",
+              reasignacionFilter
+                ? "bg-amber-600 hover:bg-amber-700 text-white border-amber-600 shadow-xs"
+                : "bg-amber-50/90 hover:bg-amber-100 text-amber-800 border-amber-300"
+            )}
+            title="Filtrar casos con practicante inactivo o sin turnos registrados"
+          >
+            <AlertTriangle className={cn("w-4 h-4 shrink-0", reasignacionFilter ? "text-white" : "text-amber-600")} />
+            <span>Requieren reasignación (Practicante inactivo)</span>
+            {conteoReasignacion !== undefined && (
+              <span
+                className={cn(
+                  "px-1.5 py-0.5 rounded-full text-[10px] font-bold",
+                  reasignacionFilter
+                    ? "bg-amber-800 text-white"
+                    : "bg-amber-200 text-amber-900"
+                )}
+              >
+                {conteoReasignacion}
+              </span>
+            )}
+          </Button>
+        )}
 
         <Button
           onClick={onClear}

@@ -60,12 +60,18 @@ export async function registerEstudiante(
   }
 
   // 3. Insert into estudiantes table
+  const { getPeriodoActivo } = await import("../../actions/periodoAcademicoActions");
+  const periodoActivo = await getPeriodoActivo();
+
   const { error: estudianteError } = await supabaseAdmin
     .from("estudiantes")
     .insert({
       id_perfil: userId,
       semestre: input.semestre,
       jornada: input.jornada,
+      turno: (input.horarios[0]?.turno as any) ?? null,
+      dia: input.horarios[0]?.dia ?? null,
+      ultimo_periodo_actualizado: periodoActivo,
     });
 
   if (estudianteError) {
@@ -155,6 +161,20 @@ export async function registerAsesor(
     await supabaseAdmin.from("horarios").insert(
       input.horarios.map((h) => ({ id_perfil: userId, turno: h.turno, dia: h.dia })),
     );
+
+    const horarioJson: Record<string, any> = {};
+    input.horarios.forEach((h) => {
+      horarioJson[h.dia] = { activo: true, turno: h.turno };
+    });
+
+    await supabaseAdmin
+      .from("asesores")
+      .update({
+        horario: horarioJson,
+        turno: input.horarios[0]?.turno ?? null,
+        dia: input.horarios[0]?.dia ?? null,
+      })
+      .eq("id_perfil", userId);
   }
 
   return {

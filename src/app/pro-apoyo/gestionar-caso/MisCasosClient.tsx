@@ -42,6 +42,7 @@ import { formatDate } from "@/lib/format-date";
 import { formatArea } from "@/lib/utils";
 import { CaseFilters } from "@/components/casos-juridicos/case-filters";
 import { CountdownTimer } from "@/components/casos-juridicos/countdown-timer";
+import { verificarCasoRequiereReasignacion } from "@/lib/transicion-semestral";
 
 export default function SupportCasesPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -52,6 +53,7 @@ export default function SupportCasesPage() {
   const [advisorFilter, setAdvisorFilter] = useState("todos");
   const [dateSort, setDateSort] = useState("ultima_mod");
   const [classFilter, setClassFilter] = useState("todos");
+  const [reasignacionFilter, setReasignacionFilter] = useState(false);
   const [casos, setCasos] = useState<Caso[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -111,6 +113,10 @@ export default function SupportCasesPage() {
       const matchesPeriodo =
         periodoFilter === "todos" || caso.periodo === periodoFilter;
 
+      const matchesReasignacion =
+        !reasignacionFilter ||
+        verificarCasoRequiereReasignacion(caso).requiereReasignacion;
+
       return (
         isSearchMatch &&
         matchesStatus &&
@@ -118,7 +124,8 @@ export default function SupportCasesPage() {
         matchesStudent &&
         matchesAdvisor &&
         matchesClass &&
-        matchesPeriodo
+        matchesPeriodo &&
+        matchesReasignacion
       );
     });
   }, [
@@ -130,7 +137,14 @@ export default function SupportCasesPage() {
     advisorFilter,
     classFilter,
     periodoFilter,
+    reasignacionFilter,
   ]);
+
+  const conteoReasignacion = useMemo(() => {
+    return (casos ?? []).filter(
+      (c) => verificarCasoRequiereReasignacion(c).requiereReasignacion,
+    ).length;
+  }, [casos]);
 
   const sortedCases = useMemo(() => {
     return [...filteredCases].sort((a, b) => {
@@ -181,6 +195,7 @@ export default function SupportCasesPage() {
     classFilter,
     periodoFilter,
     dateSort,
+    reasignacionFilter,
   ]);
 
   // Paginación
@@ -294,6 +309,9 @@ export default function SupportCasesPage() {
           onDateSortChange={setDateSort}
           classFilter={classFilter}
           onClassChange={setClassFilter}
+          reasignacionFilter={reasignacionFilter}
+          onReasignacionChange={setReasignacionFilter}
+          conteoReasignacion={conteoReasignacion}
           loading={loading}
           onClear={() => {
             setSearchTerm("");
@@ -304,6 +322,7 @@ export default function SupportCasesPage() {
             setAdvisorFilter("todos");
             setDateSort("ultima_mod");
             setClassFilter("todos");
+            setReasignacionFilter(false);
           }}
         >
           <div className="w-full lg:w-40 space-y-1.5">
@@ -328,6 +347,7 @@ export default function SupportCasesPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
           {currentCases?.map((caso) => {
             const usuario = Array.isArray(caso.usuarios) ? caso.usuarios[0] : caso.usuarios;
+            const reasignacionInfo = verificarCasoRequiereReasignacion(caso);
             return (
               <div
                 key={caso.id_caso}
@@ -337,7 +357,7 @@ export default function SupportCasesPage() {
                 <Card
                   className="p-6 border-none shadow-sm shadow-slate-200/50 hover:shadow-md hover:shadow-blue-900/5 hover:border-blue-300 transition-all duration-300 bg-white rounded-2xl group flex flex-col h-full"
                 >
-                <div className="flex justify-between items-start mb-5 border-b border-slate-100 pb-4">
+                <div className="flex justify-between items-start mb-4 border-b border-slate-100 pb-4">
                   <div className="space-y-1">
                     <div className="text-xs font-semibold text-slate-400">
                       Caso #{caso.id_caso}
@@ -351,6 +371,14 @@ export default function SupportCasesPage() {
                   </div>
                   <div className="shrink-0">{getStatusBadge(caso.estado)}</div>
                 </div>
+
+                {reasignacionInfo.requiereReasignacion && (
+                  <div className="-mt-1 mb-4">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-semibold shadow-xs">
+                      <span>⚠️ Practicante Inactivo (Requiere Reasignación)</span>
+                    </div>
+                  </div>
+                )}
 
               <div className="space-y-3 mb-6 flex-1">
                 <div className="space-y-1">

@@ -18,6 +18,11 @@ import {
   aplicarResolucionLlamado,
   type LlamadoAtencionAdmin,
 } from "../supabase/queries/getLlamadosAdmin";
+import {
+  verificarCasoRequiereReasignacion,
+  sugerirSiguienteSemestre,
+  validarPeriodoAcademico,
+} from "../src/lib/transicion-semestral";
 
 console.log("=== INICIANDO SUITE DE PRUEBAS DE QA ===\n");
 
@@ -1601,6 +1606,225 @@ test("ROLE_HOME maneja roles no definidos devolviendo undefined para fallback se
   assert.equal(getHome("estudiante"), "/estudiante/mis-casos");
   assert.equal(getHome("asesor"), "/asesor/mis-casos");
   assert.equal(getHome("desconocido"), "/");
+});
+
+// -------------------------------------------------------------------
+// 13. Pruebas de Transición Semestral y Detección de Casos a Reasignar
+// -------------------------------------------------------------------
+console.log("\n13. Pruebas de Transición Semestral y Detección de Casos a Reasignar");
+
+// --- 13.1 verificarCasoRequiereReasignacion ---
+test("verificarCasoRequiereReasignacion: Caso activo con estudiante activo y con horarios -> false", () => {
+  const caso: any = {
+    id_caso: 501,
+    estado: "activo",
+    estudiantes_casos: [
+      {
+        fecha_fin_asignacion: null,
+        estudiante: {
+          id_perfil: "est-1",
+          perfil: { activo: true, nombre_completo: "Carlos Estudiante" },
+          horarios: [{ dia: "Lunes", turno: "9-11" }],
+        },
+      },
+    ],
+  };
+
+  const resultado = verificarCasoRequiereReasignacion(caso);
+  assert.equal(resultado.requiereReasignacion, false);
+  assert.equal(resultado.motivo, null);
+  assert.equal(resultado.estudianteActivo?.id_perfil, "est-1");
+});
+
+test("verificarCasoRequiereReasignacion: Caso activo con estudiante inactivo (activo === false) -> true", () => {
+  const caso: any = {
+    id_caso: 502,
+    estado: "activo",
+    estudiantes_casos: [
+      {
+        fecha_fin_asignacion: null,
+        estudiante: {
+          id_perfil: "est-2",
+          perfil: { activo: false, nombre_completo: "Estudiante Inactivo" },
+          horarios: [{ dia: "Martes", turno: "2-4" }],
+        },
+      },
+    ],
+  };
+
+  const resultado = verificarCasoRequiereReasignacion(caso);
+  assert.equal(resultado.requiereReasignacion, true);
+  assert.equal(resultado.motivo, "inactivo");
+  assert.equal(resultado.estudianteActivo?.id_perfil, "est-2");
+});
+
+test("verificarCasoRequiereReasignacion: Caso activo con estudiante activo sin horarios -> false (no es inactivo)", () => {
+  const caso: any = {
+    id_caso: 503,
+    estado: "activo",
+    estudiantes_casos: [
+      {
+        fecha_fin_asignacion: null,
+        estudiante: {
+          id_perfil: "est-3",
+          perfil: { activo: true, nombre_completo: "Carlos Rodriguez", horarios: [] },
+          horarios: [],
+        },
+      },
+    ],
+  };
+
+  const resultado = verificarCasoRequiereReasignacion(caso);
+  assert.equal(resultado.requiereReasignacion, false);
+  assert.equal(resultado.motivo, null);
+  assert.equal(resultado.estudianteActivo?.id_perfil, "est-3");
+});
+
+test("verificarCasoRequiereReasignacion: Caso cerrado o archivado con estudiante inactivo -> false", () => {
+  const casoCerrado: any = {
+    id_caso: 504,
+    estado: "cerrado",
+    estudiantes_casos: [
+      {
+        fecha_fin_asignacion: null,
+        estudiante: {
+          id_perfil: "est-4",
+          perfil: { activo: false },
+          horarios: [],
+        },
+      },
+    ],
+  };
+
+  const resultadoCerrado = verificarCasoRequiereReasignacion(casoCerrado);
+  assert.equal(resultadoCerrado.requiereReasignacion, false);
+  assert.equal(resultadoCerrado.estudianteActivo, null);
+  assert.equal(resultadoCerrado.motivo, null);
+
+  const casoArchivado: any = {
+    id_caso: 505,
+    estado: "archivado",
+    estudiantes_casos: [
+      {
+        fecha_fin_asignacion: null,
+        estudiante: {
+          id_perfil: "est-5",
+          perfil: { activo: false },
+          horarios: [],
+        },
+      },
+    ],
+  };
+
+  const resultadoArchivado = verificarCasoRequiereReasignacion(casoArchivado);
+  assert.equal(resultadoArchivado.requiereReasignacion, false);
+  assert.equal(resultadoArchivado.estudianteActivo, null);
+  assert.equal(resultadoArchivado.motivo, null);
+});
+
+test("verificarCasoRequiereReasignacion: Caso sin estudiante asignado -> false", () => {
+  const casoSinAsignar: any = {
+    id_caso: 506,
+    estado: "activo",
+    estudiantes_casos: [],
+  };
+
+  const resultadoVacio = verificarCasoRequiereReasignacion(casoSinAsignar);
+  assert.equal(resultadoVacio.requiereReasignacion, false);
+  assert.equal(resultadoVacio.estudianteActivo, null);
+  assert.equal(resultadoVacio.motivo, null);
+
+  const casoConHistoricos: any = {
+    id_caso: 507,
+    estado: "activo",
+    estudiantes_casos: [
+      {
+        fecha_fin_asignacion: "2026-01-15",
+        estudiante: {
+          id_perfil: "est-historico",
+          perfil: { activo: false },
+          horarios: [],
+        },
+      },
+    ],
+  };
+
+  const resultadoHistorico = verificarCasoRequiereReasignacion(casoConHistoricos);
+  assert.equal(resultadoHistorico.requiereReasignacion, false);
+  assert.equal(resultadoHistorico.estudianteActivo, null);
+  assert.equal(resultadoHistorico.motivo, null);
+});
+
+// --- 13.2 Lógica de transición de semestre (sugerirSiguienteSemestre) ---
+test("sugerirSiguienteSemestre avanza semestre + 1 cuando es menor a 10", () => {
+  assert.equal(sugerirSiguienteSemestre(7), 8);
+  assert.equal(sugerirSiguienteSemestre(8), 9);
+  assert.equal(sugerirSiguienteSemestre(9), 10);
+  assert.equal(sugerirSiguienteSemestre(1), 2);
+});
+
+test("sugerirSiguienteSemestre respeta el tope máximo en semestre 10", () => {
+  assert.equal(sugerirSiguienteSemestre(10), 10);
+  assert.equal(sugerirSiguienteSemestre(11), 10);
+  assert.equal(sugerirSiguienteSemestre(12), 10);
+});
+
+test("sugerirSiguienteSemestre sugiere 7 como valor inicial seguro para perfiles nulos o incompletos", () => {
+  assert.equal(sugerirSiguienteSemestre(null), 7);
+  assert.equal(sugerirSiguienteSemestre(undefined), 7);
+  assert.equal(sugerirSiguienteSemestre(0), 7);
+  assert.equal(sugerirSiguienteSemestre(-3), 7);
+  assert.equal(sugerirSiguienteSemestre(NaN), 7);
+});
+
+// --- 13.3 Validación de actualización de período académico activo ---
+test("validarPeriodoAcademico acepta formatos válidos AAAA-1 y AAAA-2", () => {
+  assert.deepEqual(validarPeriodoAcademico("2026-1"), { valido: true, periodoNormalizado: "2026-1" });
+  assert.deepEqual(validarPeriodoAcademico("2026-2"), { valido: true, periodoNormalizado: "2026-2" });
+  assert.deepEqual(validarPeriodoAcademico("2027-1"), { valido: true, periodoNormalizado: "2027-1" });
+  assert.deepEqual(validarPeriodoAcademico("2030-2"), { valido: true, periodoNormalizado: "2030-2" });
+});
+
+test("validarPeriodoAcademico normaliza espacios en blanco en extremos", () => {
+  assert.deepEqual(validarPeriodoAcademico("   2026-2   "), {
+    valido: true,
+    periodoNormalizado: "2026-2",
+  });
+});
+
+test("validarPeriodoAcademico rechaza entradas vacías o solo espacios", () => {
+  const vacio = validarPeriodoAcademico("");
+  assert.equal(vacio.valido, false);
+  assert.equal(vacio.error, "El período académico no puede estar vacío.");
+
+  const espacios = validarPeriodoAcademico("     ");
+  assert.equal(espacios.valido, false);
+  assert.equal(espacios.error, "El período académico no puede estar vacío.");
+});
+
+test("validarPeriodoAcademico rechaza formatos que no corresponden a período académico", () => {
+  const formatosInvalidos = [
+    "2026-3",
+    "2026-0",
+    "2026",
+    "26-1",
+    "2026/1",
+    "periodo-1",
+    "2026-1-extra",
+  ];
+
+  for (const f of formatosInvalidos) {
+    const res = validarPeriodoAcademico(f);
+    assert.equal(res.valido, false, `Formato "${f}" debe ser rechazado`);
+    assert.ok(res.error?.includes('formato del período debe ser "AAAA-1" o "AAAA-2"'));
+  }
+});
+
+test("validarPeriodoAcademico rechaza tipos no string", () => {
+  assert.equal(validarPeriodoAcademico(null).valido, false);
+  assert.equal(validarPeriodoAcademico(undefined).valido, false);
+  assert.equal(validarPeriodoAcademico(2026 as any).valido, false);
+  assert.equal(validarPeriodoAcademico({ periodo: "2026-1" } as any).valido, false);
 });
 
 console.log(`\n=== RESUMEN DE PRUEBAS ===`);

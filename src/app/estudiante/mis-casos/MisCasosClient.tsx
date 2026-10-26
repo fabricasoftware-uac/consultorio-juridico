@@ -43,6 +43,11 @@ import {
   Clock,
   AlertTriangle,
 } from "lucide-react";
+import { ModalActualizarSemestre } from "@/components/estudiantes/modal-actualizar-semestre";
+import {
+  verificarEstudianteRequiereActualizacion,
+  type DatosEstudianteTransicion,
+} from "app/actions/periodoAcademicoActions";
 
 export default function MisCasosClient() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -55,6 +60,9 @@ export default function MisCasosClient() {
   const [loading, setLoading] = useState(false);
   const [casos, setCasos] = useState<Caso[] | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [modalActualizarOpen, setModalActualizarOpen] = useState(false);
+  const [periodoActivo, setPeriodoActivo] = useState("2026-2");
+  const [datosEstudiante, setDatosEstudiante] = useState<DatosEstudianteTransicion | null>(null);
   const router = useRouter();
 
   const refetch = useCallback(async () => {
@@ -67,8 +75,21 @@ export default function MisCasosClient() {
   }, []);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setCurrentUserId(user?.id ?? null);
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      const uid = user?.id ?? null;
+      setCurrentUserId(uid);
+      if (uid) {
+        try {
+          const res = await verificarEstudianteRequiereActualizacion(uid);
+          if (res.requiereActualizacion) {
+            setPeriodoActivo(res.periodoActivo);
+            setDatosEstudiante(res.datosEstudiante);
+            setModalActualizarOpen(true);
+          }
+        } catch (err) {
+          console.error("Error al verificar actualización semestral:", err);
+        }
+      }
     });
   }, []);
 
@@ -586,6 +607,16 @@ export default function MisCasosClient() {
           </div>
         )}
       </main>
+
+      <ModalActualizarSemestre
+        open={modalActualizarOpen}
+        periodoActivo={periodoActivo}
+        datosEstudiante={datosEstudiante}
+        onSuccess={() => {
+          setModalActualizarOpen(false);
+          refetch();
+        }}
+      />
     </div>
   );
 }

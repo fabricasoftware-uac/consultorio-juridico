@@ -25,7 +25,12 @@ import {
   Eye,
   X,
   ChartNoAxesColumnDecreasingIcon,
+  Calendar,
 } from "lucide-react";
+import {
+  getPeriodoActivo,
+  setPeriodoActivo,
+} from "app/actions/periodoAcademicoActions";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -92,6 +97,10 @@ export default function EstudiantesPage() {
   const [filtroJornada, setFiltroJornada] = useState("todas");
   const [filtroSemestre, setFiltroSemestre] = useState("todos");
   const [filtroEstado, setFiltroEstado] = useState("todos");
+  const [filtroPeriodo, setFiltroPeriodo] = useState<"todos" | "al_dia" | "pendientes">("todos");
+  const [periodoActivo, setPeriodoActivoState] = useState<string>("2026-2");
+  const [isCambiarPeriodoOpen, setIsCambiarPeriodoOpen] = useState(false);
+  const [nuevoPeriodoInput, setNuevoPeriodoInput] = useState("");
   const [pagina, setPagina] = useState(1);
   const [isPending, startTransition] = useTransition();
 
@@ -99,7 +108,7 @@ export default function EstudiantesPage() {
   // puede quedar viendo una página que ya no existe.
   useEffect(() => {
     setPagina(1);
-  }, [searchTerm, filtroJornada, filtroSemestre, filtroEstado]);
+  }, [searchTerm, filtroJornada, filtroSemestre, filtroEstado, filtroPeriodo]);
 
   // Edit State
   const [editingStudent, setEditingStudent] = useState<Estudiante | null>(null);
@@ -113,9 +122,39 @@ export default function EstudiantesPage() {
     setLoading(false);
   }
 
+  async function fetchPeriodo() {
+    try {
+      const p = await getPeriodoActivo();
+      setPeriodoActivoState(p);
+    } catch (err) {
+      console.error("Error al obtener periodo activo:", err);
+    }
+  }
+
   useEffect(() => {
     fetchEstudiantes();
+    fetchPeriodo();
   }, []);
+
+  const handleCambiarPeriodo = () => {
+    const nuevo = nuevoPeriodoInput.trim();
+    if (!nuevo) {
+      toast.error("El período no puede estar vacío.");
+      return;
+    }
+
+    startTransition(async () => {
+      const res = await setPeriodoActivo(nuevo);
+      if (res.success) {
+        toast.success(res.message);
+        setPeriodoActivoState(nuevo);
+        setIsCambiarPeriodoOpen(false);
+        fetchEstudiantes();
+      } else {
+        toast.error(res.error);
+      }
+    });
+  };
 
   const set = (field: keyof StudentForm) => (value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -237,8 +276,17 @@ export default function EstudiantesPage() {
       filtroEstado === "todos" ||
       (filtroEstado === "activos" ? (e.perfil?.activo ?? false) : !(e.perfil?.activo ?? false));
 
+    const coincidePeriodo =
+      filtroPeriodo === "todos" ||
+      (filtroPeriodo === "al_dia" && e.ultimo_periodo_actualizado === periodoActivo) ||
+      (filtroPeriodo === "pendientes" && e.ultimo_periodo_actualizado !== periodoActivo);
+
     return (
-      coincideBusqueda && coincideJornada && coincideSemestre && coincideEstado
+      coincideBusqueda &&
+      coincideJornada &&
+      coincideSemestre &&
+      coincideEstado &&
+      coincidePeriodo
     );
   });
 
@@ -256,13 +304,15 @@ export default function EstudiantesPage() {
     searchTerm !== "" ||
     filtroJornada !== "todas" ||
     filtroSemestre !== "todos" ||
-    filtroEstado !== "todos";
+    filtroEstado !== "todos" ||
+    filtroPeriodo !== "todos";
 
   const limpiarFiltros = () => {
     setSearchTerm("");
     setFiltroJornada("todas");
     setFiltroSemestre("todos");
     setFiltroEstado("todos");
+    setFiltroPeriodo("todos");
   };
 
   return (
@@ -418,9 +468,29 @@ export default function EstudiantesPage() {
           {/* Right Column: List & CRUD */}
           <div className="lg:col-span-2">
             <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <h2 className="text-xl font-bold text-gray-900">
-                Estudiantes Registrados
-              </h2>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h2 className="text-xl font-bold text-gray-900">
+                  Estudiantes Registrados
+                </h2>
+                <Badge
+                  variant="outline"
+                  className="bg-blue-50 text-blue-700 border-blue-200 font-semibold px-2.5 py-1 text-xs"
+                >
+                  Período Activo: {periodoActivo}
+                </Badge>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setNuevoPeriodoInput(periodoActivo);
+                    setIsCambiarPeriodoOpen(true);
+                  }}
+                  className="h-7 text-xs border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg"
+                >
+                  <Calendar className="w-3.5 h-3.5 mr-1 text-blue-600" />
+                  Cambiar Período
+                </Button>
+              </div>
               <div className="relative w-full sm:w-64">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
                 <Input
@@ -472,6 +542,17 @@ export default function EstudiantesPage() {
                 </SelectContent>
               </Select>
 
+              <Select value={filtroPeriodo} onValueChange={(val: any) => setFiltroPeriodo(val)}>
+                <SelectTrigger className="h-9 w-auto min-w-44 text-sm" aria-label="Filtrar por período">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos los períodos</SelectItem>
+                  <SelectItem value="al_dia">Al día ({periodoActivo})</SelectItem>
+                  <SelectItem value="pendientes">Pendientes por actualizar</SelectItem>
+                </SelectContent>
+              </Select>
+
               {hayFiltros && (
                 <Button
                   variant="ghost"
@@ -503,6 +584,7 @@ export default function EstudiantesPage() {
                     <TableRow>
                       <TableHead>Nombre / Cédula</TableHead>
                       <TableHead>Semestre / Turno</TableHead>
+                      <TableHead>Período</TableHead>
                       <TableHead>Estado</TableHead>
                       <TableHead className="text-right">Acciones</TableHead>
                     </TableRow>
@@ -511,7 +593,7 @@ export default function EstudiantesPage() {
                     {loading ? (
                       <TableRow>
                         <TableCell
-                          colSpan={4}
+                          colSpan={5}
                           className="h-48 text-center text-slate-500"
                         >
                           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
@@ -521,7 +603,7 @@ export default function EstudiantesPage() {
                     ) : filteredEstudiantes.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={4}
+                          colSpan={5}
                           className="h-41 text-center text-slate-500"
                         >
                           No se encontraron estudiantes.
@@ -564,6 +646,23 @@ export default function EstudiantesPage() {
                                   {student.jornada}
                                 </div>
                               </>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {student.ultimo_periodo_actualizado === periodoActivo ? (
+                              <Badge
+                                variant="outline"
+                                className="text-[11px] border-emerald-300 bg-emerald-50 text-emerald-800 font-medium whitespace-nowrap"
+                              >
+                                Al día ({periodoActivo})
+                              </Badge>
+                            ) : (
+                              <Badge
+                                variant="outline"
+                                className="text-[11px] border-amber-300 bg-amber-50 text-amber-800 font-medium whitespace-nowrap"
+                              >
+                                Pendiente ({student.ultimo_periodo_actualizado || "Sin registro"})
+                              </Badge>
                             )}
                           </TableCell>
                           <TableCell>
@@ -748,6 +847,62 @@ export default function EstudiantesPage() {
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
                 ) : null}
                 Guardar Cambios
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog Cambiar Período */}
+        <Dialog open={isCambiarPeriodoOpen} onOpenChange={setIsCambiarPeriodoOpen}>
+          <DialogContent className="sm:max-w-md rounded-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-bold text-slate-900">
+                Cambiar Período Académico
+              </DialogTitle>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Al activar un nuevo período (por ejemplo <strong>2027-1</strong>),
+                los estudiantes verán un modal al ingresar para confirmar su
+                semestre, jornada y turnos de consultorio correspondientes al nuevo ciclo.
+              </p>
+            </DialogHeader>
+
+            <div className="space-y-3 py-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="input-nuevo-periodo" className="text-xs font-semibold text-slate-700">
+                  Código del Período
+                </Label>
+                <Input
+                  id="input-nuevo-periodo"
+                  placeholder="Ej: 2027-1"
+                  value={nuevoPeriodoInput}
+                  onChange={(e) => setNuevoPeriodoInput(e.target.value)}
+                  disabled={isPending}
+                  className="h-10 rounded-xl"
+                />
+                <p className="text-[11px] text-slate-400">
+                  Formato estándar: AÑO-SEMESTRE (ej. 2026-2, 2027-1)
+                </p>
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsCambiarPeriodoOpen(false)}
+                disabled={isPending}
+                className="rounded-xl"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                onClick={handleCambiarPeriodo}
+                disabled={isPending || !nuevoPeriodoInput.trim()}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl"
+              >
+                {isPending && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                Guardar y Activar
               </Button>
             </DialogFooter>
           </DialogContent>

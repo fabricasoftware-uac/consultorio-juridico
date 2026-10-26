@@ -183,9 +183,23 @@ Tabla `auditoria_casos` que registra toda acción sobre un caso (creación, asig
 - **Dashboard de analíticas** (`/api/admin/analiticas`): métricas de casos por estado, área, periodo, mes, clasificación; demográficos (sexo, edad, estrato, estado civil, vivienda, situación laboral); diversidad (enfoque diverso, LGBTIQ+); carga de estudiantes y asesores; llamados de atención
 - **Exportación Excel** (`/api/admin/exportar`): exporta casos, usuarios, estudiantes, asesores, llamados, demandados o contratos en formato `.xlsx` con ExcelJS
 
-### Reasignación de equipo
+### Reasignación de equipo y Casos Huérfanos
 
-Sidebar "Equipo asignado" en el detalle del caso permite reasignar estudiantes y asesores. El selector muestra nombre, carga actual de casos, día y jornada disponible.
+- En el detalle de cada caso, el modal "Reasignar equipo" permite transferir casos entre practicantes y asesores con historial de fechas.
+- Filtro inteligente en la bandeja de casos para detectar **"Casos que requieren reasignación"** cuando el practicante asignado ha sido inactivado (`activo = false`, ej. graduados o retirados), evitando casos desatendidos.
+- El selector muestra nombre, cédula, correo, semestre, carga activa y los turnos semanales reales desde `public.horarios`.
+
+### Período Académico y Transición Semestral
+
+- **Configuración Global**: Tabla `configuracion_sistema` con clave `periodo_activo` (ej. `2026-2`, `2027-1`).
+- **Control Administrativo**: Selector de período activo en `/admin/estudiantes` con indicador de estado ("Al día" vs "Pendiente").
+- **Self-Service de Estudiantes**: Modal de 30 segundos que intercepta a estudiantes en su primer inicio de sesión del nuevo ciclo para actualizar semestre, jornada, turnos y teléfono.
+- **Acceso Directo**: Los roles operativos ingresan directamente a su bandeja de trabajo (`/estudiante/mis-casos`, `/asesor/mis-casos`).
+
+### Centralización de Horarios y Cambio de Estados
+
+- **Horarios de Asesores**: Gestión exclusiva por el Administrador en `/admin/asesores` mediante `ScheduleEditor`, sincronizando tanto el JSON estructurado como la tabla relacional `public.horarios`. Vista de solo lectura informativa en `/asesor/mi-horario`.
+- **Cambio de Estado por Admin**: Modal interactivo en el detalle del caso con glosario explicativo de estados, motivo obligatorio y recálculo automático de plazos (ej. 3 días hábiles en `en_correccion`).
 
 ## Estructura del Proyecto
 
@@ -245,6 +259,7 @@ consultorio-juridico/
 | `pnpm start` | Iniciar servidor de producción |
 | `pnpm lint` | Ejecutar ESLint |
 | `pnpm typecheck` | Verificar tipos con TypeScript |
+| `pnpm test:qa` | Ejecutar suite de pruebas unitarias y de integración (75 tests) |
 | `pnpm supabase start` | Iniciar contenedores Docker de Supabase |
 | `pnpm supabase stop` | Detener contenedores |
 | `pnpm supabase db reset` | Borrar BD y re-aplicar migraciones |
@@ -266,7 +281,7 @@ consultorio-juridico/
 - **JWT**: expiración de 1 hora, refresh token rotation habilitado
 - **Signups**: habilitados, confirmación de email deshabilitada en desarrollo
 - **Subida de archivos**: el límite de 4.5 MB del body de Vercel serverless se evita mediante subida directa al storage de Supabase desde el cliente; la API Route solo maneja metadatos
-- **Migraciones**: 47 archivos SQL en orden cronológico. No modificar migraciones ya aplicadas; siempre crear nuevas
+- **Migraciones**: 73 archivos SQL en orden cronológico. No modificar migraciones ya aplicadas; siempre crear nuevas
 - **Realtime**: la publicación `supabase_realtime` incluye las tablas `casos`, `estudiantes_casos`, `asesores_casos`, `notificaciones_usuario`, `auditoria_casos`, `documentos_caso`, `actividades_caso`
 
 ## Licencia

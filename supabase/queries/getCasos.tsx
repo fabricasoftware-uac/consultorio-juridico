@@ -33,11 +33,18 @@ export async function getCasos(): Promise<Caso[]> {
         semestre,
         jornada,
         turno,
+        ultimo_periodo_actualizado,
         perfil:perfiles (
+          id,
           nombre_completo,
           correo,
           telefono,
-          cedula
+          cedula,
+          activo,
+          horarios (
+            dia,
+            turno
+          )
         )
       )
     ),
@@ -63,5 +70,18 @@ export async function getCasos(): Promise<Caso[]> {
     return [];
   }
 
-  return data as unknown as Caso[];
+  const formatted = data?.map((caso: any) => ({
+    ...caso,
+    estudiantes_casos: caso.estudiantes_casos?.map((ec: any) => ({
+      ...ec,
+      estudiante: ec.estudiante
+        ? {
+            ...ec.estudiante,
+            horarios: ec.estudiante.perfil?.horarios ?? ec.estudiante.horarios ?? [],
+          }
+        : ec.estudiante,
+    })),
+  }));
+
+  return (formatted ?? []) as unknown as Caso[];
 }

@@ -1,96 +1,104 @@
 # Manual de Usuario: Sistema de Gestión del Consultorio Jurídico
 
-Bienvenido al manual de usuario del **Consultorio Jurídico**. Este documento proporciona instrucciones detalladas para los tres roles principales del sistema: **Estudiantes**, **Asesores Docentes** y **Profesionales de Apoyo**.
+Bienvenido al manual de usuario del **Consultorio Jurídico**. Este documento proporciona instrucciones detalladas para los cuatro roles del sistema: **Estudiantes**, **Asesores Docentes**, **Profesionales de Apoyo** y **Administradores**.
 
 ---
 
 ## 1. Rol: Estudiante
 
-El estudiante es el encargado del contacto directo con el cliente y la ejecución técnica del caso.
+El estudiante es el encargado del contacto directo con el solicitante y la ejecución jurídica y técnica del caso.
 
-### 1.1 Visualización de Casos
+### 1.1 Acceso Directo y Visualización de Casos
+- Al iniciar sesión con tu correo institucional Google (`@uniautonoma.edu.co`), el sistema te dirige inmediatamente a **"Mis Casos"** (`/estudiante/mis-casos`).
+- Visualizarás tarjetas ejecutivas con el resumen de tus casos activos, pendientes de corrección y cerrados.
+- **Buscador limpio**: Busca directamente por nombre o cédula del solicitante o por el identificador del caso (`#ID`).
+- **Filtros independientes**: Filtra por Asesor Docente, Área del derecho, Estado procesal, Clasificación y Período académico sin mezclar términos.
 
-- Al ingresar a **"Mis Casos"**, verás una lista de los procesos que tienes asignados actualmente.
-- Si un caso es reasignado a otro compañero, este desaparecerá automáticamente de tu lista para evitar confusiones.
-- Puedes filtrar por estado (Aprobado, Pendiente, En Proceso) o buscar por nombre de cliente/cédula.
+### 1.2 Transición Semestral (Self-Service de 30 Segundos)
+- Al inicio de cada nuevo ciclo académico (ej. 2026-2, 2027-1), al iniciar sesión serás recibido con una ventana modal de confirmación rápida:
+  1. **Semestre**: Sugiere automáticamente tu siguiente semestre (tope 10).
+  2. **Jornada**: Diurna, Nocturna o Mixto.
+  3. **Turnos de Consultorio**: Selecciona el día y horario en que prestarás turno (ej. Lunes 9:00 am - 11:00 am).
+  4. **Teléfono de contacto**: Confirmación de tu celular para coordinaciones de casos.
+- Al confirmar, tu perfil queda marcado como **"Al día"** y continúas a tus casos sin interrupciones.
 
-### 1.2 Proceso de Entrevista
-
-- Para los casos en estado **"En Proceso"**, aparecerá el botón **"Continuar a entrevista"**.
-- Este es un formulario exhaustivo de 8 pasos donde registrarás:
-  1. Información básica de la entrevista.
-  2. Datos detallados del solicitante.
-  3. Representación legal (si aplica).
-  4. Información laboral y financiera.
-  5. Datos del demandado.
-  6. Detalles de contratos laborales.
-  7. Resumen de hechos y pretensiones.
-  8. Firmas y autorizaciones.
-
-### 1.3 Solicitud de Aprobación
-
-- Al finalizar la entrevista, el estado del caso cambiará automáticamente a **"Pendiente de Aprobación"**.
-- En este estado, el asesor revisará la información y decidirá si el caso puede proceder.
+### 1.3 Proceso de Entrevista y Documentos
+- Para los casos en estado **"En Proceso"**, utiliza el botón **"Continuar a entrevista"** (formulario guiado de 8 pasos sociodemográficos y jurídicos).
+- Puedes adjuntar documentos probatorios directamente en formato PDF, Word, Excel o imágenes (hasta 25 MB).
+- Al finalizar la entrevista, el estado cambiará a **"Pendiente de Aprobación"** para la revisión del asesor docente.
 
 ---
 
 ## 2. Rol: Asesor Docente
 
-El asesor supervisa la labor del estudiante y garantiza la calidad jurídica de los procesos.
+El asesor docente supervisa la labor del practicante y certifica la calidad técnica de las actuaciones.
 
-### 2.1 Supervisión y Control
+### 2.1 Acceso Directo y Supervisión de Casos
+- Al iniciar sesión, ingresas directamente a **"Mis Casos"** (`/asesor/mis-casos`), donde observas los expedientes de tus estudiantes asignados.
+- Puedes filtrar por estudiante asignado específico o buscar por datos del solicitante.
 
-- En la sección **"Mis Casos Asignados"**, el asesor podrá ver todos los casos de los estudiantes bajo su cargo.
-- Solo verás los casos donde eres el asesor activo actualmente.
+### 2.2 Consulta de Horario Asignado
+- En el menú **"Mi Horario"** (`/asesor/mi-horario`), puedes consultar los días y turnos de atención asignados administrativamente.
+- La gestión y asignación de horarios es administrada de forma centralizada por la Dirección/Coordinación del Consultorio.
 
-### 2.2 Aprobación de Casos
-
-- Los casos marcados como **"Pendiente"** requieren tu revisión.
-- Al entrar en detalles, puedes revisar el resumen de hechos, los datos del cliente y del demandado.
-- Si la información es correcta, haz clic en el botón **"Aprobar"** para que el estudiante pueda continuar con el trámite.
-
-### 2.3 Observaciones y Seguimiento
-
-- El asesor puede agregar y modificar **Observaciones** en cualquier momento.
-- Estas observaciones son visibles para el estudiante y sirven como guía para el desarrollo del caso.
+### 2.3 Aprobación, Ajustes y Observaciones
+- **Aprobar Caso**: Si la entrevista y documentos cumplen con los requisitos, aprueba el caso para pasarlo a estado **"Activo"** (en trámite).
+- **Solicitar Correcciones**: Si faltan soportes o hechos por aclarar, solicita ajustes enviando el caso a **"En Corrección"** (el estudiante dispondrá de 3 días hábiles para subsanar).
+- **Observaciones en tiempo real**: Canal de comunicación interno por caso para orientar al practicante.
 
 ---
 
 ## 3. Rol: Profesional de Apoyo (Pro-Apoyo)
 
-Este rol administrativo tiene control total sobre la infraestructura de la plataforma.
+El profesional de apoyo coordina la operación, apertura de expedientes y equilibrio de cargas.
 
-### 3.1 Creación de Casos
+### 3.1 Apertura y Asignación de Casos
+- Creación de nuevos expedientes en `/pro-apoyo/crear-caso`, registrando al solicitante, los hechos y asignando al equipo inicial (estudiante y docente).
+- El selector inteligente prioriza a los estudiantes y asesores que prestan turno el día de hoy.
 
-- El equipo de Pro-Apoyo es el único autorizado para crear nuevos casos en el sistema.
-- Durante la creación, se define el área jurídica (Civil, Laboral, etc.) y se asigna el equipo inicial.
-
-### 3.2 Gestión de Equipo (Reasignación)
-
-- Si un estudiante o asesor no puede continuar con un caso, Pro-Apoyo puede utilizar la herramienta de **"Reasignar"**.
-- El sistema mantiene un historial de todas las personas que han pasado por el caso, permitiendo una trazabilidad completa.
-
-### 3.3 Modificación de Datos Estructurales
-
-- Si hay errores en nombres, cédulas o datos de contacto que el estudiante no puede editar, Pro-Apoyo tiene permisos para realizar estas correcciones.
+### 3.2 Detección de Casos Huérfanos y Reasignación Rápida
+- **Alerta de Practicante Inactivo**: Si un estudiante asignado culminó sus prácticas o fue inactivado administrativamente, su caso se destaca con el badge `⚠️ Practicante Inactivo (Requiere Reasignación)`.
+- **Filtro de Reasignación**: Botón directo para listar exclusivamente los casos que necesitan nuevo practicante.
+- **Herramienta de Reasignación**: Modal con búsqueda, historial de asignaciones previas, carga actual de casos (ej. 2/5) y turnos semanales reales de cada candidato.
 
 ---
 
-## 4. Preguntas Frecuentes y Soporte
+## 4. Rol: Administrador del Sistema
 
-### 4.1 Centro de Ayuda
+El administrador tiene control directivo, de auditoría y configuración académica.
 
-- Todos los usuarios tienen acceso al **"Centro de Ayuda"** desde la barra de navegación.
-- Allí encontrarás soluciones a problemas comunes y guías rápidas.
+### 4.1 Barra Lateral de Navegación (Sidebar)
+- Navegación agrupada y colapsable con persistencia de preferencias y menú móvil responsive:
+  - **Operaciones**: Inicio (KPIs ejecutivos), Todos los Casos, Llamados de Atención.
+  - **Directorio**: Estudiantes, Asesores Docentes, Profesionales de Apoyo.
+  - **Analíticas**: Métricas demográficas, operativas y exportación a Excel.
 
-### 4.2 Errores en la Información
+### 4.2 Centralización de Horarios Docentes
+- En `/admin/asesores`, el administrador tiene control exclusivo para asignar los días y turnos de atención de cada docente mediante el componente visual `ScheduleEditor`, sincronizando en tiempo real la base de datos relacional.
 
-- **¿Qué hago si hay datos incorrectos?**
-  - Si eres Estudiante o Asesor y detectas información errónea en un perfil, debes contactar inmediatamente a **Pro-Apoyo**. Solo ellos pueden modificar datos de identidad maestros.
+### 4.3 Control de Estado de Casos con Glosario Interactivo
+- En el detalle de cualquier caso (`/admin/todos-los-casos/[id]`), el administrador puede forzar la transición de estado procesal:
+  - **Glosario en pantalla**: Explicación interactiva del significado de cada estado (`en_proceso`, `pendiente_aprobacion`, `en_correccion`, `activo`, `cerrado`, `archivado`).
+  - **Justificación Obligatoria**: Exige un motivo detallado que queda registrado con fecha y usuario en `auditoria_casos`.
+  - **Recálculo de Plazos**: Al pasar a `en_correccion` asigna automáticamente 3 días hábiles al estudiante; al cerrar o archivar limpia los plazos pendientes.
 
-### 4.3 Canales de Soporte
+### 4.4 Módulo de Llamados de Atención y Justificación
+- En `/admin/llamados`, visualización agrupada por impacto de infractores (docentes y practicantes con alertas activas).
+- Permite resolver llamados de forma manual ingresando un motivo de justificación (ej. excusa médica, entrega en reunión, acuerdo en comité docente).
 
-- **Mesa de ayuda Técnica**: (321) 634-2133
+### 4.5 Transición de Período Académico
+- En `/admin/estudiantes`, selector del período académico vigente (ej. `2026-2`, `2027-1`).
+- Permite identificar de inmediato qué estudiantes están **"Al día"** con su matrícula y disponibilidad, y quiénes están **"Pendientes"**.
+
+---
+
+## 5. Preguntas Frecuentes y Soporte
+
+### 5.1 Centro de Ayuda Contextual
+- Accesible desde el menú superior en `/centro-ayuda` con preguntas frecuentes filtradas por rol.
+
+### 5.2 Mesa de Soporte Técnico
+- **Canal Telefónico**: (321) 634-2133
 - **Correo Institucional**: ayuda-consultorio@uac.edu.co
 
 ---

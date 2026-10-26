@@ -83,7 +83,18 @@ export const StudentInfo = ({
                 icon={Clock}
                 className="capitalize"
               />
-              <InfoField label="Turno" value={student.turno} icon={Calendar} />
+              <InfoField
+                label="Turno / Horario"
+                value={
+                  student.horarios && student.horarios.length > 0
+                    ? student.horarios
+                        .map((h: any) => `${h.dia?.substring(0, 3) || ""} ${h.turno || ""}`.trim())
+                        .filter(Boolean)
+                        .join(", ")
+                    : student.turno
+                }
+                icon={Calendar}
+              />
               <InfoField
                 label="Teléfono"
                 value={student.perfil?.telefono || "No registrado"}

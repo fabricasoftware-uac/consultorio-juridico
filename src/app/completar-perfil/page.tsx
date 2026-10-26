@@ -150,7 +150,7 @@ export default function CompletarPerfilPage() {
       // layout vean el estado nuevo de inmediato.
       await supabase.auth.refreshSession();
       router.refresh();
-      router.push("/estudiante/inicio");
+      router.push("/estudiante/mis-casos");
     });
   };
 

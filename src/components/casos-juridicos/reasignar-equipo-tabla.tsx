@@ -44,13 +44,20 @@ export function AdminReasignarEquipo({ idCaso, type, currentName, onRefresh }: P
   useEffect(() => {
     if (open) {
       if (type === "estudiante") {
-        getEstudiantes(true).then((r) => setItems(r ?? []));
+        getEstudiantes(true).then((r) => {
+          const list = r ?? [];
+          setItems(list);
+          cargarHorarios(list);
+        });
       } else {
-        getAsesores(true).then((r) => setItems(r ?? []));
+        getAsesores(true).then((r) => {
+          const list = r ?? [];
+          setItems(list);
+          cargarHorarios(list);
+        });
       }
       // Cargar historial
       cargarHistorial();
-      cargarHorarios();
     } else {
       setSelectedId("");
       setSearch("");
@@ -79,9 +86,8 @@ export function AdminReasignarEquipo({ idCaso, type, currentName, onRefresh }: P
     }
   };
 
-  const cargarHorarios = async () => {
-    // Obtener todos los horarios de los items disponibles
-    const ids = items.map((i) => i.id_perfil?.toString()).filter(Boolean);
+  const cargarHorarios = async (listaItems: (Estudiante | Asesor)[]) => {
+    const ids = listaItems.map((i) => i.id_perfil?.toString()).filter(Boolean);
     if (ids.length === 0) return;
     const { data } = await supabase.from("horarios").select("id_perfil, turno, dia").in("id_perfil", ids);
     const map: Record<string, string[]> = {};
@@ -95,19 +101,33 @@ export function AdminReasignarEquipo({ idCaso, type, currentName, onRefresh }: P
   const filtrados = items
     .filter((item) => {
       const perfil = "perfil" in item ? item.perfil : (item as Asesor).perfil;
+      const id = item.id_perfil?.toString() ?? (item as Asesor).id_perfil?.toString();
       const matchSearch = matchesSearch(
         search,
         perfil?.nombre_completo,
         perfil?.cedula,
         perfil?.correo,
       );
-      const matchDia = diaFilter === "todos" || item.dia?.toLowerCase() === diaFilter.toLowerCase();
+      const horariosList = id ? (horariosMap[id] || []) : [];
+      const matchDia =
+        diaFilter === "todos" ||
+        item.dia?.toLowerCase() === diaFilter.toLowerCase() ||
+        horariosList.some((h) =>
+          h.toLowerCase().startsWith(diaFilter.substring(0, 3).toLowerCase()),
+        );
       const matchJornada = jornadaFilter === "todos" || ("jornada" in item ? item.jornada?.toLowerCase() === jornadaFilter.toLowerCase() : true);
       return matchSearch && matchDia && matchJornada;
     })
     .sort((a, b) => ((a as any).total_casos ?? 0) - ((b as any).total_casos ?? 0));
 
-  const dias = [...new Set(items.map((i) => i.dia).filter(Boolean))];
+  const dias = [
+    "Lunes",
+    "Martes",
+    "Miercoles",
+    "Jueves",
+    "Viernes",
+    "Sabado",
+  ];
 
   const handleReassign = async () => {
     if (!selectedId) return;

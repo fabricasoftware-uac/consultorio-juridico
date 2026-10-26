@@ -101,12 +101,18 @@ export async function completarPerfilEstudiante(
     return { success: false, error: "No se pudieron guardar tus datos personales." };
   }
 
+  const { getPeriodoActivo } = await import("./periodoAcademicoActions");
+  const periodoActivo = await getPeriodoActivo();
+
   const { error: estudianteError } = await supabaseAdmin
     .from("estudiantes")
     .insert({
       id_perfil: user.id,
       semestre: input.semestre,
       jornada: input.jornada,
+      turno: (horarios[0]?.turno as any) ?? null,
+      dia: horarios[0]?.dia ?? null,
+      ultimo_periodo_actualizado: periodoActivo,
     });
 
   if (estudianteError) {

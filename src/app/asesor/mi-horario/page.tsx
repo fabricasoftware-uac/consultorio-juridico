@@ -53,8 +53,30 @@ export default function MiHorarioPage() {
           throw asesorErr;
         }
 
-        if (asesor?.horario) {
+        if (asesor?.horario && Object.keys(asesor.horario).length > 0) {
           setHorario({ ...horarioPorDefecto, ...(asesor.horario as any) });
+        } else {
+          // Fallback resiliente: consultar tabla relacional public.horarios
+          const { data: filasHorario } = await supabase
+            .from("horarios")
+            .select("dia, turno")
+            .eq("id_perfil", uid);
+
+          if (filasHorario && filasHorario.length > 0) {
+            const horarioReconstruido = { ...horarioPorDefecto };
+            filasHorario.forEach((f: any) => {
+              const diaNormalizado = diasSemana.find(
+                (d) => d.toLowerCase() === f.dia?.toLowerCase(),
+              );
+              if (diaNormalizado) {
+                horarioReconstruido[diaNormalizado] = {
+                  activo: true,
+                  turno: f.turno,
+                };
+              }
+            });
+            setHorario(horarioReconstruido);
+          }
         }
       } catch (err) {
         console.error(err);
