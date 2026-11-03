@@ -11,12 +11,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FileText, Upload, Download, Trash2, File, Image as ImageIcon, FileSpreadsheet, FileArchive, Archive, Eye, CheckCircle, XCircle, MoreVertical, AlertTriangle, Lock, BellRing } from "lucide-react";
+import { FileText, Upload, Download, Trash2, File as FileIcon, Image as ImageIcon, FileSpreadsheet, FileArchive, Archive, Eye, CheckCircle, XCircle, MoreVertical, AlertTriangle, Lock, BellRing } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/supabase-client";
 import { jwtDecode } from "jwt-decode";
 import { formatDate } from "@/lib/format-date";
 import { insertAuditEvent } from "../../../supabase/queries/auditoriaCasos";
+import imageCompression from "browser-image-compression";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,7 +40,7 @@ type Documento = {
   signed_url?: string | null;
 };
 
-const ICON_MIME: Record<string, { icon: typeof File; color: string }> = {
+const ICON_MIME: Record<string, { icon: typeof FileIcon; color: string }> = {
   "application/pdf": { icon: FileText, color: "text-red-500" },
   "image/": { icon: ImageIcon, color: "text-blue-500" },
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": { icon: FileSpreadsheet, color: "text-green-500" },
@@ -51,7 +52,7 @@ const ICON_MIME: Record<string, { icon: typeof File; color: string }> = {
 
 function getIcon(mime: string) {
   const match = Object.entries(ICON_MIME).find(([k]) => mime.startsWith(k));
-  return match?.[1] ?? { icon: File, color: "text-slate-500" };
+  return match?.[1] ?? { icon: FileIcon, color: "text-slate-500" };
 }
 
 function formatSize(bytes: number) {
@@ -90,21 +91,50 @@ const ALLOWED_TYPES = [
   "application/pdf",
   "image/jpeg",
   "image/png",
+  "image/webp",
   "application/msword",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "application/vnd.ms-excel",
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "application/zip",
 ];
-const SUPABASE_MAX = 25 * 1024 * 1024; // 25MB
+const SUPABASE_MAX = 8 * 1024 * 1024; // 8MB
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 async function uploadDirecto(idCaso: string, file: File) {
   if (!ALLOWED_TYPES.includes(file.type)) {
     toast.error("Tipo de archivo no permitido");
     return null;
   }
-  if (file.size > SUPABASE_MAX) {
-    toast.error(`Archivo demasiado grande (máx. ${SUPABASE_MAX / 1024 / 1024} MB). Tamaño actual: ${(file.size / 1024 / 1024).toFixed(1)} MB`);
+
+  let fileToUpload = file;
+
+  if (IMAGE_TYPES.includes(file.type)) {
+    try {
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+        fileType: file.type as string,
+      };
+      const compressedBlob = await imageCompression(file, options);
+      const compressedFile = new File([compressedBlob], file.name, { type: file.type });
+
+      if (file.size > 1024 * 1024) {
+        toast.info(
+          `Archivo optimizado: de ${(file.size / 1024 / 1024).toFixed(1)} MB a ${(compressedFile.size / 1024 / 1024).toFixed(1)} MB`
+        );
+      }
+      fileToUpload = compressedFile;
+    } catch (err) {
+      console.error("Error optimizando la imagen:", err);
+    }
+  }
+
+  if (fileToUpload.size > SUPABASE_MAX) {
+    toast.error(
+      `Archivo demasiado grande. El límite máximo permitido es de 8 MB (tamaño actual: ${(fileToUpload.size / 1024 / 1024).toFixed(1)} MB). Si es un PDF escaneado, te recomendamos guardarlo en resolución estándar de escaneo (150 DPI).`
+    );
     return null;
   }
 
@@ -118,12 +148,12 @@ async function uploadDirecto(idCaso: string, file: File) {
     return null;
   }
 
-  const ext = file.name.split(".").pop() || "bin";
+  const ext = fileToUpload.name.split(".").pop() || "bin";
   const storagePath = `${idCaso}/${crypto.randomUUID()}.${ext}`;
 
   const { error: uploadError } = await supabase.storage
     .from("documentos-casos")
-    .upload(storagePath, file, { contentType: file.type, upsert: false });
+    .upload(storagePath, fileToUpload, { contentType: fileToUpload.type, upsert: false });
 
   if (uploadError) {
     toast.error(uploadError.message);
@@ -136,10 +166,10 @@ async function uploadDirecto(idCaso: string, file: File) {
       id_caso: parseInt(idCaso),
       id_usuario: (await supabase.auth.getUser()).data.user?.id,
       storage_path: storagePath,
-      nombre_original: file.name,
+      nombre_original: fileToUpload.name,
       tipo: "documento",
-      mime_type: file.type,
-      tamano: file.size,
+      mime_type: fileToUpload.type,
+      tamano: fileToUpload.size,
     })
     .select()
     .single();
@@ -327,7 +357,7 @@ export function DocumentosCaso({ idCaso, estado }: Props) {
         {documentos.length === 0 ? (
           casoCerrado ? (
             <div className="p-6 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
-              <File className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+              <FileIcon className="w-8 h-8 text-slate-300 mx-auto mb-2" />
               <p className="text-sm text-slate-400">No se cargaron documentos en este caso</p>
             </div>
           ) : (
@@ -425,7 +455,7 @@ export function DocumentosCaso({ idCaso, estado }: Props) {
         ) : (
           <>
             <input ref={fileRef} type="file" onChange={handleUpload} className="hidden"
-              accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.zip"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.webp,.zip"
             />
             <Button
               variant="outline"

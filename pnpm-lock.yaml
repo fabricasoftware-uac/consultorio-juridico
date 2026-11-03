@@ -95,6 +95,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.76.0
         version: 2.76.0
+      browser-image-compression:
+        specifier: ^2.0.2
+        version: 2.0.2
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -164,7 +167,7 @@ importers:
         version: 6.0.0
       '@snaplet/seed':
         specifier: 0.98.0
-        version: 0.98.0(@snaplet/copycat@6.0.0)(@types/pg@8.15.5)(openai@4.104.0(ws@8.18.3)(zod@4.1.12))(pg@8.16.3)(postgres@3.4.8)(ws@8.18.3)
+        version: 0.98.0(@snaplet/copycat@6.0.0)(@types/pg@8.15.5)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(pg@8.16.3)(postgres@3.4.8)(supports-color@7.2.0)(ws@8.18.3)
       '@tailwindcss/postcss':
         specifier: ^4.1.15
         version: 4.1.15
@@ -1588,6 +1591,9 @@ packages:
   braces@3.0.3:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
     engines: {node: '>=8'}
+
+  browser-image-compression@2.0.2:
+    resolution: {integrity: sha512-pBLlQyUf6yB8SmmngrcOw3EoS4RpQ1BcylI3T9Yqn7+4nrQTXJD4sJDe5ODnJdrvNMaio5OicFo75rDyJD2Ucw==}
 
   browser-or-node@2.1.1:
     resolution: {integrity: sha512-8CVjaLJGuSKMVTxJ2DpBl5XnlNDiT4cQFeuCJJrvJmts9YrTZDizTX7PjC2s6W4x+MBGZeEY6dGMrF04/6Hgqg==}
@@ -3117,6 +3123,9 @@ packages:
     deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
+  uzip@0.20201231.0:
+    resolution: {integrity: sha512-OZeJfZP+R0z9D6TmBgLq2LHzSSptGMGDGigGiEe0pr8UBe/7fdflgHlHBNDASTXB5jnFuxHpNaJywSg8YFeGng==}
+
   valid-url@1.0.9:
     resolution: {integrity: sha512-QQDsV8OnSf5Uc30CKSwG9lnhMPe6exHtTXLRYX8uMwKENy640pU+2BgBL0LRbDh/eYRahNCS7aewCx0wf3NYVA==}
 
@@ -3494,13 +3503,13 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@langchain/core@0.2.36(openai@4.104.0(ws@8.18.3)(zod@4.1.12))':
+  '@langchain/core@0.2.36(openai@4.104.0(ws@8.18.3)(zod@3.25.76))':
     dependencies:
       ansi-styles: 5.2.0
       camelcase: 6.3.0
       decamelize: 1.2.0
       js-tiktoken: 1.0.21
-      langsmith: 0.1.68(openai@4.104.0(ws@8.18.3)(zod@4.1.12))
+      langsmith: 0.1.68(openai@4.104.0(ws@8.18.3)(zod@3.25.76))
       mustache: 4.2.0
       p-queue: 6.6.2
       p-retry: 4.6.2
@@ -3510,9 +3519,9 @@ snapshots:
     transitivePeerDependencies:
       - openai
 
-  '@langchain/groq@0.0.15(openai@4.104.0(ws@8.18.3)(zod@4.1.12))(ws@8.18.3)':
+  '@langchain/groq@0.0.15(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(ws@8.18.3)':
     dependencies:
-      '@langchain/core': 0.2.36(openai@4.104.0(ws@8.18.3)(zod@4.1.12))
+      '@langchain/core': 0.2.36(openai@4.104.0(ws@8.18.3)(zod@3.25.76))
       '@langchain/openai': 0.2.11(ws@8.18.3)
       groq-sdk: 0.3.3
       zod: 3.25.76
@@ -3524,7 +3533,7 @@ snapshots:
 
   '@langchain/openai@0.2.11(ws@8.18.3)':
     dependencies:
-      '@langchain/core': 0.2.36(openai@4.104.0(ws@8.18.3)(zod@4.1.12))
+      '@langchain/core': 0.2.36(openai@4.104.0(ws@8.18.3)(zod@3.25.76))
       js-tiktoken: 1.0.21
       openai: 4.104.0(ws@8.18.3)(zod@3.25.76)
       zod: 3.25.76
@@ -4279,11 +4288,11 @@ snapshots:
       string-argv: 0.3.2
       uuid: 9.0.1
 
-  '@snaplet/seed@0.98.0(@snaplet/copycat@6.0.0)(@types/pg@8.15.5)(openai@4.104.0(ws@8.18.3)(zod@4.1.12))(pg@8.16.3)(postgres@3.4.8)(ws@8.18.3)':
+  '@snaplet/seed@0.98.0(@snaplet/copycat@6.0.0)(@types/pg@8.15.5)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(pg@8.16.3)(postgres@3.4.8)(supports-color@7.2.0)(ws@8.18.3)':
     dependencies:
       '@inquirer/prompts': 5.5.0
-      '@langchain/core': 0.2.36(openai@4.104.0(ws@8.18.3)(zod@4.1.12))
-      '@langchain/groq': 0.0.15(openai@4.104.0(ws@8.18.3)(zod@4.1.12))(ws@8.18.3)
+      '@langchain/core': 0.2.36(openai@4.104.0(ws@8.18.3)(zod@3.25.76))
+      '@langchain/groq': 0.0.15(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(ws@8.18.3)
       '@langchain/openai': 0.2.11(ws@8.18.3)
       '@prisma/generator-helper': 5.14.0-dev.34
       '@prisma/internals': 5.14.0-dev.34
@@ -4293,7 +4302,7 @@ snapshots:
       ansi-escapes: 6.2.1
       c12: 1.11.2
       change-case: 5.4.4
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@7.2.0)
       dedent: 1.7.0
       execa: 8.0.1
       exit-hook: 4.0.0
@@ -4668,6 +4677,10 @@ snapshots:
     dependencies:
       fill-range: 7.1.1
 
+  browser-image-compression@2.0.2:
+    dependencies:
+      uzip: 0.20201231.0
+
   browser-or-node@2.1.1: {}
 
   buffer-crc32@0.2.13: {}
@@ -4874,9 +4887,11 @@ snapshots:
 
   dayjs@1.11.21: {}
 
-  debug@4.4.3:
+  debug@4.4.3(supports-color@7.2.0):
     dependencies:
       ms: 2.1.3
+    optionalDependencies:
+      supports-color: 7.2.0
 
   decamelize@1.2.0: {}
 
@@ -5276,7 +5291,7 @@ snapshots:
 
   kleur@4.1.5: {}
 
-  langsmith@0.1.68(openai@4.104.0(ws@8.18.3)(zod@4.1.12)):
+  langsmith@0.1.68(openai@4.104.0(ws@8.18.3)(zod@3.25.76)):
     dependencies:
       '@types/uuid': 10.0.0
       commander: 10.0.1
@@ -5285,7 +5300,7 @@ snapshots:
       semver: 7.7.3
       uuid: 10.0.0
     optionalDependencies:
-      openai: 4.104.0(ws@8.18.3)(zod@4.1.12)
+      openai: 4.104.0(ws@8.18.3)(zod@3.25.76)
 
   lazystream@1.0.1:
     dependencies:
@@ -5557,22 +5572,6 @@ snapshots:
       zod: 3.25.76
     transitivePeerDependencies:
       - encoding
-
-  openai@4.104.0(ws@8.18.3)(zod@4.1.12):
-    dependencies:
-      '@types/node': 18.19.130
-      '@types/node-fetch': 2.6.13
-      abort-controller: 3.0.0
-      agentkeepalive: 4.6.0
-      form-data-encoder: 1.7.2
-      formdata-node: 4.4.1
-      node-fetch: 2.7.0
-    optionalDependencies:
-      ws: 8.18.3
-      zod: 4.1.12
-    transitivePeerDependencies:
-      - encoding
-    optional: true
 
   ora@8.2.0:
     dependencies:
@@ -6139,6 +6138,8 @@ snapshots:
   uuid@8.3.2: {}
 
   uuid@9.0.1: {}
+
+  uzip@0.20201231.0: {}
 
   valid-url@1.0.9: {}
 

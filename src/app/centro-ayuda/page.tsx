@@ -139,7 +139,7 @@ export default function CentroAyuda() {
     },
     {
       q: "¿Cómo subo documentos al caso?",
-      a: "En los detalles del caso, sección 'Documentos', haz clic en 'Subir documento'. Formatos permitidos: PDF, Word, Excel, imágenes (JPG/PNG) y ZIP. Límite: 25 MB por archivo, máximo 50 archivos por caso.",
+      a: "En los detalles del caso, sección 'Documentos', haz clic en 'Subir documento'. Formatos permitidos: PDF, Word, Excel, imágenes (JPG/PNG/WEBP) y ZIP. Límite: 8 MB por archivo, máximo 50 archivos por caso. Las imágenes se optimizan automáticamente antes de la subida.",
     },
     {
       q: "¿Qué son las observaciones y cómo las uso?",
@@ -408,9 +408,9 @@ export default function CentroAyuda() {
               <div className="p-4 bg-slate-50 rounded-xl">
                 <h3 className="font-semibold text-slate-800 mb-2">Límites</h3>
                 <ul className="text-sm text-slate-600 space-y-1">
-                  <li>Tamaño máximo: 25 MB por archivo</li>
+                  <li>Tamaño máximo: 8 MB por archivo</li>
                   <li>Máximo 50 documentos activos por caso (los archivados no cuentan)</li>
-                  <li>PDFs escaneados: usar 200-300 DPI en escala de grises</li>
+                  <li>PDFs escaneados: usar resolución estándar de 150 DPI</li>
                 </ul>
               </div>
             </div>
