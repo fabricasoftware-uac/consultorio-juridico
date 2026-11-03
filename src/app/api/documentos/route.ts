@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
   if (!data) return NextResponse.json({ documentos: [] });
 
   const urlBase = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey = process.env.NEXT_SUPABASE_SERVICE_ROLE_KEY;
+  const serviceKey = process.env.NEXT_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   const documentos = await Promise.all(
     data.map(async (doc) => {
