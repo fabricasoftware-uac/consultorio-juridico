@@ -175,6 +175,7 @@ export type Caso = {
   fecha_vencimiento_estudiante?: string | null;
   fecha_vencimiento_asesor?: string | null;
   ultima_modificacion?: string | null;
+  ultimo_evento?: string | null;
   periodo?: string | null;
   estado: EstadoEnum;
   fecha_cierre?: string | null;

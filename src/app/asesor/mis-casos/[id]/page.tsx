@@ -31,7 +31,7 @@ import { toast } from "sonner";
 import { cleanData, sumarDiasHabiles } from "@/lib/utils";
 import { supabase } from "@/lib/supabase/supabase-client";
 import {
-  AlertTriangle, Notebook, FileText, CheckCircle2, Users,
+  AlertTriangle, Notebook, FileText, CheckCircle2, Users, BellRing,
 } from "lucide-react";
 import { getStatusBadge } from "@/components/ui/status-badge";
 import { CaseDetailShell, TabConfig } from "@/components/casos-juridicos/case-detail-shell";
@@ -49,6 +49,12 @@ import { BotonesEntrevista } from "@/components/casos-juridicos/botones-entrevis
 import { SectionCard } from "@/components/casos-juridicos/shared-ui";
 import { HistorialCorrecciones } from "@/components/casos-juridicos/historial-correcciones";
 
+interface SolicitudCierreAdmin {
+  descripcion: string;
+  motivo?: string;
+  created_at: string;
+}
+
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = React.use(params);
   const [demandado, setDemandado] = useState<Demandado>();
@@ -60,6 +66,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const [motivoCorreccionInput, setMotivoCorreccionInput] = useState("");
   const [ultimoEstudiante, setUltimoEstudiante] = useState<Estudiante>();
   const [ultimoAsesor, setUltimoAsesor] = useState<Asesor>();
+  const [solicitudCierre, setSolicitudCierre] = useState<SolicitudCierreAdmin | null>(null);
   const id_caso = id;
 
   const [isEditingClient, setIsEditingClient] = useState(false);
@@ -78,9 +85,17 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   async function traerDatos() {
     try {
       setError("");
-      const [casoFetch, demandadoFetch] = await Promise.all([
+      const [casoFetch, demandadoFetch, solicitudCierreRes] = await Promise.all([
         getCasoById(id_caso),
         getDemandadoByCasoId(id_caso),
+        supabase
+          .from("auditoria_casos")
+          .select("id, descripcion, metadata, created_at")
+          .eq("id_caso", Number(id_caso))
+          .eq("accion", "solicitud_cierre_admin")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
       ]);
 
       if (!casoFetch) {
@@ -104,6 +119,18 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
       if (casoFetch.usuarios?.id_usuario) {
         setContrato(await getContratoByUsuarioId(casoFetch.usuarios.id_usuario));
+      }
+
+      if (solicitudCierreRes?.data) {
+        setSolicitudCierre({
+          descripcion: solicitudCierreRes.data.descripcion,
+          motivo:
+            (solicitudCierreRes.data.metadata as any)?.motivo ||
+            solicitudCierreRes.data.descripcion,
+          created_at: solicitudCierreRes.data.created_at,
+        });
+      } else {
+        setSolicitudCierre(null);
       }
     } catch (err) {
       console.error(err);
@@ -560,6 +587,46 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     disabled={isSavingClasificacion}
                     className="bg-white border-amber-300 h-10 max-w-md"
                   />
+                </div>
+              </Card>
+            )}
+
+            {caso?.estado === "activo" && solicitudCierre && (
+              <Card className="p-6 bg-purple-50 border-purple-200 shadow-xs">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-start gap-3.5">
+                    <div className="p-2.5 bg-purple-100 text-purple-700 rounded-xl mt-0.5 shrink-0">
+                      <BellRing className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-bold text-purple-950">
+                          Solicitud de Cierre del Administrador
+                        </h3>
+                        <span className="text-xs text-purple-700 bg-purple-100/90 font-semibold px-2.5 py-0.5 rounded-full border border-purple-200">
+                          Acción requerida
+                        </span>
+                      </div>
+                      <p className="text-sm text-purple-800 mt-1">
+                        El administrador ha solicitado el cierre de este caso con las siguientes observaciones:
+                      </p>
+                      <div className="mt-3 p-3.5 bg-white/90 border border-purple-200/90 rounded-lg">
+                        <p className="text-sm text-slate-800 whitespace-pre-wrap leading-relaxed font-sans">
+                          {solicitudCierre.motivo || solicitudCierre.descripcion}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-full sm:w-auto shrink-0 pt-2 sm:pt-0">
+                    <CerrarCasoAsesor
+                      idCaso={id_caso}
+                      estado={caso.estado}
+                      clasificacion={caso.clasificacion}
+                      onRefresh={traerDatos}
+                      variant="default"
+                      className="w-full sm:w-auto bg-purple-700 hover:bg-purple-800 text-white font-medium shadow-sm h-10 px-5"
+                    />
+                  </div>
                 </div>
               </Card>
             )}

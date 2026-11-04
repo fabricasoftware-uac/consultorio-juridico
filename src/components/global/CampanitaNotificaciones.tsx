@@ -17,6 +17,7 @@ const ICONOS: Record<string, { icon: typeof Bell; color: string; bg: string }> =
   aprobacion: { icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-100" },
   correccion: { icon: AlertTriangle, color: "text-orange-600", bg: "bg-orange-100" },
   observacion: { icon: MessageSquare, color: "text-yellow-600", bg: "bg-yellow-100" },
+  solicitud_cierre_admin: { icon: CheckCircle2, color: "text-purple-600", bg: "bg-purple-100" },
 };
 
 function tiempoRelativo(iso: string) {

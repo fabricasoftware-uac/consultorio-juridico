@@ -12,12 +12,15 @@ import type { LlamadoAtencion } from "../../../supabase/queries/getLlamadosByCas
 
 interface LlamadosListProps {
   idCaso: string;
+  estadoCaso?: string;
 }
 
-export function LlamadosList({ idCaso }: LlamadosListProps) {
+export function LlamadosList({ idCaso, estadoCaso }: LlamadosListProps) {
   const [llamados, setLlamados] = useState<LlamadoAtencion[]>([]);
   const [loading, setLoading] = useState(true);
   const [puedeResolver, setPuedeResolver] = useState(false);
+
+  const esCasoFinalizado = estadoCaso === "cerrado" || estadoCaso === "archivado";
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -79,24 +82,33 @@ export function LlamadosList({ idCaso }: LlamadosListProps) {
 
   return (
     <div className="space-y-3">
-      {llamados.map((llamado) => (
-        <Card
-          key={llamado.id}
-          className="p-5 border-slate-200 shadow-sm rounded-xl overflow-hidden"
-        >
-          <div className="flex items-start gap-4">
+      {llamados.map((llamado) => {
+        const estaResuelto = llamado.resuelto || esCasoFinalizado;
+
+        return (
+          <Card
+            key={llamado.id}
+            className="p-5 border-slate-200 shadow-sm rounded-xl overflow-hidden"
+          >
+            <div className="flex items-start gap-4">
               <div className="flex items-start gap-3 flex-1 min-w-0">
                 <div
                   className={`p-2 rounded-lg mt-0.5 ${
-                    llamado.tipo === "estudiante"
-                      ? "bg-blue-100 text-blue-600"
-                      : "bg-purple-100 text-purple-600"
+                    estaResuelto
+                      ? "bg-slate-100 text-slate-500"
+                      : llamado.tipo === "estudiante"
+                        ? "bg-blue-100 text-blue-600"
+                        : "bg-purple-100 text-purple-600"
                   }`}
                 >
-                  <AlertTriangle className="w-5 h-5" />
+                  {estaResuelto ? (
+                    <CheckCircle className="w-5 h-5 text-slate-500" />
+                  ) : (
+                    <AlertTriangle className="w-5 h-5" />
+                  )}
                 </div>
                 <div className="space-y-1 flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Badge
                       variant="outline"
                       className={
@@ -112,6 +124,11 @@ export function LlamadosList({ idCaso }: LlamadosListProps) {
                         <Check className="w-3 h-3 mr-1" />
                         Resuelto
                       </Badge>
+                    ) : esCasoFinalizado ? (
+                      <Badge variant="outline" className="bg-slate-100 text-slate-600 border-slate-300">
+                        <Check className="w-3 h-3 mr-1" />
+                        Resuelto por {estadoCaso === "archivado" ? "archivo" : "cierre"} de caso
+                      </Badge>
                     ) : llamado.leido ? (
                       <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                         <CheckCircle className="w-3 h-3 mr-1" />
@@ -125,6 +142,11 @@ export function LlamadosList({ idCaso }: LlamadosListProps) {
                     )}
                   </div>
                   <p className="text-sm text-slate-700">{llamado.motivo}</p>
+                  {llamado.motivo_resolucion && (
+                    <p className="text-xs text-slate-500 italic">
+                      Motivo de resolución: {llamado.motivo_resolucion}
+                    </p>
+                  )}
                   <p className="text-[11px] text-slate-400 font-medium">
                     {new Date(llamado.fecha_creacion).toLocaleDateString("es-CO", {
                       day: "numeric",
@@ -137,7 +159,7 @@ export function LlamadosList({ idCaso }: LlamadosListProps) {
                 </div>
               </div>
             </div>
-            {!llamado.resuelto && puedeResolver && (
+            {!llamado.resuelto && !esCasoFinalizado && puedeResolver && (
               <div className="ml-11 mt-2">
                 <Button
                   variant="outline"
@@ -150,8 +172,9 @@ export function LlamadosList({ idCaso }: LlamadosListProps) {
                 </Button>
               </div>
             )}
-        </Card>
-      ))}
+          </Card>
+        );
+      })}
     </div>
   );
 }

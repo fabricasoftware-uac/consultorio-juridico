@@ -262,7 +262,7 @@ export function CaseDetailShell({
                           </h3>
                         </div>
                         <div className="p-6">
-                          <LlamadosList idCaso={idCaso} />
+                          <LlamadosList idCaso={idCaso} estadoCaso={caso?.estado} />
                         </div>
                       </Card>
 

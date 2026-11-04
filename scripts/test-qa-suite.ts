@@ -23,6 +23,10 @@ import {
   sugerirSiguienteSemestre,
   validarPeriodoAcademico,
 } from "../src/lib/transicion-semestral";
+import {
+  formatRelativeActivity,
+  formatFullDateTime,
+} from "../src/lib/format-date";
 
 console.log("=== INICIANDO SUITE DE PRUEBAS DE QA ===\n");
 
@@ -1825,6 +1829,47 @@ test("validarPeriodoAcademico rechaza tipos no string", () => {
   assert.equal(validarPeriodoAcademico(undefined).valido, false);
   assert.equal(validarPeriodoAcademico(2026 as any).valido, false);
   assert.equal(validarPeriodoAcademico({ periodo: "2026-1" } as any).valido, false);
+});
+
+// -------------------------------------------------------------------
+// 14. Pruebas de Formateo de Actividad Reciente y Fechas
+// -------------------------------------------------------------------
+console.log("\n14. Pruebas de Formateo de Actividad Reciente y Fechas");
+
+test("formatRelativeActivity maneja casos nulos, indefinidos o vacíos", () => {
+  assert.equal(formatRelativeActivity(null), "Sin actividad");
+  assert.equal(formatRelativeActivity(undefined), "Sin actividad");
+  assert.equal(formatRelativeActivity(""), "Sin actividad");
+  assert.equal(formatRelativeActivity("fecha-invalida"), "—");
+});
+
+test("formatRelativeActivity formatea tiempos recientes relativos adecuadamente", () => {
+  const now = Date.now();
+  // Menos de 60 segundos
+  assert.equal(formatRelativeActivity(new Date(now - 10 * 1000).toISOString()), "Hace un momento");
+  // Minutos
+  assert.equal(formatRelativeActivity(new Date(now - 60 * 1000).toISOString()), "Hace 1 minuto");
+  assert.equal(formatRelativeActivity(new Date(now - 15 * 60 * 1000).toISOString()), "Hace 15 minutos");
+  // Horas
+  assert.equal(formatRelativeActivity(new Date(now - 3600 * 1000).toISOString()), "Hace 1 hora");
+  assert.equal(formatRelativeActivity(new Date(now - 4 * 3600 * 1000).toISOString()), "Hace 4 horas");
+  // Días
+  assert.equal(formatRelativeActivity(new Date(now - 24 * 3600 * 1000).toISOString()), "Hace 1 día");
+  assert.equal(formatRelativeActivity(new Date(now - 3 * 24 * 3600 * 1000).toISOString()), "Hace 3 días");
+  // Semanas
+  assert.equal(formatRelativeActivity(new Date(now - 8 * 24 * 3600 * 1000).toISOString()), "Hace 1 semana");
+  assert.equal(formatRelativeActivity(new Date(now - 21 * 24 * 3600 * 1000).toISOString()), "Hace 3 semanas");
+});
+
+test("formatFullDateTime maneja casos nulos y formatea fecha completa", () => {
+  assert.equal(formatFullDateTime(null), "");
+  assert.equal(formatFullDateTime(undefined), "");
+  assert.equal(formatFullDateTime(""), "");
+  assert.equal(formatFullDateTime("invalido"), "");
+
+  const full = formatFullDateTime("2026-11-04T15:30:00Z");
+  assert.ok(full.length > 5);
+  assert.ok(full.includes("2026") || full.includes("noviembre") || full.includes("nov"));
 });
 
 console.log(`\n=== RESUMEN DE PRUEBAS ===`);

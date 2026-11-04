@@ -23,11 +23,11 @@ import { Caso } from "app/types/database";
 import { getCasos } from "../../../../supabase/queries/getCasos";
 import { getStatusBadge } from "@/components/ui/status-badge";
 import { formatArea } from "@/lib/utils";
-import { formatDate } from "@/lib/format-date";
+import { formatDate, formatRelativeActivity, formatFullDateTime } from "@/lib/format-date";
 import { Spinner } from "@/components/ui/spinner";
 import { matchesSearch } from "@/lib/search";
 import { CaseFilters } from "@/components/casos-juridicos/case-filters";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { verificarCasoRequiereReasignacion } from "@/lib/transicion-semestral";
 
@@ -258,6 +258,7 @@ export default function TodosLosCasosPage() {
                   <th className="text-left p-3 text-[11px] font-bold text-slate-500 uppercase">Estado</th>
                   <th className="text-left p-3 text-[11px] font-bold text-slate-500 uppercase hidden lg:table-cell">Estudiante</th>
                   <th className="text-left p-3 text-[11px] font-bold text-slate-500 uppercase hidden lg:table-cell">Período</th>
+                  <th className="text-left p-3 text-[11px] font-bold text-slate-500 uppercase hidden md:table-cell">Última actividad</th>
                   <th className="text-right p-3 text-[11px] font-bold text-slate-500 uppercase">Acción</th>
                 </tr>
               </thead>
@@ -289,6 +290,25 @@ export default function TodosLosCasosPage() {
                         </div>
                       </td>
                       <td className="p-3 text-slate-500 text-xs hidden lg:table-cell">{c.periodo || "—"}</td>
+                      <td className="p-3 hidden md:table-cell">
+                        <div className="flex flex-col gap-0.5">
+                          <div
+                            className="flex items-center gap-1.5 text-xs text-slate-700 font-medium"
+                            title={formatFullDateTime(c.ultima_modificacion || c.fecha_creacion)}
+                          >
+                            <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <span>
+                              {formatRelativeActivity(c.ultima_modificacion || c.fecha_creacion)}
+                            </span>
+                          </div>
+                          <p
+                            className="text-[11px] text-slate-500 truncate max-w-[220px]"
+                            title={c.ultimo_evento || "Caso registrado"}
+                          >
+                            {c.ultimo_evento || "Caso registrado"}
+                          </p>
+                        </div>
+                      </td>
                       <td className="p-3 text-right">
                         <Link href={`/admin/todos-los-casos/${c.id_caso}`}>
                           <Button variant="ghost" size="sm" className="text-xs text-blue-600 h-7">

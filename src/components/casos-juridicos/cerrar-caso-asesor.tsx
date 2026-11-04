@@ -12,9 +12,18 @@ interface Props {
   estado: string;
   clasificacion?: string | null;
   onRefresh: () => void;
+  className?: string;
+  variant?: "outline" | "default" | "destructive" | "secondary" | "ghost" | "link";
 }
 
-export function CerrarCasoAsesor({ idCaso, estado, clasificacion, onRefresh }: Props) {
+export function CerrarCasoAsesor({
+  idCaso,
+  estado,
+  clasificacion,
+  onRefresh,
+  className,
+  variant = "outline",
+}: Props) {
   const [loading, setLoading] = useState(false);
 
   if (estado !== "activo") return null;
@@ -47,6 +56,16 @@ export function CerrarCasoAsesor({ idCaso, estado, clasificacion, onRefresh }: P
         .eq("id_caso", idCaso);
       if (error) throw error;
 
+      await supabase
+        .from("llamados_atencion")
+        .update({
+          resuelto: true,
+          fecha_resolucion: new Date().toISOString(),
+          motivo_resolucion: "Caso cerrado por asesor",
+        })
+        .eq("id_caso", idCaso)
+        .eq("resuelto", false);
+
       await insertAuditEvent(
         idCaso,
         "cierre",
@@ -65,14 +84,17 @@ export function CerrarCasoAsesor({ idCaso, estado, clasificacion, onRefresh }: P
 
   return (
     <Button
-      variant="outline"
+      variant={variant}
       size="sm"
       onClick={handleCerrar}
       disabled={loading}
-      className="w-full text-xs text-emerald-700 border-emerald-200 hover:bg-emerald-50 h-8"
+      className={
+        className ||
+        "w-full text-xs text-emerald-700 border-emerald-200 hover:bg-emerald-50 h-8"
+      }
     >
       <CheckCircle className="w-3.5 h-3.5 mr-1" />
-      Cerrar caso
+      {loading ? "Cerrando caso..." : "Cerrar caso"}
     </Button>
   );
 }

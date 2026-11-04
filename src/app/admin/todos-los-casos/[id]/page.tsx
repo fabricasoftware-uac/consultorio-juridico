@@ -23,6 +23,7 @@ import { BotonesCerrarArchivar } from "@/components/casos-juridicos/botones-cerr
 import { BotonesEntrevista } from "@/components/casos-juridicos/botones-entrevista";
 import { HistorialCorrecciones } from "@/components/casos-juridicos/historial-correcciones";
 import { ModalCambiarEstadoAdmin } from "@/components/casos-juridicos/modal-cambiar-estado-admin";
+import { ModalSolicitarCierreAdmin } from "@/components/casos-juridicos/modal-solicitar-cierre-admin";
 import { useRealtimeCaso } from "@/lib/hooks/useRealtimeCaso";
 import { useCaseEdit } from "@/lib/hooks/useCaseEdit";
 import { Users, ClipboardList, FileText } from "lucide-react";
@@ -163,22 +164,35 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       statusBadge={caso ? getStatusBadge(caso.estado) : null}
       tabs={tabs}
       headerActions={
-        caso && (
-          <div className="flex flex-col gap-2 lg:min-w-[260px]">
-            <ModalCambiarEstadoAdmin
-              idCaso={id}
-              estadoActual={caso.estado}
-              onSuccess={refetch}
-            />
-            <BotonesEntrevista idCaso={id} caso={caso} demandado={demandado} />
-            <BotonesCerrarArchivar
-              idCaso={id}
-              estado={caso.estado}
-              clasificacion={caso.clasificacion}
-              onRefresh={refetch}
-            />
-          </div>
-        )
+        caso && (() => {
+          const asesorActivo = caso.asesores_casos?.find(
+            (a) => !a.fecha_fin_asignacion
+          )?.asesor?.perfil?.nombre_completo;
+
+          return (
+            <div className="flex flex-col gap-2 lg:min-w-[260px]">
+              <ModalCambiarEstadoAdmin
+                idCaso={id}
+                estadoActual={caso.estado}
+                onSuccess={refetch}
+              />
+              <ModalSolicitarCierreAdmin
+                idCaso={id}
+                estado={caso.estado}
+                nombreAsesor={asesorActivo}
+                tieneAsesor={!!asesorActivo}
+                onSuccess={refetch}
+              />
+              <BotonesEntrevista idCaso={id} caso={caso} demandado={demandado} />
+              <BotonesCerrarArchivar
+                idCaso={id}
+                estado={caso.estado}
+                clasificacion={caso.clasificacion}
+                onRefresh={refetch}
+              />
+            </div>
+          );
+        })()
       }
       sidebarTop={
         <Card className="p-0 overflow-hidden border-slate-200 shadow-sm">

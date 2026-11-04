@@ -42,6 +42,16 @@ export function BotonesCerrarArchivar({ idCaso, estado, clasificacion, onRefresh
         .eq("id_caso", idCaso);
       if (error) throw error;
 
+      await supabase
+        .from("llamados_atencion")
+        .update({
+          resuelto: true,
+          fecha_resolucion: new Date().toISOString(),
+          motivo_resolucion: `Caso ${nuevoEstado}`,
+        })
+        .eq("id_caso", idCaso)
+        .eq("resuelto", false);
+
       await insertAuditEvent(
         idCaso,
         nuevoEstado === "cerrado" ? "cierre" : "archivado",
