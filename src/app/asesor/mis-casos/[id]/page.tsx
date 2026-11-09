@@ -31,7 +31,7 @@ import { toast } from "sonner";
 import { cleanData, sumarDiasHabiles } from "@/lib/utils";
 import { supabase } from "@/lib/supabase/supabase-client";
 import {
-  AlertTriangle, Notebook, FileText, CheckCircle2, Users, BellRing,
+  AlertTriangle, Notebook, FileText, CheckCircle2, Users,
 } from "lucide-react";
 import { getStatusBadge } from "@/components/ui/status-badge";
 import { CaseDetailShell, TabConfig } from "@/components/casos-juridicos/case-detail-shell";
@@ -48,6 +48,7 @@ import { CerrarCasoAsesor } from "@/components/casos-juridicos/cerrar-caso-aseso
 import { BotonesEntrevista } from "@/components/casos-juridicos/botones-entrevista";
 import { SectionCard } from "@/components/casos-juridicos/shared-ui";
 import { HistorialCorrecciones } from "@/components/casos-juridicos/historial-correcciones";
+import { Logo } from "@/components/global/LogoUac";
 
 interface SolicitudCierreAdmin {
   descripcion: string;
@@ -592,26 +593,27 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             )}
 
             {caso?.estado === "activo" && solicitudCierre && (
-              <Card className="p-6 bg-purple-50 border-purple-200 shadow-xs">
+              <Card className="p-6 bg-purple-50 border-purple-200 shadow-xs mb-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-start gap-3.5">
-                    <div className="p-2.5 bg-purple-100 text-purple-700 rounded-xl mt-0.5 shrink-0">
-                      <BellRing className="w-5 h-5" />
-                    </div>
+                    <Logo
+                      variant="purple"
+                      className="w-10 h-10 rounded-xl shrink-0 mt-0.5 shadow-xs"
+                    />
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-bold text-purple-950">
+                        <h3 className="text-lg font-bold text-purple-950 font-museo">
                           Solicitud de Cierre del Administrador
                         </h3>
-                        <span className="text-xs text-purple-700 bg-purple-100/90 font-semibold px-2.5 py-0.5 rounded-full border border-purple-200">
+                        <span className="text-xs text-purple-700 bg-purple-100/90 font-semibold px-2.5 py-0.5 rounded-full border border-purple-200 font-museo">
                           Acción requerida
                         </span>
                       </div>
-                      <p className="text-sm text-purple-800 mt-1">
+                      <p className="text-sm text-purple-800 mt-1 font-museo">
                         El administrador ha solicitado el cierre de este caso con las siguientes observaciones:
                       </p>
                       <div className="mt-3 p-3.5 bg-white/90 border border-purple-200/90 rounded-lg">
-                        <p className="text-sm text-slate-800 whitespace-pre-wrap leading-relaxed font-sans">
+                        <p className="text-sm text-slate-800 whitespace-pre-wrap leading-relaxed font-museo">
                           {solicitudCierre.motivo || solicitudCierre.descripcion}
                         </p>
                       </div>

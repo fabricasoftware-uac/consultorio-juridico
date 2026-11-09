@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test:qa": "npx tsx scripts/test-qa-suite.ts"
+    "test:qa": "npx tsx scripts/test-qa-suite.ts",
+    "db:migrate:vps": "./scripts/migrar-vps.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
